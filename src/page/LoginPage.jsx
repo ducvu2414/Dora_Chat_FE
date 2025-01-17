@@ -2,6 +2,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import LogoLogin from "@/assets/login1.png"
+import Logo from "@/assets/dorachat_logo.png"
+import Banner from "@/assets/banner.png"
 
 export default function LoginPage() {
     return (
@@ -9,7 +11,7 @@ export default function LoginPage() {
             {/* Left Section */}
             <div className="flex-1 bg-gray-50 p-4 md:p-8 lg:p-12 relative">
                 <img
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner-IhthXe6zHtqkjtAD4qP0XRr9IIp3cF.png"
+                    src={Banner}
                     alt="Dora Chat Banner"
                     className="w-full h-full object-cover rounded-2xl"
                     loading="eager"
@@ -30,7 +32,7 @@ export default function LoginPage() {
                 <div className="mb-6">
                     <div className="flex justify-center">
                         <img
-                            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DORACHAT%20(4)%201-xiyhvuxBEdR1BXnhwpUNviKKXn24Sp.png"
+                            src={Logo}
                             alt="Dora Logo"
                             className="object-contain w-[350px] h-[65px]"
                         />
