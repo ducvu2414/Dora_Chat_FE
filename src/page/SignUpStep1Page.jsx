@@ -41,10 +41,10 @@ export default function SignUpStep1Page() {
                         {/* Welcome text */}
                         <div className="text-center space-y-4">
                             <p className="text-gray-600">
-                                We're super excited to have you join our community.
+                                We&apos;re super excited to have you join our community.
                             </p>
                             <p className="text-gray-600">
-                                Let's dive into some fun conversations together!
+                                Let&apos;s dive into some fun conversations together!
                             </p>
                         </div>
 

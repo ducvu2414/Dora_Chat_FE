@@ -32,7 +32,7 @@ export default function LoginPage() {
                 <div className="w-full md:w-[400px] p-6 flex flex-col justify-center">
                     <div className="flex justify-end mb-4">
                         <p className="text-sm text-gray-600">
-                            You don't have an account?
+                            You don&apos;t have an account?
                             <Link to="/signup" className="text-orange-500 font-medium ml-1 hover:underline">
                                 Sign up
                             </Link>
@@ -81,6 +81,7 @@ export default function LoginPage() {
                                 type="submit"
                                 className="w-12 sm:w-16 h-12 sm:h-16 bg-[#D3EBFF] rounded-full hover:bg-[#bde0ff] flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
                                 size="lg"
+                                onSubmit={handleLogin}
                             >
                                 <svg
                                     viewBox="0 0 24 24"
