@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import LogoLogin from "@/assets/login1.png";
 import Logo from "@/assets/dorachat_logo.png";
 import Banner from "@/assets/banner.png";
+
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -13,6 +14,9 @@ export default function LoginPage() {
         e.preventDefault();
         console.log("Username:", username);
         console.log("Password:", password);
+        
+        // Navigate to home page after login
+        window.location.href = "/home";
     }
 
     return (
