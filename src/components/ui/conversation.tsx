@@ -1,18 +1,32 @@
-import React from 'react'
+import React from "react";
 
 interface ConversationProps {
-  avatar: string
-  name: string
-  message: string
-  time: string
+  avatar: string;
+  name: string;
+  message: string;
+  time: string;
+  onClick?: () => void;
+  isActive?: boolean;
 }
 
-export function Conversation({ avatar, name, message, time }: ConversationProps) {
+export function Conversation({
+  avatar,
+  name,
+  message,
+  time,
+  onClick,
+  isActive,
+}: ConversationProps) {
   return (
-    <div className="h-15 flex items-center gap-3 p-3 hover:bg-gray-100 rounded-lg cursor-pointer">
-      <img 
-        src={avatar || "/placeholder.svg"} 
-        alt={name} 
+    <div
+      onClick={onClick}
+      className={`h-15 flex items-center gap-3 p-3 rounded-lg cursor-pointer ${
+        isActive ? "bg-blue-100" : "hover:bg-gray-100"
+      }`}
+    >
+      <img
+        src={avatar || "/placeholder.svg"}
+        alt={name}
         className="w-14 h-14 rounded-full object-cover"
       />
       <div className="flex-1 min-w-0 pl-1">
@@ -21,6 +35,5 @@ export function Conversation({ avatar, name, message, time }: ConversationProps)
       </div>
       <span className="text-xs text-gray-400">{time}</span>
     </div>
-  )
+  );
 }
-
