@@ -12,9 +12,9 @@ export function AlertMessage({ type, message }) {
     };
 
     const icons = {
-        error: <AlertCircle className="h-4 w-4" />,
-        success: <CheckCircle2 className="h-4 w-4" />,
-        info: <Info className="h-4 w-4" />
+        error: <AlertCircle className="h-4 w-4" stroke="currentColor" />,
+        success: <CheckCircle2 className="h-4 w-4" stroke="currentColor" />,
+        info: <Info className="h-4 w-4" stroke="currentColor" />
     };
 
     return (
