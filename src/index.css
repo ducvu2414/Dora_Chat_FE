@@ -54,9 +54,16 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
-
+input[type="date"]::-webkit-calendar-picker-indicator
+ {
+    filter: invert(50%) sepia(100%) saturate(1000%) hue-rotate(200deg);
+    margin-top: 3%;
+    margin-right: -45%;
+}
+::-webkit-datetime-edit
+ { color: #646cff; }
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -53,14 +53,14 @@ module.exports = {
         },
         "regal-blue": "#086DC0",
       },
-	  placeholderColor: {
+      placeholderColor: {
         "custom-blue": "#086DC080",
       },
-	  fontFamily: {
-		"josefin": ['"Josefin Slab"'],
-	  }
+      fontFamily: {
+        "josefin": ['"Josefin Slab"'],
+      }
     },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require("tailwindcss-animate"), require('tailwind-scrollbar-hide')],	
+  plugins: [require("tailwindcss-animate"), require('tailwind-scrollbar-hide')],
 };

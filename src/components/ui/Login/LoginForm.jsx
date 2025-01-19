@@ -20,7 +20,7 @@ export const LoginForm = ({ onSubmit }) => {
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="h-12 px-4 rounded-xl placeholder-blue-100 w-full"
+                    className="h-12 px-4 rounded-xl w-full"
                 />
             </div>
             <div className="space-y-2">
