@@ -56,7 +56,7 @@ export function AddGroupModal(data) {
         {/* Friends List */}
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 text-left !font-bold">Add friends to group:</h3>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
+          <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
             {friendsList.map((friend) => (
               <div
                 key={friend.id}
