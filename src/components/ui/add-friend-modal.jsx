@@ -4,6 +4,7 @@ import { Modal } from './modal'
 import { Input } from './input'
 import { Button } from './button'
 
+// eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)

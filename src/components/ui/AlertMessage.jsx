@@ -1,6 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2, Info } from "lucide-react"
 
+// eslint-disable-next-line react/prop-types
 export function AlertMessage({ type, message }) {
     if (!message) return null;
 
