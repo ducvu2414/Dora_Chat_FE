@@ -4,10 +4,12 @@ import { Input } from "./input"
 import { Button } from "./button"
 import { Dropdown } from "./dropdown"
 import { AddFriendModal } from "./add-friend-modal"
+import { AddGroupModal } from "./add-group-modal"
 
 export function SearchBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false)
+  const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
 
   return (
     <div className="relative flex items-center gap-2 p-2">
@@ -31,11 +33,16 @@ export function SearchBar() {
           isOpen={isDropdownOpen} 
           onClose={() => setIsDropdownOpen(false)}
           onAddFriend={() => setIsAddFriendOpen(true)} 
+          onCreateGroup={() => setIsAddGroupOpen(true)}
         />
       </div>
       <AddFriendModal 
         isOpen={isAddFriendOpen}
         onClose={() => setIsAddFriendOpen(false)}
+      />
+      <AddGroupModal 
+        isOpen={isAddGroupOpen}
+        onClose={() => setIsAddGroupOpen(false)}
       />
     </div>
   )

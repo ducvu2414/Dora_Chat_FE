@@ -5,9 +5,10 @@ interface DropdownProps {
   isOpen: boolean
   onClose: () => void
   onAddFriend: () => void
+  onCreateGroup: () => void
 }
 
-export function Dropdown({ isOpen, onClose, onAddFriend }: DropdownProps) {
+export function Dropdown({ isOpen, onClose, onAddFriend, onCreateGroup }: DropdownProps) {
   if (!isOpen) return null
 
   return (
@@ -30,7 +31,10 @@ export function Dropdown({ isOpen, onClose, onAddFriend }: DropdownProps) {
           </button>
           <button
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-regal-blue bg-gray-100 rounded-md"
-            onClick={onClose}
+            onClick={() => {
+              onCreateGroup()
+              onClose()
+            }}
           >
             <Users className="w-4 h-4" />
             Create chat group
