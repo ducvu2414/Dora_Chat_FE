@@ -26,7 +26,7 @@ export default function SignUpStep2Page() {
                 navigate('/signup/info');
             }, 2000);
         }
-        catch (error) {
+        catch {
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
         }
         console.log("Sign Up Step 2");

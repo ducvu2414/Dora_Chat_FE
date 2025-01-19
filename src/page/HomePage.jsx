@@ -163,7 +163,7 @@ export default function HomePage() {
         </div>
         <div>
           <img
-            src={HomeImage || "/placeholder.svg"}
+            src={HomeImage}
             alt="Chat illustration"
             className="w-full max-w-2xl"
           />

@@ -1,10 +1,3 @@
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import LogoLogin from "@/assets/login1.png";
-import Logo from "@/assets/dorachat_logo.png";
-import Banner from "@/assets/banner.png";
 import { LoginBanner } from "../components/ui/Login/LoginBanner";
 import { SignUpLink } from "../components/ui/Login/SignUpLink";
 import { LoginHeader } from "../components/ui/Login/LoginHeader";

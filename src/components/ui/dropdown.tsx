@@ -4,9 +4,10 @@ import { Users, UserPlus } from 'lucide-react'
 interface DropdownProps {
   isOpen: boolean
   onClose: () => void
+  onAddFriend: () => void
 }
 
-export function Dropdown({ isOpen, onClose }: DropdownProps) {
+export function Dropdown({ isOpen, onClose, onAddFriend }: DropdownProps) {
   if (!isOpen) return null
 
   return (
@@ -19,7 +20,10 @@ export function Dropdown({ isOpen, onClose }: DropdownProps) {
         <div className="p-1">
           <button
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-regal-blue bg-gray-100 rounded-md"
-            onClick={onClose}
+            onClick={() => {
+              onAddFriend()
+              onClose()
+            }}
           >
             <UserPlus className="w-4 h-4" />
             Add friend

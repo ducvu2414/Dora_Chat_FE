@@ -1,4 +1,3 @@
-import { toast } from 'react-toastify';
 import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
 import { useState } from "react";
@@ -33,7 +32,7 @@ export default function SignUpStep1Page() {
             setTimeout(() => {
                 navigate('/signup/otp');
             }, 2000);
-        } catch (error) {
+        } catch {
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
         }
     }
