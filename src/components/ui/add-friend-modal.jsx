@@ -4,8 +4,9 @@ import { Modal } from './modal'
 import { Input } from './input'
 import { Button } from './button'
 
-// eslint-disable-next-line react/prop-types
-export function AddFriendModal({ isOpen, onClose }) {
+// data: { isOpen, onClose }
+
+export function AddFriendModal(data) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)
 
@@ -22,7 +23,7 @@ export function AddFriendModal({ isOpen, onClose }) {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add friend">
+    <Modal isOpen={data.isOpen} onClose={data.onClose} title="Add friend">
       <div className="space-y-6">
         {/* Search Input */}
         <div className="flex gap-2">

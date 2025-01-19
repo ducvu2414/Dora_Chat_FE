@@ -1,17 +1,17 @@
 import React from 'react'
 
-interface TabGroupProps {
-  activeTab: 'messages' | 'group'
-  onTabChange: (tab: 'messages' | 'group') => void
-}
+// data: {
+//   activeTab: 'messages' | 'group'
+//   onTabChange: (tab: 'messages' | 'group') => void
+// }
 
-export function TabGroup({ activeTab, onTabChange }: TabGroupProps) {
+export function TabGroup(data) {
   return (
     <div className="flex items-center gap-4 px-6 py-3">
       <button
-        onClick={() => onTabChange('messages')}
+        onClick={() => data.onTabChange('messages')}
         className={`text-sm font-bold relative rounded-full bg-white ${
-          activeTab === 'messages' 
+          data.activeTab === 'messages' 
             ? 'text-regal-blue border-regal-blue' 
             : 'text-gray-500 hover:text-regal-blue'
             // ? 'text-white !bg-regal-blue border-regal-blue' 
@@ -19,14 +19,14 @@ export function TabGroup({ activeTab, onTabChange }: TabGroupProps) {
         }`}
       >
         Messages
-        {activeTab === 'messages' && (
+        {data.activeTab === 'messages' && (
           <div className="absolute -bottom-3 left-0 right-0 h-0.5 bg-regal-blue rounded-full" />
         )}
       </button>
       <button
-        onClick={() => onTabChange('group')}
+        onClick={() => data.onTabChange('group')}
         className={`text-sm font-bold relative rounded-full bg-white ${
-          activeTab === 'group' 
+          data.activeTab === 'group' 
             ? 'text-regal-blue border-regal-blue' 
             : 'text-gray-500 hover:text-regal-blue'
             // ? 'text-white !bg-regal-blue border-regal-blue' 
@@ -34,7 +34,7 @@ export function TabGroup({ activeTab, onTabChange }: TabGroupProps) {
         }`}
       >
         Group
-        {activeTab === 'group' && (
+        {data.activeTab === 'group' && (
           <div className="absolute -bottom-3 left-0 right-0 h-0.5 bg-regal-blue rounded-full" />
         )}
       </button>
