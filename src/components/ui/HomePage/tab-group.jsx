@@ -1,5 +1,3 @@
-import React from 'react'
-
 // data: {
 //   activeTab: 'messages' | 'group'
 //   onTabChange: (tab: 'messages' | 'group') => void
