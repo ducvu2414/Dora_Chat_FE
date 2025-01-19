@@ -1,41 +1,35 @@
-import { toast } from 'react-toastify';
+import { useState } from "react";
 import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
-import { SignUpStep1Form } from "../components/ui/SignUp/SignUpStep1Form";
+import { SignUpOTPForm } from "../components/ui/SignUp/SignUpOTPForm";
 import { AlertMessage } from '../components/ui/AlertMessage';
-export default function SignUpStep1Page() {
-    const [email, setEmail] = useState("");
-    const [alert, setAlert] = useState({ type: "", message: "" });
+import { useNavigate } from "react-router-dom";
 
+export default function SignUpStep2Page() {
+    const [otpCode, setOtpCode] = useState("");
+    const [alert, setAlert] = useState({ type: "", message: "" });
     const navigate = useNavigate();
 
-    function handleSignUpStep1(e) {
+    const Max_Length = 6;
+    function handleSignUpStep2(e) {
         e.preventDefault();
-
-        if (!email) {
-            setAlert({ type: "error", message: "Please enter your email address" });
+        console.log("OTP Code:", otpCode);
+        if (otpCode.length !== Max_Length) {
+            setAlert({ type: "error", message: "Please enter a valid OTP code" });
             return;
         }
-
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            setAlert({ type: "error", message: "Please enter a valid email address" });
-            return;
-        }
-
         try {
             // API call would go here
-            setAlert({ type: "success", message: "Verification code sent to your email!" });
+            setAlert({ type: "success", message: "Account created successfully!" });
             setTimeout(() => {
-                navigate('/signup/otp');
+                navigate('/signup/info');
             }, 2000);
-        } catch (error) {
+        }
+        catch (error) {
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
         }
+        console.log("Sign Up Step 2");
     }
 
     return (
@@ -59,13 +53,11 @@ export default function SignUpStep1Page() {
 
                         {/* Logo */}
                         <div className="flex justify-center">
-                            <div className="flex justify-center">
-                                <img
-                                    src={Logo}
-                                    alt="Dora Logo"
-                                    className="object-contain w-[350px] h-[65px]"
-                                />
-                            </div>
+                            <img
+                                src={Logo}
+                                alt="Dora Logo"
+                                className="object-contain w-[350px] h-[65px]"
+                            />
                         </div>
 
                         {/* Welcome text */}
@@ -78,12 +70,12 @@ export default function SignUpStep1Page() {
                             </p>
                         </div>
 
-                        <ProgressSteps currentStep={1} />
+                        <ProgressSteps currentStep={2} />
 
-                        <SignUpStep1Form
-                            email={email}
-                            setEmail={setEmail}
-                            onSubmit={handleSignUpStep1}
+                        <SignUpOTPForm
+                            otpCode={otpCode}
+                            setOtpCode={setOtpCode}
+                            onSubmit={handleSignUpStep2}
                         />
                     </div>
                 </div>
