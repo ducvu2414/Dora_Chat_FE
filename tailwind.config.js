@@ -57,10 +57,10 @@ module.exports = {
         "custom-blue": "#086DC080",
       },
 	  fontFamily: {
-		'josefin': ['"Josefin Slab"'],
+		"josefin": ['"Josefin Slab"'],
 	  }
     },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require("tailwindcss-animate")],	
+  plugins: [require("tailwindcss-animate"), require('tailwind-scrollbar-hide')],	
 };
