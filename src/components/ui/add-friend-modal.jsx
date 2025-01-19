@@ -10,6 +10,11 @@ export function AddFriendModal(data) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)
 
+  const resetModalState = () => {
+    setPhoneNumber('')
+    setSearchResult(null)
+  }
+
   const handleSearch = () => {
     if (phoneNumber === '987654321' || phoneNumber === '0' + '987654321') {
       setSearchResult({
@@ -23,7 +28,12 @@ export function AddFriendModal(data) {
   }
 
   return (
-    <Modal isOpen={data.isOpen} onClose={data.onClose} title="Add friend">
+    <Modal isOpen={data.isOpen} 
+    onClose={() => {
+      resetModalState()
+      data.onClose()
+    }} 
+    title="Add friend">
       <div className="space-y-6">
         {/* Search Input */}
         <div className="flex gap-2">
