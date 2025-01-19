@@ -48,7 +48,7 @@ export function AddFriendModal(data) {
             />
           </div>
           <Button 
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 focus:outline-none"
             onClick={handleSearch}
           >
             <Search className="w-4 h-4" />

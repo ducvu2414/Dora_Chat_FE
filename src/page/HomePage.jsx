@@ -123,7 +123,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <button className="p-2 hover:bg-gray-200 rounded-md bg-white">
+          <button className="p-2 hover:bg-gray-200 rounded-md bg-white focus:outline-none">
             <svg
               width="16"
               height="16"

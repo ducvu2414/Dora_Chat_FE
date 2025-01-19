@@ -8,7 +8,7 @@ export function TabGroup(data) {
     <div className="flex items-center gap-4 px-6 py-3">
       <button
         onClick={() => data.onTabChange('messages')}
-        className={`text-sm font-bold relative rounded-full bg-white ${
+        className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
           data.activeTab === 'messages' 
             ? 'text-regal-blue border-regal-blue' 
             : 'text-gray-500 hover:text-regal-blue'
@@ -23,7 +23,7 @@ export function TabGroup(data) {
       </button>
       <button
         onClick={() => data.onTabChange('group')}
-        className={`text-sm font-bold relative rounded-full bg-white ${
+        className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
           data.activeTab === 'group' 
             ? 'text-regal-blue border-regal-blue' 
             : 'text-gray-500 hover:text-regal-blue'
