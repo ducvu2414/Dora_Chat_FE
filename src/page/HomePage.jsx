@@ -1,9 +1,10 @@
 import { Conversation } from "@/components/ui/conversation";
 import { SearchBar } from "@/components/ui/search-bar";
+import { TabGroup } from "@/components/ui/HomePage/tab-group";
 import HomeImage from "@/assets/home.png";
 import { useState } from "react";
 
-const conversations = [
+const messages = [
   {
     avatar:
       "https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__",
@@ -55,11 +56,33 @@ const conversations = [
   },
 ];
 
-export default function ChatLayout() {
-  const [active, setActive] = useState(null);
-  const handleActive = (index) => {
-    setActive(index);
-  };
+const groups = [
+  {
+    avatar: "/placeholder.svg?height=40&width=40",
+    name: "Design Team",
+    message: "New project discussion",
+    time: "5 mins",
+  },
+  {
+    avatar: "/placeholder.svg?height=40&width=40",
+    name: "Development Team",
+    message: "Sprint planning",
+    time: "1 hour",
+  },
+  {
+    avatar: "/placeholder.svg?height=40&width=40",
+    name: "Marketing Team",
+    message: "Campaign updates",
+    time: "3 hours",
+  },
+];
+
+export default function HomePage() {
+  const [activeTab, setActiveTab] = useState('messages');
+  const [activeConversation, setActiveConversation] = useState(null);
+
+  const conversations = activeTab === 'messages' ? messages : groups;
+
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
       {/* Sidebar */}
@@ -68,18 +91,18 @@ export default function ChatLayout() {
           <SearchBar />
         </div>
 
-        <div className="flex items-center justify-between px-6 py-3">
-          <h2 className="text-regal-blue text-sm font-bold">Messages</h2>
-          <span className="text-regal-blue text-sm">Request (2)</span>
-        </div>
+        <TabGroup 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+        />
 
-        <div className="flex-1 overflow-y-auto px-2">
+        <div className="flex-1 overflow-y-auto px-2 scrollbar-hide">
           {conversations.map((conv, i) => (
             <Conversation
               key={i}
               {...conv}
-              isActive={active === i}
-              onClick={() => handleActive(i)}
+              isActive={activeConversation === i}
+              onClick={() => setActiveConversation(i)}
             />
           ))}
         </div>
@@ -140,7 +163,7 @@ export default function ChatLayout() {
         </div>
         <div>
           <img
-            src={HomeImage}
+            src={HomeImage || "/placeholder.svg"}
             alt="Chat illustration"
             className="w-full max-w-2xl"
           />
@@ -149,3 +172,4 @@ export default function ChatLayout() {
     </div>
   );
 }
+
