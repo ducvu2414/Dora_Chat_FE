@@ -5,7 +5,6 @@ import { Input } from './input'
 import { Button } from './button'
 
 // data: { isOpen, onClose }
-
 export function AddFriendModal(data) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)

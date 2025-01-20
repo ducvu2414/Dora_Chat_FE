@@ -2,7 +2,6 @@ import { Dropdown, DropdownItem } from "./dropdown"
 import { User, LogOut, Users } from "lucide-react"
 
 // data: { isOpen, onClose }
-
 export function UserMenuDropdown(data) {
   return (
     <Dropdown isOpen={data.isOpen} onClose={data.onClose} align="right" verticalAlign="top">

@@ -1,5 +1,5 @@
-// data: { avatar, name, message, time, onClick, isActive }
 
+// data: { avatar, name, message, time, onClick, isActive }
 export function Conversation(data) {
   return (
     <div

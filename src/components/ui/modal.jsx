@@ -1,7 +1,6 @@
 import { X } from 'lucide-react'
 
 // data: { isOpen, onClose, children, title }
-
 export function Modal(data) {
   if (!data.isOpen) return null
 

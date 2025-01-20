@@ -1,3 +1,4 @@
+
 // data: { tabs: {}[], activeTab, onTabChange, rightContent }
 export function TabGroup(data) {
   return (
