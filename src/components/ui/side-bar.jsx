@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { SearchBar } from "./search-bar"
-import { TabConversation } from "./HomePage/tab-conversation"
+import { TabConversation } from "./tab-conversation"
 import { Conversation } from "./conversation"
 import { UserMenuDropdown } from "./user-menu-dropdown"
 

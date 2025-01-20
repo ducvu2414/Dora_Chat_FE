@@ -1,4 +1,4 @@
-import { TabGroup } from "../tab-group"
+import { TabGroup } from "./tab-group"
 
 // data: { activeTab, onTabChange }
 

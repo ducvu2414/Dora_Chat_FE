@@ -18,6 +18,7 @@ const alertVariants = cva(
   }
 );
 
+// eslint-disable-next-line react/prop-types
 const Alert = React.forwardRef(({ className, variant, ...props }, ref) => (
   <div
     ref={ref}
@@ -28,6 +29,7 @@ const Alert = React.forwardRef(({ className, variant, ...props }, ref) => (
 ));
 Alert.displayName = "Alert";
 
+// eslint-disable-next-line react/prop-types
 const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h5
     ref={ref}
@@ -37,6 +39,7 @@ const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
 ));
 AlertTitle.displayName = "AlertTitle";
 
+// eslint-disable-next-line react/prop-types
 const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
