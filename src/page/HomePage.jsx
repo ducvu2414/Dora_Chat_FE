@@ -88,7 +88,7 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-12 font-josefin">Let&apos;s start chatting with everyone!</p>
         </div>
         <div>
-          <img src={HomeImage || "/placeholder.svg"} alt="Chat illustration" className="w-full max-w-2xl" />
+          <img src={HomeImage} alt="Chat illustration" className="w-full max-w-2xl" />
         </div>
       </div>
     </div>
