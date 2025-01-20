@@ -1,6 +1,6 @@
 import { Conversation } from "@/components/ui/conversation";
 import { SearchBar } from "@/components/ui/search-bar";
-import { TabGroup } from "@/components/ui/HomePage/tab-group";
+import { TabGroup } from "@/components/ui/tab-group";
 import { useState } from "react";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
 import { ContactTabs } from "../components/ui/Contact/ContactTabs";
