@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
 import { SignUpStep1Form } from "../components/ui/SignUp/SignUpStep1Form";
-import { AlertMessage } from '../components/ui/AlertMessage';
+import { AlertMessage } from '../components/ui/alert-message';
 export default function SignUpStep1Page() {
     const [email, setEmail] = useState("");
     const [alert, setAlert] = useState({ type: "", message: "" });
