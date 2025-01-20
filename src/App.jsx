@@ -7,6 +7,7 @@ import SignUpStep2Page from "./page/SignUpStep2Page"
 import { ToastContainer } from "react-toastify"
 import SignUpStep3Page from "./page/SignUpStep3Page"
 import SignUpStep4Page from "./page/SignUpStep4Page"
+import ContactsPage from "./page/ContactsPage"
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/signup/complete" element={<SignUpStep4Page />} />
         <Route path="/forgot-password" element={<div>Forgot Password Page</div>} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/contacts" element={<ContactsPage />} />
       </Routes>
     </Router>
   )
