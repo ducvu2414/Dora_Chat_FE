@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import { Input } from "./input"
 import { Button } from "./button"
-import { Dropdown } from "./dropdown"
+import { AddDropdown } from "./add-dropdown"
 import { AddFriendModal } from "./add-friend-modal"
 import { AddGroupModal } from "./add-group-modal"
 
@@ -29,8 +29,9 @@ export function SearchBar() {
         >
           <Plus className="!h-6 !w-6" />
         </Button>
-        <Dropdown 
-          isOpen={isDropdownOpen} 
+        <AddDropdown 
+          isOpen={isDropdownOpen}
+          
           onClose={() => setIsDropdownOpen(false)}
           onAddFriend={() => setIsAddFriendOpen(true)} 
           onCreateGroup={() => setIsAddGroupOpen(true)}

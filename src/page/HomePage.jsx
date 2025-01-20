@@ -157,7 +157,9 @@ export default function HomePage() {
                   className="fixed inset-0 z-40"
                   onClick={() => setIsUserMenuOpen(false)}
                 />
-                <UserMenuDropdown onClose={() => setIsUserMenuOpen(false)} />
+                <UserMenuDropdown 
+                isOpen={isUserMenuOpen} 
+                onClose={() => setIsUserMenuOpen(false)} />
               </>
             )}
           </div>
