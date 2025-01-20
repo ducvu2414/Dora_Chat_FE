@@ -1,6 +1,6 @@
 import { Conversation } from "@/components/ui/conversation";
 import { SearchBar } from "@/components/ui/search-bar";
-import { TabGroup } from "@/components/ui/HomePage/tab-group";
+import { TabConversation } from "@/components/ui/HomePage/tab-conversation";
 import HomeImage from "@/assets/home.png";
 import { useState } from "react";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
@@ -93,7 +93,7 @@ export default function HomePage() {
           <SearchBar />
         </div>
 
-        <TabGroup 
+        <TabConversation 
           activeTab={activeTab} 
           onTabChange={setActiveTab}
         />
