@@ -5,35 +5,42 @@ import { useNavigate } from "react-router-dom";
 import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
 import { SignUpStep1Form } from "../components/ui/SignUp/SignUpStep1Form";
 import { AlertMessage } from '../components/ui/AlertMessage';
+import { Spinner } from "./Spinner";
+
 export default function SignUpStep1Page() {
     const [email, setEmail] = useState("");
     const [alert, setAlert] = useState({ type: "", message: "" });
-
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    function handleSignUpStep1(e) {
+    async function handleSignUpStep1(e) {
         e.preventDefault();
+        setLoading(true);
 
         if (!email) {
             setAlert({ type: "error", message: "Please enter your email address" });
+            setLoading(false);
             return;
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setAlert({ type: "error", message: "Please enter a valid email address" });
+            setLoading(false);
             return;
         }
 
         try {
-            // API call would go here
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             setAlert({ type: "success", message: "Verification code sent to your email!" });
             setTimeout(() => {
                 navigate('/signup/otp');
             }, 2000);
-        } catch {
+        } catch (error) {
+            console.error("API call failed:", error);
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -79,11 +86,16 @@ export default function SignUpStep1Page() {
 
                         <ProgressSteps currentStep={1} />
 
-                        <SignUpStep1Form
-                            email={email}
-                            setEmail={setEmail}
-                            onSubmit={handleSignUpStep1}
-                        />
+                        {/* Show spinner if loading */}
+                        {loading ? (
+                            <Spinner />
+                        ) : (
+                            <SignUpStep1Form
+                                email={email}
+                                setEmail={setEmail}
+                                onSubmit={handleSignUpStep1}
+                            />
+                        )}
                     </div>
                 </div>
 

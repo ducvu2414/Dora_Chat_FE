@@ -1,8 +1,10 @@
 import { Dropdown, DropdownItem } from "./dropdown"
 import { User, LogOut, Users } from "lucide-react"
+import { useNavigate } from "react-router-dom";
 
 // data: { isOpen, onClose }
 export function UserMenuDropdown(data) {
+  const navigate = useNavigate()
   return (
     <Dropdown isOpen={data.isOpen} onClose={data.onClose} align="right" verticalAlign="top">
       <DropdownItem
@@ -17,6 +19,7 @@ export function UserMenuDropdown(data) {
         icon={Users}
         onClick={() => {
           data.onClose()
+          navigate("/contacts")
         }}
       >
         Contacts

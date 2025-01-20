@@ -5,30 +5,40 @@ import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
 import { SignUpOTPForm } from "../components/ui/SignUp/SignUpOTPForm";
 import { AlertMessage } from '../components/ui/AlertMessage';
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "./Spinner";
+
 
 export default function SignUpStep2Page() {
     const [otpCode, setOtpCode] = useState("");
     const [alert, setAlert] = useState({ type: "", message: "" });
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const Max_Length = 6;
-    function handleSignUpStep2(e) {
+
+    async function handleSignUpStep2(e) {
         e.preventDefault();
         console.log("OTP Code:", otpCode);
         if (otpCode.length !== Max_Length) {
             setAlert({ type: "error", message: "Please enter a valid OTP code" });
             return;
         }
+
+        setLoading(true);
+
         try {
-            // API call would go here
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             setAlert({ type: "success", message: "Account created successfully!" });
             setTimeout(() => {
                 navigate('/signup/info');
             }, 2000);
-        }
-        catch {
+        } catch (error) {
+            console.error("API call failed:", error);
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
+        } finally {
+            setLoading(false);
         }
+
         console.log("Sign Up Step 2");
     }
 
@@ -72,11 +82,16 @@ export default function SignUpStep2Page() {
 
                         <ProgressSteps currentStep={2} />
 
-                        <SignUpOTPForm
-                            otpCode={otpCode}
-                            setOtpCode={setOtpCode}
-                            onSubmit={handleSignUpStep2}
-                        />
+                        {/* Show spinner if loading */}
+                        {loading ? (
+                            <Spinner />
+                        ) : (
+                            <SignUpOTPForm
+                                otpCode={otpCode}
+                                setOtpCode={setOtpCode}
+                                onSubmit={handleSignUpStep2}
+                            />
+                        )}
                     </div>
                 </div>
 
