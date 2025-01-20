@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { SideBar } from "@/components/ui/side-bar";
-import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import BannerImage from "@/assets/banner-user-info.png";
+import { useState } from "react"
+import { SideBar } from "@/components/ui/side-bar"
+import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import BannerImage from "@/assets/banner-user-info.png"
 
 const messages = [
   {
@@ -55,7 +56,7 @@ const messages = [
     message: "How are you?",
     time: "Yesterday",
   },
-];
+]
 
 const groups = [
   {
@@ -76,29 +77,44 @@ const groups = [
     message: "Campaign updates",
     time: "3 hours",
   },
-];
+]
 
 export default function UserInformation() {
-  const [activeTab, setActiveTab] = useState("account");
+  const [activeTab, setActiveTab] = useState("information")
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  });
+  })
+  const [isEditing, setIsEditing] = useState(false)
+  const [userInfo, setUserInfo] = useState({
+    firstName: "User",
+    lastName: "Admin",
+    dateOfBirth: "25/02/2003",
+    gender: "Male",
+    hobbies: "",
+  })
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     // Handle password change logic here
-    console.log("Password change submitted:", formData);
-  };
+    console.log("Password change submitted:", formData)
+  }
+
+  const handleInfoSubmit = (e) => {
+    e.preventDefault()
+    setIsEditing(false)
+    // Handle info update logic here
+    console.log("Info updated:", userInfo)
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
@@ -124,9 +140,7 @@ export default function UserInformation() {
                 alt="User Admin"
                 className="w-24 h-24 rounded-full border-4 border-white mb-4"
               />
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-                User Admin
-              </h1>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">User Admin</h1>
               <p className="text-gray-600 mb-6">⭐ Have a nice day! 🌊</p>
 
               {/* QR Code */}
@@ -136,9 +150,7 @@ export default function UserInformation() {
                   alt="QR Code"
                   className="w-32 h-32 mb-2"
                 />
-                <p className="text-sm text-orange-500 font-bold">
-                  QR code helps people follow you quickly
-                </p>
+                <p className="text-sm text-orange-500 font-bold">QR code helps people follow you quickly</p>
                 <button className="mt-2 p-2 rounded-full bg-orange-100 hover:bg-orange-200 border-none transition-colors">
                   <svg
                     width="24"
@@ -162,13 +174,93 @@ export default function UserInformation() {
           </div>
 
           {/* Tabs & Content */}
-          <div className="bg-white rounded-3xl shadow-sm">
+          <div className="bg-white rounded-3xl shadow-sm flex-1">
             <div className="border-b">
-              <TabUserInfo activeTab={activeTab} onTabChange={setActiveTab} />
+              <div className="flex justify-between items-center pr-4">
+                <TabUserInfo activeTab={activeTab} onTabChange={setActiveTab} />
+                {activeTab === "information" && (
+                  <Button
+                    variant="ghost"
+                    className="text-blue-600 bg-white hover:text-blue-700"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    Edit
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="p-6">
-              {activeTab === "account" ? (
+              {activeTab === "information" ? (
+                <form onSubmit={handleInfoSubmit} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-left">First name</label>
+                      <Input
+                        value={userInfo.firstName}
+                        onChange={(e) => setUserInfo({ ...userInfo, firstName: e.target.value })}
+                        disabled={!isEditing}
+                        className="bg-gray-50 text-regal-blue"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-left">Last name</label>
+                      <Input
+                        value={userInfo.lastName}
+                        onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
+                        disabled={!isEditing}
+                        className="bg-gray-50 text-regal-blue"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-left">Date of Birth</label>
+                      <div className="relative">
+                        <Input
+                          type="date"
+                          value={userInfo.dateOfBirth}
+                          onChange={(e) => setUserInfo({ ...userInfo, dateOfBirth: e.target.value })}
+                          disabled={!isEditing}
+                          className="bg-gray-50 text-regal-blue"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-left">Gender</label>
+                      <Select
+                        value={userInfo.gender}
+                        onValueChange={(value) => setUserInfo({ ...userInfo, gender: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="bg-gray-50 text-regal-blue">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-left">Your hobbies</label>
+                    <Input
+                      value={userInfo.hobbies}
+                      onChange={(e) => setUserInfo({ ...userInfo, hobbies: e.target.value })}
+                      placeholder="Your hobbies 💕"
+                      disabled={!isEditing}
+                      className="bg-gray-50"
+                    />
+                  </div>
+                  {isEditing && (
+                    <div className="flex justify-end">
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                        Save Changes
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              ) : (
                 <div className="max-w-md mx-auto">
                   <h2 className="text-xl font-semibold text-regal-blue mb-6 flex items-center justify-center gap-2">
                     <svg
@@ -179,15 +271,7 @@ export default function UserInformation() {
                       stroke="currentColor"
                       className="text-blue-600"
                     >
-                      <rect
-                        x="3"
-                        y="11"
-                        width="18"
-                        height="11"
-                        rx="2"
-                        ry="2"
-                        strokeWidth="2"
-                      />
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeWidth="2" />
                       <path d="M7 11V7a5 5 0 0110 0v4" strokeWidth="2" />
                     </svg>
                     Change password
@@ -195,9 +279,7 @@ export default function UserInformation() {
 
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
-                        Current password
-                      </label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">Current password</label>
                       <Input
                         type="password"
                         name="currentPassword"
@@ -209,9 +291,7 @@ export default function UserInformation() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
-                        New password
-                      </label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">New password</label>
                       <Input
                         type="password"
                         name="newPassword"
@@ -223,9 +303,7 @@ export default function UserInformation() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
-                        Confirm password
-                      </label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">Confirm password</label>
                       <Input
                         type="password"
                         name="confirmPassword"
@@ -235,22 +313,15 @@ export default function UserInformation() {
                         className="w-full rounded-full bg-gray-100"
                       />
                       <p className="mt-1 text-xs text-gray-500">
-                        Password must be at least 8 characters long, containing
-                        uppercase and lowercase letters and numbers
+                        Password must be at least 8 characters long, containing uppercase and lowercase letters and
+                        numbers
                       </p>
                     </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    >
+                    <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       Save
                     </Button>
                   </form>
-                </div>
-              ) : (
-                <div className="text-center text-gray-500 py-8">
-                  Information tab content goes here
                 </div>
               )}
             </div>
@@ -258,5 +329,6 @@ export default function UserInformation() {
         </div>
       </div>
     </div>
-  );
+  )
 }
+
