@@ -9,7 +9,7 @@ export function SignUpStep1Form({ email, setEmail, onSubmit }) {
                     type="text"
                     placeholder="Enter your mail or phone"
                     value={email}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-50"
+                    className="w-full px-4 py-2 rounded-lg bg-gray-50 text-blue-500"
                     onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button className="w-full bg-blue-600 hover:bg-blue-700">

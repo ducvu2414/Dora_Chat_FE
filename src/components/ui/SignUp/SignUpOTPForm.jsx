@@ -48,7 +48,7 @@ export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit }) {
                         placeholder="Your OTP code"
                         value={otpCode}
                         maxLength={6}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 text-blue-500"
                         onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
                     />
                 </div>
