@@ -1,5 +1,5 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 
 export const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -11,16 +11,40 @@ export const DropdownMenuTrigger = forwardRef(({ children, ...props }, ref) => (
 ));
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 
-export const DropdownMenuContent = forwardRef(({ children, ...props }, ref) => (
-    <DropdownMenuPrimitive.Content
-        ref={ref}
-        {...props}
-        className="min-w-[220px] bg-white rounded-md p-1 shadow-lg z-50" // Thêm z-50 để đảm bảo nó nằm trên các thành phần khác
-        style={{ position: 'absolute' }} // Đảm bảo dropdown được định vị chính xác
-    >
-        {children}
-    </DropdownMenuPrimitive.Content>
-));
+export const DropdownMenuContent = forwardRef(({ children, ...props }, ref) => {
+    const [align, setAlign] = useState("start");
+    const triggerRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (triggerRef.current) {
+                const rect = triggerRef.current.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+
+                if (rect.left < viewportWidth / 2) {
+                    setAlign("start");
+                } else {
+                    setAlign("end");
+                }
+            }
+        };
+
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    return (
+        <DropdownMenuPrimitive.Content
+            ref={ref}
+            {...props}
+            className="min-w-[150px] bg-white rounded-md p-1 shadow-lg z-50 mr-2 ml-2"
+            align={align}
+        >
+            {children}
+        </DropdownMenuPrimitive.Content>
+    );
+});
 DropdownMenuContent.displayName = "DropdownMenuContent";
 
 export const DropdownMenuItem = forwardRef(({ children, ...props }, ref) => (
@@ -56,8 +80,7 @@ export const DropdownMenuSubContent = forwardRef(({ children, ...props }, ref) =
     <DropdownMenuPrimitive.SubContent
         ref={ref}
         {...props}
-        className="min-w-[220px] bg-white rounded-md p-1 shadow-lg z-50"
-        style={{ position: 'absolute' }}
+        className="min-w-[150px] bg-white rounded-md p-1 shadow-lg z-50"
     >
         {children}
     </DropdownMenuPrimitive.SubContent>
