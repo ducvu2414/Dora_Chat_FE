@@ -138,7 +138,7 @@ export default function UserInformation() {
               <img
                 src="https://s3-alpha-sig.figma.com/img/20a1/d517/ac424205661ad4fee696bc7f0dcf9d8e?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=olirJ1hrxtyMOGmOGALINoUwczQrQaT0XTv6ufFztNWDjNdNkSuSkcWvyX~kyUqA57eDYG8RGPSk1WtSfvp0HeBhRZtGXR4lnEkcHGTC00KGgii593HRKIY8wQyxKiEA8Nbmt2iXPs3SY2dbS6raxgXSt9unmLHQ-NfBU1lfAB33bwPK3ZCf9qgFPTadV2pFuTuQTJeFjT8cfI1z7ukomxVEaEf8qpm7YVeubQzzkRbHbPyANpy7c84DhpBXutZkAbaDnaKjQi7pMFa-aFb2uUnhGdw9bRyYmC~ks4kq3zJwYcq7c9rIV3Ht~I1nogT-j~rllghW3c~XiGdti9b3eA__"
                 alt="User Admin"
-                className="w-24 h-24 rounded-full border-4 border-white mb-4"
+                className="w-24 h-24 rounded-full border-4 border-white mb-4 object-cover"
               />
               <h1 className="text-2xl font-semibold text-gray-900 mb-2">User Admin</h1>
               <p className="text-gray-600 mb-6">⭐ Have a nice day! 🌊</p>
