@@ -89,10 +89,10 @@ export default function InformationFriend() {
       <SideBar messages={messages} groups={groups} />
 
       {/* Main Content */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-blue-100 p-3">
         {/* Banner Image */}
         <div
-          className="h-72 w-full bg-cover bg-center"
+          className="h-72 w-full bg-cover bg-center rounded-2xl"
           style={{
             backgroundImage: `url(${BannerImage})`,
           }}
@@ -110,13 +110,13 @@ export default function InformationFriend() {
               />
             </div>
 
-            <div className="flex flex-col items-center pt-16">
+            <div className="flex flex-col items-center pt-4">
               {/* Name and Bio */}
               <h1 className="text-2xl font-semibold text-blue-600 mb-1">Monica William</h1>
               <p className="text-gray-600 mb-6">✨ Adding a little sparkle to your day.</p>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 mb-8">
+              <div className="flex gap-4 mb-4">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Send message

@@ -31,7 +31,7 @@ export default function OtherPeopleInformation() {
       <SideBar messages={messages} groups={groups} />
 
       {/* Main Content */}
-      <div className="flex-1 relative bg-blue-100 p-6">
+      <div className="flex-1 relative bg-blue-100 p-3">
         {/* Banner Image */}
         <div
           className="h-72 w-full bg-cover bg-center rounded-2xl"

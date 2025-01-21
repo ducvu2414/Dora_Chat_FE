@@ -121,7 +121,7 @@ export default function UserInformation() {
       <SideBar messages={messages} groups={groups} />
 
       {/* Main Content */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-blue-100 p-3">
         {/* Banner Image */}
         <div
           className="h-72 w-full bg-cover bg-center rounded-3xl"
