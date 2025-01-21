@@ -4,6 +4,8 @@ import ContactCardDropdown from './ContactCardDropdown';
 export function ContactCard({ contact }) {
     function onViewInfo() {
         console.log('View info');
+        // get friend by id, email, or phone number
+        window.location.href = "/friend-information";
     }
     function onCategoryChange(category) {
         console.log('Change category to', category);
