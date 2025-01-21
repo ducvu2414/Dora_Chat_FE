@@ -6,6 +6,8 @@ const HomePage = React.lazy(() => import("../page/HomePage"));
 const SignUpStep2Page = React.lazy(() => import("../page/SignUpStep2Page"));
 const SignUpStep3Page = React.lazy(() => import("../page/SignUpStep3Page"));
 const SignUpStep4Page = React.lazy(() => import("../page/SignUpStep4Page"));
+const FriendInformationPage = React.lazy(() => import("../page/FriendInformationPage"));
+
 const UserInformationPage = React.lazy(() =>
     import("../page/UserInformationPage")
 );
@@ -22,6 +24,7 @@ const routes = [
     { path: "/home", element: <HomePage /> },
     { path: "/user-information", element: <UserInformationPage /> },
     { path: "/contacts", element: <ContactsPage /> },
+    { path: "/friend-information", element: <FriendInformationPage /> },
 ];
 
 export default routes;

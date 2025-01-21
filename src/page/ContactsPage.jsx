@@ -119,9 +119,7 @@ const contacts = [
 ];
 
 const friendListRequest = [
-    {
-        name: "Iris Paul", message: "How are you?", time: "Now", avatar: "https://picsum.photos/id/237/200/300"
-    },
+    { name: "Iris Paul", message: "How are you?", time: "Now", avatar: "https://picsum.photos/id/237/200/300"},
     { name: "Jone Nguyen", message: "How are you?", time: "2 mins", avatar: "https://picsum.photos/id/237/200/300" },
     { name: "Aurora Bonita", message: "How are you?", time: "20 mins", avatar: "https://picsum.photos/id/237/200/300" },
     { name: "Tom Athony", message: "How are you?", time: "4 hours", avatar: "https://picsum.photos/id/237/200/300" },
@@ -129,7 +127,6 @@ const friendListRequest = [
     { name: "Daria Julli", message: "How are you?", time: "21 hours", avatar: "https://picsum.photos/id/237/200/300" },
     { name: "Monica William", message: "How are you?", time: "Yesterday", avatar: "https://picsum.photos/id/237/200/300" },
 ]
-
 
 const groupListRequest = [
     {

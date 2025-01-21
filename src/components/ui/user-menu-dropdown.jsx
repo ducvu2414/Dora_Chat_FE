@@ -11,6 +11,7 @@ export function UserMenuDropdown(data) {
         icon={User}
         onClick={() => {
           data.onClose()
+          navigate("/user-information")
         }}
       >
         My Profile
