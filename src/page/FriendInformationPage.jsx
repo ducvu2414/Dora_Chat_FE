@@ -57,24 +57,24 @@ const messages = [
 
 const groups = [
   {
-    avatar: "/placeholder.svg?height=40&width=40",
-    name: "Design Team",
-    message: "New project discussion",
-    time: "5 mins",
+      avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+      name: "Design Team",
+      message: "New project discussion",
+      time: "5 mins",
   },
   {
-    avatar: "/placeholder.svg?height=40&width=40",
-    name: "Development Team",
-    message: "Sprint planning",
-    time: "1 hour",
+      avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
+      name: "Development Team",
+      message: "Sprint planning",
+      time: "1 hour",
   },
   {
-    avatar: "/placeholder.svg?height=40&width=40",
-    name: "Marketing Team",
-    message: "Campaign updates",
-    time: "3 hours",
+      avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
+      name: "Marketing Team",
+      message: "Campaign updates",
+      time: "3 hours",
   },
-]
+];
 
 const hobbies = [
   { icon: "🏸", label: "Bamintion" },
