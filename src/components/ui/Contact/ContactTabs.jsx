@@ -4,7 +4,7 @@ export function ContactTabs({ activeTab, onTabChange }) {
     const tabs = [
         { id: 'friend-list', label: 'Friend list', count: 22 },
         { id: 'friend-requests', label: 'Friend requests', count: 1 },
-        { id: 'group-list', label: 'Group list' },
+        { id: 'group-list', label: 'Group list', count: 3 },
         { id: 'group-requests', label: 'Group requests', count: 1 }
     ];
 
@@ -14,7 +14,7 @@ export function ContactTabs({ activeTab, onTabChange }) {
                 <button
                     key={tab.id}
                     className={`flex items-center px-4 py-2 rounded-lg transition-colors
-                        hover:bg-[#D0EAFF80] hover:bg-opacity-50 hover:text-blue-600 hover:outline-none
+                        hover:bg-[#D0EAFF80] bg-opacity-50 hover:text-blue-600 hover:outline-none
                         focus:outline-none border-none
                         ${activeTab === tab.id
                             ? 'bg-[#D0EAFF80] bg-opacity-50 text-blue-600'

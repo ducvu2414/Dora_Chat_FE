@@ -5,22 +5,27 @@ import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
 import { AlertMessage } from '../components/ui/alert-message';
 import { useNavigate } from "react-router-dom";
 import { SignUpStep3Form } from "../components/ui/SignUp/SignUpStep3Form";
+import { Spinner } from "./Spinner";
 
 export default function SignUpStep3Page() {
     const navigate = useNavigate();
     const [alert, setAlert] = useState({ type: "", message: "" });
+    const [loading, setLoading] = useState(false);
 
-    const handleSignUpStep3 = (formData) => {
+    const handleSignUpStep3 = async (formData) => {
+        setLoading(true);
         try {
-            // API call would go here
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             console.log("Form Data:", formData);
             setAlert({ type: "success", message: "Information saved successfully!" });
             setTimeout(() => {
                 navigate('/signup/complete');
             }, 2000);
-        }
-        catch (error) {
+        } catch (error) {
+            console.error("API call failed:", error);
             setAlert({ type: "error", message: "Something went wrong. Please try again." });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -64,7 +69,12 @@ export default function SignUpStep3Page() {
 
                         <ProgressSteps currentStep={3} />
 
-                        <SignUpStep3Form onSubmit={handleSignUpStep3} />
+                        {/* Show spinner if loading */}
+                        {loading ? (
+                            <Spinner />
+                        ) : (
+                            <SignUpStep3Form onSubmit={handleSignUpStep3} />
+                        )}
                     </div>
                 </div>
 

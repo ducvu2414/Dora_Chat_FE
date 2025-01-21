@@ -77,7 +77,7 @@ export function SignUpStep3Form({ onSubmit }) {
                             name="dateOfBirth"
                             value={formData.dateOfBirth}
                             onChange={handleChange}
-                            className="placeholder-blue-500 w-full px-4 py-2 bg-gray-50 appearance-auto"
+                            className={`w-full px-4 py-2 bg-gray-50 ${formData.dateOfBirth ? "text-black" : "text-blue-500"}`}
                         />
                     </div>
                 </div>
@@ -91,7 +91,8 @@ export function SignUpStep3Form({ onSubmit }) {
                             setFormData(prev => ({ ...prev, gender: value }))
                         }
                     >
-                        <SelectTrigger className="w-full bg-gray-50">
+                        <SelectTrigger className={`w-full bg-gray-50 ${formData.gender ? "text-black" : "text-blue-500"}`}
+                        >
                             <SelectValue className="font-thin" placeholder="Your gender" />
                         </SelectTrigger>
                         <SelectContent >
@@ -122,6 +123,6 @@ export function SignUpStep3Form({ onSubmit }) {
             >
                 Next
             </Button>
-        </form>
+        </form >
     );
 }

@@ -1,7 +1,6 @@
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, Info } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 
-// eslint-disable-next-line react/prop-types
 export function AlertMessage({ type, message }) {
     if (!message) return null;
 
@@ -10,11 +9,10 @@ export function AlertMessage({ type, message }) {
         success: "border-green-500 bg-green-50 text-green-600",
         info: "border-blue-500 bg-blue-50 text-blue-600"
     };
-
     const icons = {
-        error: <AlertCircle className="h-4 w-4" stroke="currentColor" />,
-        success: <CheckCircle2 className="h-4 w-4" stroke="currentColor" />,
-        info: <Info className="h-4 w-4" stroke="currentColor" />
+        error: <AlertCircle className="h-4 w-4 text-red-600" color="#ff0000" />,
+        success: <CheckCircle2 className="h-4 w-4 text-green-600" color="#00ff00" />,
+        info: <Info className="h-4 w-4 text-blue-600" color="#0000ff" />
     };
 
     return (

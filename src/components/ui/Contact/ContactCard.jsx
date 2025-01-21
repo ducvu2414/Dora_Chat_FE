@@ -16,8 +16,10 @@ export function ContactCard({ contact }) {
     }
 
     return (
-        <button className="w-full focus:outline-none border-none p-0" onClick={() => console.log('View group')}>
-
+        <div
+            className="w-full focus:outline-none border-none p-0 cursor-pointer"
+            onClick={() => console.log('View group')}
+        >
             <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center space-x-4 flex-1 min-w-0">
                     <img
@@ -30,10 +32,15 @@ export function ContactCard({ contact }) {
                         <p className="text-sm text-gray-500 truncate">{contact.email}</p>
                     </div>
                 </div>
-                <button className="bg-white text-gray-400 hover:text-gray-600 border-none focus:outline-none flex-shrink-0">
-                    <ContactCardDropdown onViewInfo={onViewInfo} onCategoryChange={onCategoryChange} onSetNickname={onSetNickname} onDelete={onDelete} />
-                </button>
+                <div className="flex-shrink-0">
+                    <ContactCardDropdown
+                        onViewInfo={onViewInfo}
+                        onCategoryChange={onCategoryChange}
+                        onSetNickname={onSetNickname}
+                        onDelete={onDelete}
+                    />
+                </div>
             </div>
-        </button>
+        </div>
     );
 }

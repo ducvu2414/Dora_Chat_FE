@@ -77,16 +77,25 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #888; /* Màu của thanh cuộn */
-    border-radius: 4px; /* Bo góc thanh cuộn */
+    background: #888; 
+    border-radius: 4px; 
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Màu của thanh cuộn khi hover */
+    background: #555; 
 }
-::-webkit-datetime-edit
- { color: #646cff; }
-@media (prefers-color-scheme: light) {
+
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgb(249 250 251 / var(--tw-bg-opacity, 1)) inset !important; /* Đổi màu nền */
+    -webkit-text-fill-color: #000 !important; /* Đổi màu chữ */
+}
+
+
+ @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;

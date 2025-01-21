@@ -34,15 +34,14 @@ const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
                         <div className={`w-2 h-2 rounded-full ${getCategoryColor(group.category)}`} />
                     )}
                 </div>
-                <button className="bg-white text-gray-400 hover:text-gray-600 border-none focus:outline-none flex-shrink-0">
+                <div className="flex-shrink-0">
                     <GroupCardDropdown onCategoryChange={onCategoryChange} onLeaveGroup={onLeaveGroup} />
-                </button>
+                </div>
             </div>
         </button>
     );
 };
 
-// Helper function to get category color
 const getCategoryColor = (categoryId) => {
     const colorMap = {
         'customer': 'bg-red-500',
