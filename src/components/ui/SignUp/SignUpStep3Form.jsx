@@ -48,7 +48,7 @@ export function SignUpStep3Form({ onSubmit }) {
                         placeholder="Your first name"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 bg-gray-50"
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500"
                         required
                     />
                 </div>
@@ -63,7 +63,7 @@ export function SignUpStep3Form({ onSubmit }) {
                         placeholder="Your last name"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 bg-gray-50"
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500"
                         required
                     />
                 </div>
@@ -77,7 +77,7 @@ export function SignUpStep3Form({ onSubmit }) {
                             name="dateOfBirth"
                             value={formData.dateOfBirth}
                             onChange={handleChange}
-                            className={`w-full px-4 py-2 bg-gray-50 ${formData.dateOfBirth ? "text-black" : "text-blue-500"}`}
+                            className={`w-full px-4 py-2 bg-gray-50 `}
                         />
                     </div>
                 </div>
@@ -91,7 +91,7 @@ export function SignUpStep3Form({ onSubmit }) {
                             setFormData(prev => ({ ...prev, gender: value }))
                         }
                     >
-                        <SelectTrigger className={`w-full bg-gray-50 ${formData.gender ? "text-black" : "text-blue-500"}`}
+                        <SelectTrigger className={`w-full bg-gray-50`}
                         >
                             <SelectValue className="font-thin" placeholder="Your gender" />
                         </SelectTrigger>
@@ -112,7 +112,7 @@ export function SignUpStep3Form({ onSubmit }) {
                     placeholder="✨ Say something about yourself..."
                     value={formData.bio}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-gray-50 min-h-[100px]"
+                    className="w-full px-4 py-2 bg-gray-50 min-h-[50px] text-blue-500"
                 />
             </div>
 

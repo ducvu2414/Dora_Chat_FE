@@ -85,13 +85,15 @@ input[type="search"]::-webkit-search-cancel-button {
     background: #555; 
 }
 
+::-webkit-datetime-edit
+ { color: #646cff; }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px rgb(249 250 251 / var(--tw-bg-opacity, 1)) inset !important; /* Đổi màu nền */
-    -webkit-text-fill-color: #000 !important; /* Đổi màu chữ */
+    -webkit-text-fill-color: rgb(59 130 246 / var(--tw-text-opacity, 1)) !important; /* Đổi màu chữ */
 }
 
 

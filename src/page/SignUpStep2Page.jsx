@@ -49,9 +49,7 @@ export default function SignUpStep2Page() {
                 <div className="w-[150%] h-full p-4 md:p-8 lg:p-12 relative justify-center bg-white flex flex-col items-center">
                     <div className="max-w-md mx-auto space-y-10">
                         {/* Alert Message */}
-                        {alert.message && (
-                            <AlertMessage type={alert.type} message={alert.message} />
-                        )}
+                        <AlertMessage type={alert.type} message={alert.message} />
 
                         {/* Login link */}
                         <div className="text-sm">
