@@ -19,16 +19,14 @@ export function AlertMessage({ type, message }) {
         }
     };
 
-    useEffect(() => {
-        if (message) {
-            toast(
-                <div className={`flex items-center ${alertStyles[type].className}`}>
-                    {alertStyles[type].icon}
-                    <span className="ml-2">{message}</span>
-                </div>
-            );
-        }
-    }, [type, message]);
+    if (message) {
+        toast(
+            <div className={`flex items-center ${alertStyles[type].className}`}>
+                {alertStyles[type].icon}
+                <span className="ml-2">{message}</span>
+            </div>
+        );
+    }
 
     return <ToastContainer />;
 }

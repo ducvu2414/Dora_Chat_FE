@@ -10,7 +10,6 @@ import { Spinner } from "./Spinner";
 
 export default function SignUpStep2Page() {
     const [otpCode, setOtpCode] = useState("");
-    const [alert, setAlert] = useState({ type: "", message: "" });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -20,7 +19,8 @@ export default function SignUpStep2Page() {
         e.preventDefault();
         console.log("OTP Code:", otpCode);
         if (otpCode.length !== Max_Length) {
-            setAlert({ type: "error", message: "Please enter a valid OTP code" });
+            AlertMessage({ type: "error", message: "Please enter a valid OTP code" });
+
             return;
         }
 
@@ -28,13 +28,11 @@ export default function SignUpStep2Page() {
 
         try {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            setAlert({ type: "success", message: "Account created successfully!" });
-            setTimeout(() => {
-                navigate('/signup/info');
-            }, 2000);
+            AlertMessage({ type: "success", message: "Account created successfully!" });
+            navigate('/signup/info');
         } catch (error) {
             console.error("API call failed:", error);
-            setAlert({ type: "error", message: "Something went wrong. Please try again." });
+            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
         } finally {
             setLoading(false);
         }
@@ -48,8 +46,6 @@ export default function SignUpStep2Page() {
                 {/* Left side - Form */}
                 <div className="w-[150%] h-full p-4 md:p-8 lg:p-12 relative justify-center bg-white flex flex-col items-center">
                     <div className="max-w-md mx-auto space-y-10">
-                        {/* Alert Message */}
-                        <AlertMessage type={alert.type} message={alert.message} />
 
                         {/* Login link */}
                         <div className="text-sm">
@@ -102,6 +98,7 @@ export default function SignUpStep2Page() {
                     />
                 </div>
             </div>
+            <AlertMessage />
         </div>
     );
 }
