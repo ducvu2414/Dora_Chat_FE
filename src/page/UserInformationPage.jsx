@@ -4,7 +4,9 @@ import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MultiSelect } from "@/components/ui/UserInformation/multi-select"
 import BannerImage from "@/assets/banner-user-info.png"
+import { Icons } from "@/components/ui/UserInformation/icons"
 
 const messages = [
   {
@@ -60,27 +62,81 @@ const messages = [
 
 const groups = [
   {
-      avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
-      name: "Design Team",
-      message: "New project discussion",
-      time: "5 mins",
+    avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+    name: "Design Team",
+    message: "New project discussion",
+    time: "5 mins",
   },
   {
-      avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
-      name: "Development Team",
-      message: "Sprint planning",
-      time: "1 hour",
+    avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
+    name: "Development Team",
+    message: "Sprint planning",
+    time: "1 hour",
   },
   {
-      avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
-      name: "Marketing Team",
-      message: "Campaign updates",
-      time: "3 hours",
+    avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
+    name: "Marketing Team",
+    message: "Campaign updates",
+    time: "3 hours",
+  },
+]
+
+const availableHobbies = [
+  {
+    value: "Singing",
+    label: "Singing",
+    icon: Icons.mic,
+  },
+  {
+    value: "Dancing",
+    label: "Dancing",
+    icon: Icons.partyPopper,
+  },
+  {
+    value: "Reading",
+    label: "Reading",
+    icon: Icons.book,
+  },
+  {
+    value: "Writing",
+    label: "Writing",
+    icon: Icons.notebookPen,
+  },
+  {
+    value: "Painting",
+    label: "Painting",
+    icon: Icons.palette,
+  },
+  {
+    value: "Photography",
+    label: "Photography",
+    icon: Icons.camera,
+  },
+  {
+    value: "Cooking",
+    label: "Cooking",
+    icon: Icons.chefHat,
+  },
+  {
+    value: "Gardening",
+    label: "Gardening",
+    icon: Icons.fence,
+  },
+  {
+    value: "Traveling",
+    label: "Traveling",
+    icon: Icons.plane,
+  },
+  {
+    value: "Sports",
+    label: "Sports",
+    icon: Icons.bike,
   },
 ];
 
 export default function UserInformation() {
   const [activeTab, setActiveTab] = useState("information")
+  const [selectedHobbies, setSelectedHobbies] = useState(["Singing", "Dancing"])
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -90,9 +146,9 @@ export default function UserInformation() {
   const [userInfo, setUserInfo] = useState({
     firstName: "User",
     lastName: "Admin",
-    dateOfBirth: "25/02/2003",
+    dateOfBirth: "2003-02-25",
     gender: "Male",
-    hobbies: "",
+    hobbies: [],
   })
 
   const handleInputChange = (e) => {
@@ -244,12 +300,15 @@ export default function UserInformation() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1 text-left">Your hobbies</label>
-                    <Input
-                      value={userInfo.hobbies}
-                      onChange={(e) => setUserInfo({ ...userInfo, hobbies: e.target.value })}
-                      placeholder="Your hobbies 💕"
+                    <MultiSelect
                       disabled={!isEditing}
-                      className="bg-gray-50"
+                      options={availableHobbies}
+                      onValueChange={setSelectedHobbies}
+                      defaultValue={selectedHobbies}
+                      placeholder="Select options"
+                      variant="inverted"
+                      animation={2}
+                      maxCount={3}
                     />
                   </div>
                   {isEditing && (
