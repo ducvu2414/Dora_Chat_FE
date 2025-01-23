@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/UserInformation/multi-select"
-import BannerImage from "@/assets/banner-user-info.png"
 import { Icons } from "@/components/ui/UserInformation/icons"
+import { AlertMessage } from '../components/ui/alert-message';
+import BannerImage from "@/assets/banner-user-info.png"
 
 const messages = [
   {
@@ -137,12 +138,11 @@ const availableHobbies = [
 export default function UserInformation() {
   const [activeTab, setActiveTab] = useState("information")
   const [selectedHobbies, setSelectedHobbies] = useState(["Singing", "Dancing"])
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isEditing, setIsEditing] = useState(false)
+
   const [userInfo, setUserInfo] = useState({
     firstName: "User",
     lastName: "Admin",
@@ -151,18 +151,41 @@ export default function UserInformation() {
     hobbies: [],
   })
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Handle password change logic here
-    console.log("Password change submitted:", formData)
+
+    if (!currentPassword) {
+      AlertMessage({ type: "error", message: "Please enter your current password" });
+      return
+    }
+
+    if (!newPassword) {
+      AlertMessage({ type: "error", message: "Please enter your new password" });
+      return
+    }
+
+    if (!confirmPassword) {
+      AlertMessage({ type: "error", message: "Please enter your confirm password" });
+      return
+    }
+
+    if (currentPassword !== "12345678") {
+      AlertMessage({ type: "error", message: "Current password is incorrect" });
+      return
+    } 
+
+    if (newPassword !== confirmPassword) {
+      AlertMessage({ type: "error", message: "Confirm password does not match" });
+      return
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      AlertMessage({ type: "error", message: "Password must be at least 8 characters long, containing uppercase and lowercase letters and numbers" });
+      return
+    }
+
+    AlertMessage({ type: "success", message: "Password changed successfully" });
   }
 
   const handleInfoSubmit = (e) => {
@@ -342,10 +365,9 @@ export default function UserInformation() {
                       <Input
                         type="password"
                         name="currentPassword"
-                        value={formData.currentPassword}
-                        onChange={handleInputChange}
                         placeholder="Enter current password"
                         className="w-full rounded-full bg-gray-100"
+                        onChange={(e) => setCurrentPassword(e.target.value)}
                       />
                     </div>
 
@@ -354,10 +376,9 @@ export default function UserInformation() {
                       <Input
                         type="password"
                         name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleInputChange}
                         placeholder="Enter new password"
                         className="w-full rounded-full bg-gray-100"
+                        onChange={(e) => setNewPassword(e.target.value)}
                       />
                     </div>
 
@@ -366,10 +387,9 @@ export default function UserInformation() {
                       <Input
                         type="password"
                         name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
                         placeholder="Enter confirm password"
                         className="w-full rounded-full bg-gray-100"
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Password must be at least 8 characters long, containing uppercase and lowercase letters and
