@@ -30,6 +30,7 @@ export function SideBar(data) {
             {...conv}
             isActive={activeConversation === i}
             onClick={() => setActiveConversation(i)}
+            activeTab={activeTab}
           />
         ))}
       </div>
