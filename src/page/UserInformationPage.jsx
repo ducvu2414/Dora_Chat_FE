@@ -137,7 +137,6 @@ const availableHobbies = [
 
 export default function UserInformation() {
   const [activeTab, setActiveTab] = useState("information")
-  const [selectedHobbies, setSelectedHobbies] = useState(["Singing", "Dancing"])
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -148,10 +147,10 @@ export default function UserInformation() {
     lastName: "Admin",
     dateOfBirth: "2003-02-25",
     gender: "Male",
-    hobbies: [],
+    hobbies: ["Singing", "Dancing"],
   })
 
-  const handleSubmit = (e) => {
+  const handleSubmitPassword = (e) => {
     e.preventDefault()
 
     if (!currentPassword) {
@@ -188,11 +187,38 @@ export default function UserInformation() {
     AlertMessage({ type: "success", message: "Password changed successfully" });
   }
 
-  const handleInfoSubmit = (e) => {
+  const handleSubmitInfo = (e) => {
     e.preventDefault()
     setIsEditing(false)
-    // Handle info update logic here
-    console.log("Info updated:", userInfo)
+
+    const regexName = /^[A-Za-zÀ-ỹ\s]+$/;
+    if (!userInfo.firstName) {
+      AlertMessage({ type: "error", message: "Please enter your first name" });
+      return
+    }
+
+    if (!regexName.test(userInfo.firstName)) {
+      AlertMessage({ type: "error", message: "First name must be characters" });
+      return
+    }
+
+    if (!userInfo.lastName) {
+      AlertMessage({ type: "error", message: "Please enter your last name" });
+      return
+    }
+
+    if (!regexName.test(userInfo.lastName)) {
+      AlertMessage({ type: "error", message: "Last name must be characters" });
+      return
+    }
+
+    // under 18
+    if (new Date().getFullYear() - new Date(userInfo.dateOfBirth).getFullYear() < 18) {
+      AlertMessage({ type: "error", message: "Age must be over 18" });
+      return
+    }
+
+    AlertMessage({ type: "success", message: "Information updated successfully" });
   }
 
   return (
@@ -271,7 +297,7 @@ export default function UserInformation() {
 
             <div className="p-6">
               {activeTab === "information" ? (
-                <form onSubmit={handleInfoSubmit} className="space-y-6">
+                <form onSubmit={handleSubmitInfo} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium mb-1 text-left">First name</label>
@@ -326,8 +352,8 @@ export default function UserInformation() {
                     <MultiSelect
                       disabled={!isEditing}
                       options={availableHobbies}
-                      onValueChange={setSelectedHobbies}
-                      defaultValue={selectedHobbies}
+                      onValueChange={(value) => setUserInfo({ ...userInfo, hobbies: value })}
+                      defaultValue={userInfo.hobbies}
                       placeholder="Select options"
                       variant="inverted"
                       animation={2}
@@ -359,7 +385,7 @@ export default function UserInformation() {
                     Change password
                   </h2>
 
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmitPassword} className="space-y-4">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-1 text-left">Current password</label>
                       <Input
