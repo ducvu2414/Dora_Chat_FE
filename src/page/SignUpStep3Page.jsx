@@ -9,21 +9,18 @@ import { Spinner } from "./Spinner";
 
 export default function SignUpStep3Page() {
     const navigate = useNavigate();
-    const [alert, setAlert] = useState({ type: "", message: "" });
     const [loading, setLoading] = useState(false);
 
-    const handleSignUpStep3 = async (formData) => {
+    const handleSignUpStep3 = async () => {
         setLoading(true);
         try {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log("Form Data:", formData);
-            setAlert({ type: "success", message: "Information saved successfully!" });
-            setTimeout(() => {
-                navigate('/signup/complete');
-            }, 2000);
+            AlertMessage({ type: "success", message: "Information saved successfully!" });
+            navigate('/signup/complete');
         } catch (error) {
             console.error("API call failed:", error);
-            setAlert({ type: "error", message: "Something went wrong. Please try again." });
+            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
+
         } finally {
             setLoading(false);
         }
@@ -35,9 +32,6 @@ export default function SignUpStep3Page() {
                 {/* Left side - Form */}
                 <div className="w-[150%] h-full p-4 md:p-8 lg:p-12 relative justify-center bg-white flex flex-col items-center">
                     <div className="max-w-md mx-auto space-y-10">
-                        {/* Alert Message */}
-                        <AlertMessage type={alert.type} message={alert.message} />
-
 
                         {/* Login link */}
                         <div className="text-sm">
@@ -86,6 +80,7 @@ export default function SignUpStep3Page() {
                     />
                 </div>
             </div>
+            <AlertMessage />
         </div>
     );
 }

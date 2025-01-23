@@ -9,7 +9,6 @@ import { Spinner } from "./Spinner";
 
 export default function SignUpStep1Page() {
     const [email, setEmail] = useState("");
-    const [alert, setAlert] = useState({ type: "", message: "" });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -18,27 +17,25 @@ export default function SignUpStep1Page() {
         setLoading(true);
 
         if (!email) {
-            setAlert({ type: "error", message: "Please enter your email address" });
+            AlertMessage({ type: "error", message: "Please enter your email address" });
             setLoading(false);
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setAlert({ type: "error", message: "Please enter a valid email address" });
+            AlertMessage({ type: "error", message: "Please enter a valid email address" });
             setLoading(false);
             return;
         }
 
         try {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            setAlert({ type: "success", message: "Verification code sent to your email!" });
-            setTimeout(() => {
-                navigate('/signup/otp');
-            }, 2000);
+            AlertMessage({ type: "success", message: "Verification code sent to your email!" });
+            navigate('/signup/otp');
         } catch (error) {
             console.error("API call failed:", error);
-            setAlert({ type: "error", message: "Something went wrong. Please try again." });
+            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
         } finally {
             setLoading(false);
         }
@@ -50,9 +47,6 @@ export default function SignUpStep1Page() {
                 {/* Left side - Form */}
                 <div className="w-[150%] h-full p-4 md:p-8 lg:p-12 relative justify-center bg-white flex flex-col items-center">
                     <div className="max-w-md mx-auto space-y-10">
-                        {/* Alert Message */}
-                        <AlertMessage type={alert.type} message={alert.message} />
-
                         {/* Login link */}
                         <div className="text-sm">
                             You had an account?
@@ -106,6 +100,7 @@ export default function SignUpStep1Page() {
                     />
                 </div>
             </div>
+            <AlertMessage />
         </div>
     );
 }
