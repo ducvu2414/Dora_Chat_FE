@@ -1,6 +1,6 @@
-import * as React from "react"
 
-export function Step({ number, label, icon, active = false }) {
+// eslint-disable-next-line react/prop-types
+export function Step({ label, icon, active = false }) {
     return (
         <div className="flex flex-col items-center space-y-2">
             <div

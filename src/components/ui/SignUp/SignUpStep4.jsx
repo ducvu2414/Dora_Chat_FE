@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Rocket } from 'lucide-react';
 import { useNavigate } from "react-router-dom";

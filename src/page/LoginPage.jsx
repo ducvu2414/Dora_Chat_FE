@@ -1,7 +1,7 @@
-import { LoginBanner } from "../components/ui/Login/LoginBanner";
-import { SignUpLink } from "../components/ui/Login/SignUpLink";
-import { LoginHeader } from "../components/ui/Login/LoginHeader";
-import { LoginForm } from "../components/ui/Login/LoginForm";
+import { LoginBanner } from "@/components/ui/Login/LoginBanner";
+import { SignUpLink } from "@/components/ui/Login/SignUpLink";
+import { LoginHeader } from "@/components/ui/Login/LoginHeader";
+import { LoginForm } from "@/components/ui/Login/LoginForm";
 
 export default function LoginPage() {
     const handleLogin = ({ username, password }) => {

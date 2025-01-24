@@ -1,8 +1,8 @@
-import { TabGroup } from "../tab-group"
+import { TabGroup } from "@/components/ui/tab-group"
 import { User, Settings } from "lucide-react"
 
-// data: {activeTab, onTabChange}
-export function TabUserInfo(data) {
+// eslint-disable-next-line react/prop-types
+export function TabUserInfo({activeTab, onTabChange}) {
   const tabs = [
     {
       id: "information",
@@ -16,6 +16,6 @@ export function TabUserInfo(data) {
     },
   ]
 
-  return <TabGroup tabs={tabs} activeTab={data.activeTab} onTabChange={data.onTabChange} />
+  return <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} />
 }
 

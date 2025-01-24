@@ -1,5 +1,4 @@
-import React from 'react';
-import { MoreVertical } from 'lucide-react';
+/* eslint-disable react/prop-types */
 import GroupCardDropdown from './GroupCardDropdown';
 
 const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {

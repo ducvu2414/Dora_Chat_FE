@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import { FriendRequestItem } from './FriendRequestItem';
 
 export function FriendRequestList({ friendRequests }) {

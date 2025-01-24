@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
 import { cva } from "class-variance-authority";
 import {
@@ -58,7 +59,6 @@ export const MultiSelect = React.forwardRef(
       animation = 0,
       maxCount = 3,
       modalPopover = false,
-      asChild = false,
       className,
       ...props
     },

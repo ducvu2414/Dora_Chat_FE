@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Search, UserPlus, MessageCircle } from 'lucide-react'
-import { Modal } from './modal'
-import { Input } from './input'
-import { Button } from './button'
+import { Modal } from '@/components/ui/modal'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
-// data: { isOpen, onClose }
-export function AddFriendModal(data) {
+export function AddFriendModal(isOpen, onClose) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)
 
@@ -27,10 +26,10 @@ export function AddFriendModal(data) {
   }
 
   return (
-    <Modal isOpen={data.isOpen} 
+    <Modal isOpen={isOpen} 
     onClose={() => {
       resetModalState()
-      data.onClose()
+      onClose()
     }} 
     title="Add friend">
       <div className="space-y-6">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/UserInformation/multi-select"
 import { Icons } from "@/components/ui/UserInformation/icons"
-import { AlertMessage } from '../components/ui/alert-message';
+import { AlertMessage } from '@/components/ui/alert-message';
 import BannerImage from "@/assets/banner-user-info.png"
 
 const messages = [

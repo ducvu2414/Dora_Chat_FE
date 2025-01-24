@@ -1,15 +1,15 @@
-import { Dropdown, DropdownItem } from "./dropdown"
+import { Dropdown, DropdownItem } from "@/components/ui/dropdown"
 import { UserPlus, Users } from "lucide-react"
 
-// data: { isOpen, onClose, onAddFriend, onCreateGroup }
-export function AddDropdown(data) {
+// eslint-disable-next-line react/prop-types
+export function AddDropdown({ isOpen, onClose, onAddFriend, onCreateGroup }) {
   return (
-    <Dropdown isOpen={data.isOpen} onClose={data.onClose} align="right" verticalAlign="bottom">
+    <Dropdown isOpen={isOpen} onClose={onClose} align="right" verticalAlign="bottom">
       <DropdownItem
         icon={UserPlus}
         onClick={() => {
-            data.onAddFriend()
-            data.onClose()
+            onAddFriend()
+            onClose()
         }}
       >
         Add friend
@@ -17,8 +17,8 @@ export function AddDropdown(data) {
       <DropdownItem
         icon={Users}
         onClick={() => {
-            data.onCreateGroup()
-            data.onClose()
+            onCreateGroup()
+            onClose()
         }}
       >
         Create chat group

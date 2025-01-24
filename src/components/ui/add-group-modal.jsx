@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Modal } from './modal'
-import { Input } from './input'
-import { Button } from './button'
+import { Modal } from '@/components/ui/modal'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
 
 const friendsList = [
@@ -13,7 +13,7 @@ const friendsList = [
   { id: 6, name: 'Aurora Bonita', avatar: 'https://s3-alpha-sig.figma.com/img/b3c2/3d22/9e7189a7eb428bd40284e032a6a646cc?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=qeF61cmLHi1NPEez5ZCWxrLsDss5xAGHt44FH3cPc7oQ7s86nIJayB064zDnzpKYCACqeOGGjVO5VjCOWtWm3fbpjw~hGaYG~ebUaTfu597TWCIiEvJ99gdk5F2Ig~zirHOUZFvCEAorIZhiX0JRJ-rOUnJqOOWX7fzzorNBpHis2wHEWU6zfdBdbeBQ0cQrH4OB6K02bMK4cHfCkM2t3foddVeShTHUv9U2Zt3~A1jSbkF4VzAs0QXoCnrUF4RP0WIYaetUZfLZyFWL9uOq-McF12Xj~Vj4Hrkpy6dxfeZnxwLwD52tN8dz7gIdRflVlN6P26cxdAD50byl2XUr2A__' },
 ]
 
-export function AddGroupModal(data) {
+export function AddGroupModal(onClose, isOpen) {
   const [groupName, setGroupName] = useState('')
   const [selectedFriends, setSelectedFriends] = useState([])
 
@@ -33,13 +33,13 @@ export function AddGroupModal(data) {
   const handleCreateGroup = () => {
     console.log('Creating group:', { name: groupName, members: selectedFriends })
     resetModalState()
-    data.onClose()
+    onClose()
   }
 
   return (
-    <Modal isOpen={data.isOpen} onClose={() => {
+    <Modal isOpen={isOpen} onClose={() => {
       resetModalState()
-      data.onClose()
+      onClose()
     }} title="Create chat group">
       <div className="space-y-6">
         {/* Group Name Input */}

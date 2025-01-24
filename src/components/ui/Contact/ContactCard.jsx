@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import ContactCardDropdown from './ContactCardDropdown';
 
 export function ContactCard({ contact }) {

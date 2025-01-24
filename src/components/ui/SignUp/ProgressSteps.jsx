@@ -1,8 +1,8 @@
-import * as React from "react"
 import { User, Mail, Info, CheckCircle } from 'lucide-react';
 import { Step } from './Step';
 import { Line } from './Line';
 
+// eslint-disable-next-line react/prop-types
 export function ProgressSteps({ currentStep }) {
     return (
         <div className="flex justify-between items-center">

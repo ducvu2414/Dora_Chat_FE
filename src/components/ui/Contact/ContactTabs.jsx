@@ -1,5 +1,5 @@
-import React from 'react';
 
+// eslint-disable-next-line react/prop-types
 export function ContactTabs({ activeTab, onTabChange }) {
     const tabs = [
         { id: 'friend-list', label: 'Friend list', count: 22 },

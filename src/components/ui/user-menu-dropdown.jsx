@@ -1,16 +1,16 @@
-import { Dropdown, DropdownItem } from "./dropdown"
+import { Dropdown, DropdownItem } from "@/components/ui/dropdown"
 import { User, LogOut, Users } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 
-// data: { isOpen, onClose }
-export function UserMenuDropdown(data) {
+// eslint-disable-next-line react/prop-types
+export function UserMenuDropdown({ isOpen, onClose }) {
   const navigate = useNavigate()
   return (
-    <Dropdown isOpen={data.isOpen} onClose={data.onClose} align="right" verticalAlign="top">
+    <Dropdown isOpen={isOpen} onClose={onClose} align="right" verticalAlign="top">
       <DropdownItem
         icon={User}
         onClick={() => {
-          data.onClose()
+          onClose()
           navigate("/user-information")
         }}
       >
@@ -19,7 +19,7 @@ export function UserMenuDropdown(data) {
       <DropdownItem
         icon={Users}
         onClick={() => {
-          data.onClose()
+          onClose()
           navigate("/contacts")
         }}
       >
@@ -28,7 +28,7 @@ export function UserMenuDropdown(data) {
       <DropdownItem
         icon={LogOut}
         onClick={() => {
-          data.onClose()
+          onClose()
         }}
       >
         Log out

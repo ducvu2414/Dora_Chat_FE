@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 
 export const DropdownMenu = DropdownMenuPrimitive.Root;
 
+// eslint-disable-next-line react/prop-types
 export const DropdownMenuTrigger = forwardRef(({ children, ...props }, ref) => (
     <DropdownMenuPrimitive.Trigger ref={ref} {...props}>
         {children}
@@ -11,6 +12,7 @@ export const DropdownMenuTrigger = forwardRef(({ children, ...props }, ref) => (
 ));
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 
+// eslint-disable-next-line react/prop-types
 export const DropdownMenuContent = forwardRef(({ children, ...props }, ref) => {
     const [align, setAlign] = useState("start");
     const triggerRef = useRef(null);
@@ -47,6 +49,7 @@ export const DropdownMenuContent = forwardRef(({ children, ...props }, ref) => {
 });
 DropdownMenuContent.displayName = "DropdownMenuContent";
 
+// eslint-disable-next-line react/prop-types
 export const DropdownMenuItem = forwardRef(({ children, ...props }, ref) => (
     <DropdownMenuPrimitive.Item
         ref={ref}
@@ -64,6 +67,7 @@ export const DropdownMenuSeparator = () => (
 
 export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
+// eslint-disable-next-line react/prop-types
 export const DropdownMenuSubTrigger = forwardRef(({ children, ...props }, ref) => (
     <DropdownMenuPrimitive.SubTrigger
         ref={ref}
@@ -76,6 +80,7 @@ export const DropdownMenuSubTrigger = forwardRef(({ children, ...props }, ref) =
 ));
 DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
 
+// eslint-disable-next-line react/prop-types
 export const DropdownMenuSubContent = forwardRef(({ children, ...props }, ref) => (
     <DropdownMenuPrimitive.SubContent
         ref={ref}

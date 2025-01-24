@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { ContactTabs } from "../components/ui/Contact/ContactTabs";
-import { ContactList } from "../components/ui/Contact/ContactList";
-import { ContactSearch } from "../components/ui/Contact/ContactSearch";
-import GroupList from "../components/ui/Contact/GroupList";
-import { FriendRequestList } from "../components/ui/Contact/FriendRequestList";
+import { ContactTabs } from "@/components/ui/Contact/ContactTabs";
+import { ContactList } from "@/components/ui/Contact/ContactList";
+import { ContactSearch } from "@/components/ui/Contact/ContactSearch";
+import GroupList from "@/components/ui/Contact/GroupList";
+import { FriendRequestList } from "@/components/ui/Contact/FriendRequestList";
 import { SideBar } from "@/components/ui/side-bar"
-import { GroupRequestList } from "../components/ui/Contact/GroupRequestList";
+import { GroupRequestList } from "@/components/ui/Contact/GroupRequestList";
 
 const messages = [
     {

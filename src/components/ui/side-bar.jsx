@@ -1,16 +1,16 @@
 import { useState } from "react"
-import { SearchBar } from "./search-bar"
-import { TabConversation } from "./tab-conversation"
-import { Conversation } from "./conversation"
-import { UserMenuDropdown } from "./user-menu-dropdown"
+import { SearchBar } from "@/components/search-bar"
+import { TabConversation } from "@/components/tab-conversation"
+import { Conversation } from "@/components/conversation"
+import { UserMenuDropdown } from "@/components/user-menu-dropdown"
 
-// data: { messages, groups }
-export function SideBar(data) {
+// eslint-disable-next-line react/prop-types
+export function SideBar({ messages, groups }) {
   const [activeTab, setActiveTab] = useState('messages')
   const [activeConversation, setActiveConversation] = useState(null)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
-  const conversations = activeTab === 'messages' ? data.messages : data.groups
+  const conversations = activeTab === 'messages' ? messages : groups
 
   return (
     <div className="w-[380px] bg-white border-r flex flex-col">

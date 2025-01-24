@@ -1,4 +1,3 @@
-import React from "react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -11,6 +10,7 @@ import {
 } from "../dropdown-menu";
 import { MoreVertical } from "lucide-react";
 
+// eslint-disable-next-line react/prop-types
 const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
     const categories = [
         { id: "customer", label: "Customer", color: "bg-red-500" },

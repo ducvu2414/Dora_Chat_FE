@@ -14,6 +14,7 @@ const DialogPortal = DialogPrimitive.Portal;
 
 const DialogClose = DialogPrimitive.Close;
 
+// eslint-disable-next-line react/prop-types
 const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
@@ -26,6 +27,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+// eslint-disable-next-line react/prop-types
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
@@ -47,6 +49,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+// eslint-disable-next-line react/prop-types
 const DialogHeader = ({ className, ...props }) => (
   <div
     className={cn(
@@ -58,6 +61,7 @@ const DialogHeader = ({ className, ...props }) => (
 );
 DialogHeader.displayName = "DialogHeader";
 
+// eslint-disable-next-line react/prop-types
 const DialogFooter = ({ className, ...props }) => (
   <div
     className={cn(
@@ -69,6 +73,7 @@ const DialogFooter = ({ className, ...props }) => (
 );
 DialogFooter.displayName = "DialogFooter";
 
+// eslint-disable-next-line react/prop-types
 const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
@@ -81,6 +86,7 @@ const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
+// eslint-disable-next-line react/prop-types
 const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}

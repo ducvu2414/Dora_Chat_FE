@@ -1,8 +1,7 @@
-import { TabGroup } from "./tab-group"
+import { TabGroup } from "@/components/ui/tab-group"
 
-// data: { activeTab, onTabChange }
-
-export function TabConversation(data) {
+// eslint-disable-next-line react/prop-types
+export function TabConversation({ activeTab, onTabChange }) {
   const tabs = [
     { id: "messages", label: "Messages" },
     { id: "group", label: "Group" },
@@ -10,6 +9,6 @@ export function TabConversation(data) {
 
   const rightContent = <span className="text-regal-blue text-sm hover:underline cursor-pointer">Request (2)</span>
 
-  return <TabGroup tabs={tabs} activeTab={data.activeTab} onTabChange={data.onTabChange} rightContent={rightContent} />
+  return <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} rightContent={rightContent} />
 }
 

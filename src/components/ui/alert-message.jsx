@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 
+// eslint-disable-next-line react/prop-types
 export function AlertMessage({ type, message }) {
     const alertStyles = {
         error: {

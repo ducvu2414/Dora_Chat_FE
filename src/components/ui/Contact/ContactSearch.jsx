@@ -1,8 +1,8 @@
-import React from 'react';
 import { Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+// eslint-disable-next-line react/prop-types
 export function ContactSearch({ onSearch }) {
 
     return (

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
-import { ProgressSteps } from "../components/ui/SignUp/ProgressSteps";
-import { SignUpOTPForm } from "../components/ui/SignUp/SignUpOTPForm";
-import { AlertMessage } from '../components/ui/alert-message';
+import { ProgressSteps } from "@/components/ui/SignUp/ProgressSteps";
+import { SignUpOTPForm } from "@/components/ui/SignUp/SignUpOTPForm";
+import { AlertMessage } from '@/components/ui/alert-message';
 import { useNavigate } from "react-router-dom";
-import { Spinner } from "./Spinner";
+import { Spinner } from "@/page/Spinner";
 
 
 export default function SignUpStep2Page() {

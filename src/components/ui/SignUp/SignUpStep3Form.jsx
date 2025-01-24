@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 
 
+// eslint-disable-next-line react/prop-types
 export function SignUpStep3Form({ onSubmit }) {
     const [formData, setFormData] = useState({
         firstName: '',

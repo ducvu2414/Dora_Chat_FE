@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
-import { Input } from "./input"
-import { Button } from "./button"
-import { AddDropdown } from "./add-dropdown"
-import { AddFriendModal } from "./add-friend-modal"
-import { AddGroupModal } from "./add-group-modal"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { AddDropdown } from "@/components/ui/add-dropdown"
+import { AddFriendModal } from "@/components/ui/add-friend-modal"
+import { AddGroupModal } from "@/components/ui/add-group-modal"
 
 export function SearchBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
