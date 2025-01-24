@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { SearchBar } from "@/components/search-bar"
-import { TabConversation } from "@/components/tab-conversation"
-import { Conversation } from "@/components/conversation"
-import { UserMenuDropdown } from "@/components/user-menu-dropdown"
+import { SearchBar } from "@/components/ui/search-bar"
+import { TabConversation } from "@/components/ui/tab-conversation"
+import { Conversation } from "@/components/ui/conversation"
+import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown"
 
 // eslint-disable-next-line react/prop-types
 export function SideBar({ messages, groups }) {

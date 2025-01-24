@@ -5,7 +5,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent } from "@/components/ui/UserInformation/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // eslint-disable-next-line react/prop-types
 const Command = React.forwardRef(({ className, ...props }, ref) => (

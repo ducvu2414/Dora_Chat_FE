@@ -10,14 +10,14 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/UserInformation/separator";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/UserInformation/badge";
+import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/UserInformation/popover";
+} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -26,7 +26,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/UserInformation/command";
+} from "@/components/ui/command";
 
 const multiSelectVariants = cva(
   "m-1 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300",

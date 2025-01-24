@@ -31,7 +31,6 @@ export function SearchBar() {
         </Button>
         <AddDropdown 
           isOpen={isDropdownOpen}
-          
           onClose={() => setIsDropdownOpen(false)}
           onAddFriend={() => setIsAddFriendOpen(true)} 
           onCreateGroup={() => setIsAddGroupOpen(true)}

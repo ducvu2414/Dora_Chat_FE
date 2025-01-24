@@ -4,8 +4,8 @@ import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "@/components/ui/UserInformation/multi-select"
-import { Icons } from "@/components/ui/UserInformation/icons"
+import { MultiSelect } from "@/components/ui/multi-select"
+import { Icons } from "@/components/ui/icons"
 import { AlertMessage } from '@/components/ui/alert-message';
 import BannerImage from "@/assets/banner-user-info.png"
 
