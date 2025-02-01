@@ -74,10 +74,25 @@ const groups = [
   },
 ];
 
+const requests = [
+  {
+    avatar: "https://example.com/avatar1.jpg",
+    name: "John Doe",
+    message: "Hi, I'd like to connect!",
+    time: "2 hours ago",
+  },
+  {
+    avatar: "https://example.com/avatar2.jpg",
+    name: "Jane Smith",
+    message: "Hello, can we chat?",
+    time: "1 day ago",
+  },
+]
+
 export default function HomePage() {
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
-      <SideBar messages={messages} groups={groups} />
+      <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-row items-center justify-center text-center px-8">
