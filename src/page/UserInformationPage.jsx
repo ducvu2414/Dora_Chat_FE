@@ -82,6 +82,21 @@ const groups = [
   },
 ]
 
+const requests = [
+  {
+    avatar: "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
+    name: "John Doe",
+    message: "Hi, I'd like to connect!",
+    time: "2 hours ago",
+  },
+  {
+    avatar: "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
+    name: "Jane Smith",
+    message: "Hello, can we chat?",
+    time: "1 day ago",
+  },
+]
+
 const availableHobbies = [
   {
     value: "Singing",
@@ -223,7 +238,7 @@ export default function UserInformation() {
 
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
-      <SideBar messages={messages} groups={groups} />
+      <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
       <div className="flex-1 relative bg-blue-100 p-3">
@@ -241,7 +256,7 @@ export default function UserInformation() {
           <div className="bg-white rounded-3xl p-6 shadow-sm mb-6 text-center">
             <div className="flex flex-col items-center">
               <img
-                src="https://s3-alpha-sig.figma.com/img/20a1/d517/ac424205661ad4fee696bc7f0dcf9d8e?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=olirJ1hrxtyMOGmOGALINoUwczQrQaT0XTv6ufFztNWDjNdNkSuSkcWvyX~kyUqA57eDYG8RGPSk1WtSfvp0HeBhRZtGXR4lnEkcHGTC00KGgii593HRKIY8wQyxKiEA8Nbmt2iXPs3SY2dbS6raxgXSt9unmLHQ-NfBU1lfAB33bwPK3ZCf9qgFPTadV2pFuTuQTJeFjT8cfI1z7ukomxVEaEf8qpm7YVeubQzzkRbHbPyANpy7c84DhpBXutZkAbaDnaKjQi7pMFa-aFb2uUnhGdw9bRyYmC~ks4kq3zJwYcq7c9rIV3Ht~I1nogT-j~rllghW3c~XiGdti9b3eA__"
+                src="https://s3-alpha-sig.figma.com/img/20a1/d517/ac424205661ad4fee696bc7f0dcf9d8e?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=aoH6zpyJ3XrNKTtX60RhnUjzWlJt1SRFL0aYWlWPwbpgvkP~kH0Cx1ODjG-dqq-FRG5Mc6VF94ib~lrcrcxnoCLR0y0mEeoN65hFqXGVLGF82cHPR0gnDmVe-k6r5JoXWjUJrQTSilXqvDHQuMTkih5-t2vm27yAodKXOmXdn14cDC3mIbSGOkoP2L1PFDN16RMNOHACx3R-3h-IAAhDuY-s6Lc3pq~RvJbBz-8gVneiQZ4gsXhojMOmYT~m-b0nhCapF1A4eYQq40Rauws2ftnJlEQ0~0MeDDYHRj0AO32wQbRgYXCMbHYXWPMPIR0nJNc7fIJMJBJNXc~VaF~oVw__"
                 alt="User Admin"
                 className="w-24 h-24 rounded-full border-4 border-white mb-4 object-cover"
               />
@@ -251,7 +266,7 @@ export default function UserInformation() {
               {/* QR Code */}
               <div className="flex flex-col items-center">
                 <img
-                  src="https://s3-alpha-sig.figma.com/img/0374/d850/67166b3ba72139d99902439d7af64208?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=UIaYZRZnAdTY~WhI14vJBY28uTTLL0v9bcjdLOudyiNhoLb4qEwkYZBEgKedeG3rEelGrZ7zfc54zTIrrZbE6TG48EMkAi919ACib-XlwbvGV3I3Wh2bLCQN37VwYYt1Mh5dGKe-cMVRDTbjU2CgZEZIAcVL7GD1Ym1~kFKPzI3ZH7Qfqog~P5HUstQFXQUR1ZquguA-t6TDnQ~nceuMtJcK8wTVUVqRDk9HH6PhOJnpxiOzDPjyN9lqRXoCRvZoJ~7i3E49iuYmgIhIHwyZl7ISGF1k-KYV7ka01TLDPSkeS~K5DyVtmpeCMgUKg8604yPlSynaUUPtv9upGqmkLA__"
+                  src="https://s3-alpha-sig.figma.com/img/0374/d850/67166b3ba72139d99902439d7af64208?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=JZ7wxzMSGCy6FylTJdRL-bCaGmeVbzAGd1Zkxp5xu3cCaMUh3dsXDiSN-50xHNl7oBGUXkzk4Cb~FaAFqEV6oY-6LLkhNTiGbU8zf2DobPFipskQ4SH4lcYQXZe1RfPWE2CbPhzm35Ip6GH~HIGKgtuUWydCr6IhHzE6gKkJYIHSISRHUYtNhdy542PfUg9CUHVI5-WN9cfQMhbS7Mv4LL1~oI-7-vy8XUDa6xlwJcBdcyfbDOkAZZYcYcItr8HM48JGa1q3CspnIMkdnpFjR4ymtjQ5xDpWHzpAJoRLMDPxHlv2NHS4i4t8VWw8ZK~TVyGXAZcxW9d-4bSNsLlZaQ__"
                   alt="QR Code"
                   className="w-32 h-32 mb-2"
                 />
