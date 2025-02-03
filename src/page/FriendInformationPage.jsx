@@ -2,6 +2,7 @@ import { SideBar } from "@/components/ui/side-bar"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, UserMinus } from "lucide-react"
 import BannerImage from "@/assets/banner-user-info.png"
+import CatIllustration from "@/assets/friend-information.png"
 
 const messages = [
   {
@@ -76,6 +77,21 @@ const groups = [
   },
 ];
 
+const requests = [
+  {
+    avatar: "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
+    name: "John Doe",
+    message: "Hi, I'd like to connect!",
+    time: "2 hours ago",
+  },
+  {
+    avatar: "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
+    name: "Jane Smith",
+    message: "Hello, can we chat?",
+    time: "1 day ago",
+  },
+]
+
 const hobbies = [
   { icon: "🏸", label: "Bamintion" },
   { icon: "⚽", label: "Football" },
@@ -86,7 +102,7 @@ const hobbies = [
 export default function InformationFriend() {
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
-      <SideBar messages={messages} groups={groups} />
+      <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
       <div className="flex-1 relative bg-blue-100 p-3">
@@ -205,7 +221,7 @@ export default function InformationFriend() {
             {/* Cat Illustration - Positioned at bottom right */}
             <div className="absolute bottom-0 right-0">
               <img
-                src="https://s3-alpha-sig.figma.com/img/9fe0/53f1/5f00a02794ce5507d74be1dc94b0be60?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=KsCPWwDAJLDnIF5RV0v6c6FKXL9mOiRT3LFtgFbNGZFEBGP9YLWpUpp4xQzTsLOMJshiUL-kEQKIX2KpwNT3gfmfmOqeWcRMGIwB6FX5SlGctXfld34Yy677hPpMBful6zbaps6JxkzvtaOYQw7VW7SjxxdnISGT55jcc6ZCAL78M1a7ouRPVn1C~7mU-fe3vd3eMhj-fPhDqj~vIe-Z5F5ZOC8qZ3jb7aWbcIZrYj8BA0RpJd2zj50qVOvJFAOMktTMJ8CAvYlnna2Ir6lyqCnCLauSroPcK8e1aGJuXzgcEHjYAvIOiAEmsaPKsb~za9r7Q-DDppzuw5oJ2wVZmg__"
+                src={CatIllustration}
                 alt="Cat illustration"
                 className="w-48 h-auto"
               />
