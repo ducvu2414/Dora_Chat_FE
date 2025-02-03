@@ -3,9 +3,12 @@ import { Search, UserPlus, MessageCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
+  const navigate = useNavigate()
+
   const [phoneNumber, setPhoneNumber] = useState('')
   const [searchResult, setSearchResult] = useState(null)
 
@@ -18,7 +21,7 @@ export function AddFriendModal({ isOpen, onClose }) {
     if (phoneNumber === '987654321' || phoneNumber === '0' + '987654321') {
       setSearchResult({
         name: 'Trịnh Minh Kha',
-        avatar: 'https://s3-alpha-sig.figma.com/img/64dc/8ad0/c703131b418ed3db7ccb749b38302b92?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BEo1ouAzfJLj10AadxwniuowUIGVBfdFaoVV9bC-c3agfECoUFNB606wFODYkfuiBy6bmkfQOmB~lqooTBeHFcx-iQ1akB2ePlqtnxjYdgzqM9vV4jQ9LNHWkSbDVsDN7lWRw1Lss-~mAzBP4h6wTmbJeHs0xnsl9tVZ1gUEgb1iJPb70hzVnb2pCBrVZQjj0bfhJ0aq3c35nALu0XVHjbB5ov8g37LSq-8Sxj4MBXuAjWO1KtEarUjgHQNTIZFMYtqq7svMmqQ5bHjivanoyDg2lDjU~sqwRIc5QIZ7lDRH2atq~yMKCYIofhE1k4bO-o64vNfBEGljrCryoqCK4Q__',
+        avatar: 'https://s3-alpha-sig.figma.com/img/64dc/8ad0/c703131b418ed3db7ccb749b38302b92?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Fi~X1ie0Z0QdgkKeGP1Oy0LGU0CS7RYF0dtoZ8RTMM2qWgssK2ZEaDZ0ozsX7VeiwrJWJIFs7YrB8pSmWqtDTcvX7pPXNCUox~GGEBChFY6cgzz9eyUOwAq1WS3IOJxlbgSk55cTxnRKcoTwtrYO5l6ZGtLteMB1kuwVcbXZImjKZW5QwXbl1T7xuCMv7c3vepf4Vbou80TLFnrxDBOksA-b-tIcA~r0S9i2Q56KRNt39lTiNvLyptrHtptyWBk~UVsrUIG3oVXdTPvwK5~gNkKibs96lOdC63U-ptFwyAGafwmnvpu1EKaQDgAGD~ND-SaX9TynuPplGkA6MobOow__',
         bio: 'Likes playing badminton 🏸 and drinking 🍺'
       })
     } else {
@@ -76,10 +79,11 @@ export function AddFriendModal({ isOpen, onClose }) {
                 <img 
                   src={searchResult.avatar || "/placeholder.svg"}
                   alt={searchResult.name}
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover cursor-pointer"
+                  onClick={() => navigate("/other-people-information")}
                 />
                 <div className="text-left">
-                  <h4 className="text-sm font-medium">{searchResult.name}</h4>
+                  <h4 className="text-sm font-medium cursor-pointer" onClick={() => navigate("/other-people-information")}>{searchResult.name}</h4>
                   <p className="text-sm text-gray-500">{searchResult.bio}</p>
                 </div>
               </div>
