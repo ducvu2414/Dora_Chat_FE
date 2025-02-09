@@ -14,21 +14,23 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     async function handleLogin({ username, password }) {
-        e.preventDefault();
+        // e.preventDefault();
         console.log("Username:", username);
         console.log("Password:", password);
-        setLoading(true);
+        navigate('/home');
 
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            AlertMessage({ type: "success", message: "Login successfully!" });
-            navigate('/home');
-        } catch (error) {
-            console.error("API call failed:", error);
-            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
-        } finally {
-            setLoading(false);
-        }
+        // setLoading(true);
+
+        // try {
+        //     await new Promise((resolve) => setTimeout(resolve, 2000));
+        //     AlertMessage({ type: "success", message: "Login successfully!" });
+        //     navigate('/home');
+        // } catch (error) {
+        //     console.error("API call failed:", error);
+        //     AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
+        // } finally {
+        //     setLoading(false);
+        // }
 
     };
 
