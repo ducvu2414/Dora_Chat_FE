@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import { FriendRequestItem } from './FriendRequestItem';
+import { FriendRequestItem } from '@/components/ui/Contact/FriendRequestItem';
 
 export function FriendRequestList({ friendRequests }) {
     return (

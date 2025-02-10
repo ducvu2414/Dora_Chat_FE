@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-// eslint-disable-next-line react/prop-types
 export const LoginForm = ({ onSubmit }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");

@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// eslint-disable-next-line react/prop-types
 export function SignUpStep1Form({ email, setEmail, onSubmit }) {
     return (
         <div className="space-y-6">

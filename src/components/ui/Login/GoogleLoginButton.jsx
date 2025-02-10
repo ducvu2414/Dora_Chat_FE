@@ -1,22 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const GoogleLoginButton = ({ onClick, loading, className = '' }) => {
+export const GoogleLoginButton = ({ onClick, loading }) => {
     return (
         <button
             onClick={onClick}
             disabled={loading}
             type="button"
-            className={`
-        w-full flex items-center justify-center gap-2 
-        bg-white border border-gray-300 rounded-lg px-4 py-2 
-        text-gray-700 hover:bg-gray-50 
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-        disabled:opacity-50 disabled:cursor-not-allowed
-        transition-colors duration-200
-        mt-4
-        ${className}
-      `}
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -43,8 +34,5 @@ const GoogleLoginButton = ({ onClick, loading, className = '' }) => {
 
 GoogleLoginButton.propTypes = {
     onClick: PropTypes.func.isRequired,
-    loading: PropTypes.bool,
-    className: PropTypes.string
+    loading: PropTypes.bool
 };
-
-export default GoogleLoginButton;

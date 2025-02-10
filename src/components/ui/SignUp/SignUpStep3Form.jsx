@@ -10,8 +10,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-
-// eslint-disable-next-line react/prop-types
 export function SignUpStep3Form({ onSubmit }) {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -49,7 +47,7 @@ export function SignUpStep3Form({ onSubmit }) {
                         placeholder="Your first name"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 bg-gray-50 text-blue-500"
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500 placeholder-[var(--color-blue-500)]"
                         required
                     />
                 </div>
@@ -64,7 +62,7 @@ export function SignUpStep3Form({ onSubmit }) {
                         placeholder="Your last name"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 bg-gray-50 text-blue-500"
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500 placeholder-[var(--color-blue-500)]"
                         required
                     />
                 </div>
@@ -78,7 +76,7 @@ export function SignUpStep3Form({ onSubmit }) {
                             name="dateOfBirth"
                             value={formData.dateOfBirth}
                             onChange={handleChange}
-                            className={`w-full px-4 py-2 bg-gray-50 `}
+                            className={`w-full px-4 py-2 bg-gray-50`}
                         />
                     </div>
                 </div>

@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import { ContactCard } from './ContactCard';
+import { ContactCard } from '@/components/ui/Contact/ContactCard';
 
 export function ContactList({ contacts }) {
     return (

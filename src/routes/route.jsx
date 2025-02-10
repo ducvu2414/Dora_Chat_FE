@@ -1,15 +1,15 @@
 import React from "react";
 
-const LoginPage = React.lazy(() => import("../page/LoginPage"));
-const SignUpPage = React.lazy(() => import("../page/SignUpStep1Page"));
-const HomePage = React.lazy(() => import("../page/HomePage"));
-const SignUpStep2Page = React.lazy(() => import("../page/SignUpStep2Page"));
-const SignUpStep3Page = React.lazy(() => import("../page/SignUpStep3Page"));
-const SignUpStep4Page = React.lazy(() => import("../page/SignUpStep4Page"));
-const FriendInformationPage = React.lazy(() => import("../page/FriendInformationPage"));
-const UserInformationPage = React.lazy(() => import("../page/UserInformationPage"));
-const ContactsPage = React.lazy(() => import("../page/ContactsPage"));
-const OtherPeopleInformation = React.lazy(() => import("../page/OtherPeopleInformationPage"));
+const LoginPage = React.lazy(() => import("@/page/LoginPage"));
+const SignUpPage = React.lazy(() => import("@/page/SignUpStep1Page"));
+const HomePage = React.lazy(() => import("@/page/HomePage"));
+const SignUpStep2Page = React.lazy(() => import("@/page/SignUpStep2Page"));
+const SignUpStep3Page = React.lazy(() => import("@/page/SignUpStep3Page"));
+const SignUpStep4Page = React.lazy(() => import("@/page/SignUpStep4Page"));
+const FriendInformationPage = React.lazy(() => import("@/page/FriendInformationPage"));
+const UserInformationPage = React.lazy(() => import("@/page/UserInformationPage"));
+const ContactsPage = React.lazy(() => import("@/page/ContactsPage"));
+const OtherPeopleInformation = React.lazy(() => import("@/page/OtherPeopleInformationPage"));
 
 const routes = [
     { path: "/", element: <LoginPage /> },

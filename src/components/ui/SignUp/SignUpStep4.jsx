@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Rocket } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 
-
 export function SignUpStep4Banner() {
     const navigate = useNavigate();
     return (

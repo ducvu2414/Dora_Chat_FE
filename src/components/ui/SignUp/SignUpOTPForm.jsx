@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield } from 'lucide-react';
 
-// eslint-disable-next-line react/prop-types
 export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit }) {
     const [countdown, setCountdown] = useState(0);
     const [resendCount, setResendCount] = useState(0);

@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import GroupCardDropdown from './GroupCardDropdown';
+import GroupCardDropdown from '@/components/ui/Contact/GroupCardDropdown';
 
 const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
     return (

@@ -1,5 +1,3 @@
-
-// eslint-disable-next-line react/prop-types
 export function Step({ label, icon, active = false }) {
     return (
         <div className="flex flex-col items-center space-y-2">

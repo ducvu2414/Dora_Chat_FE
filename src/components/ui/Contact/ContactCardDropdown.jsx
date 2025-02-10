@@ -7,10 +7,9 @@ import {
     DropdownMenuSub,
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
-} from "../dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 
-// eslint-disable-next-line react/prop-types
 const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDelete }) => {
     const categories = [
         { id: "customer", label: "Customer", color: "bg-red-500" },

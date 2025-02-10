@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import ContactCardDropdown from './ContactCardDropdown';
+import ContactCardDropdown from '@/components/ui/Contact/ContactCardDropdown';
 
 export function ContactCard({ contact }) {
     function onViewInfo() {

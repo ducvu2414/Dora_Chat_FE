@@ -7,7 +7,7 @@ import {
     DropdownMenuSub,
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
-} from "../dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 
 // eslint-disable-next-line react/prop-types
