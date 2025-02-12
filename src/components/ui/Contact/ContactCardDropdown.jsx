@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -8,7 +9,7 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDelete }) => {
     const categories = [
@@ -20,26 +21,35 @@ const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDe
         { id: "study", label: "Study", color: "bg-blue-500" },
     ];
 
+    const handleCategoryClick = (categoryId) => {
+        if (onCategoryChange) {
+            onCategoryChange(categoryId);
+        }
+    };
+
     return (
-        <DropdownMenu>
+        <DropdownMenu className="bg-red-500">
             <DropdownMenuTrigger asChild>
-                <div className="bg-white text-gray-400 hover:text-gray-600 border-none focus:outline-none flex-shrink-0 cursor-pointer">
-                    <MoreVertical className="w-5 h-5" />
-                </div>
+                <button
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none bg-white rounded-full p-2"
+                >
+                    <MoreHorizontal className="w-5 h-5" />
+                </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
                 <DropdownMenuItem onClick={onViewInfo}>
                     <span>View info</span>
                 </DropdownMenuItem>
                 <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="flex items-center cursor-pointer">
                         <span>Classify as</span>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
                         {categories.map((category) => (
                             <DropdownMenuItem
                                 key={category.id}
-                                onClick={() => onCategoryChange(category.id)}
+                                onClick={() => handleCategoryClick(category.id)}
+                                className="flex items-center cursor-pointer"
                             >
                                 <div className={`w-3 h-3 rounded-full ${category.color} mr-2`} />
                                 <span>{category.label}</span>
@@ -47,16 +57,21 @@ const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDe
                         ))}
                     </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                <DropdownMenuItem onClick={onSetNickname}>
-                    <span>Sets nickname</span>
+                <DropdownMenuItem
+                    onClick={onSetNickname}
+                    className="flex items-center cursor-pointer"
+                >
+                    <span>Set nickname</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600" onClick={onDelete}>
+                <DropdownMenuItem
+                    onClick={onDelete}
+                    className="flex items-center cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                >
                     <span>Delete contact</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-
     );
 };
 

@@ -3,7 +3,6 @@ import ContactCardDropdown from '@/components/ui/Contact/ContactCardDropdown';
 export function ContactCard({ contact }) {
     function onViewInfo() {
         console.log('View info');
-        // get friend by id, email, or phone number
         window.location.href = "/friend-information";
     }
     function onCategoryChange(category) {
@@ -32,6 +31,9 @@ export function ContactCard({ contact }) {
                         <h3 className="text-sm font-medium text-gray-900 truncate">{contact.name}</h3>
                         <p className="text-sm text-gray-500 truncate">{contact.email}</p>
                     </div>
+                    {contact.category && (
+                        <div className={`w-2 h-2 rounded-full ${getCategoryColor(contact.category)}`} />
+                    )}
                 </div>
                 <div className="flex-shrink-0">
                     <ContactCardDropdown
@@ -45,3 +47,15 @@ export function ContactCard({ contact }) {
         </div>
     );
 }
+
+const getCategoryColor = (categoryId) => {
+    const colorMap = {
+        'customer': 'bg-red-500',
+        'family': 'bg-pink-500',
+        'work': 'bg-orange-500',
+        'friends': 'bg-yellow-500',
+        'reply-later': 'bg-green-500',
+        'study': 'bg-blue-500'
+    };
+    return colorMap[categoryId] || 'bg-gray-500';
+};

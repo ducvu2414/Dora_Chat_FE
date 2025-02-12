@@ -2,7 +2,7 @@ import GroupCardDropdown from '@/components/ui/Contact/GroupCardDropdown';
 
 const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
     return (
-        <button className="w-full focus:outline-none border-none p-0" onClick={() => console.log('View group')}>
+        <div className="w-full focus:outline-none border-none p-0" onClick={() => console.log('View group')}>
             <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center space-x-4 flex-1 min-w-0">
                     <div className="relative">
@@ -36,7 +36,7 @@ const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
                     <GroupCardDropdown onCategoryChange={onCategoryChange} onLeaveGroup={onLeaveGroup} />
                 </div>
             </div>
-        </button>
+        </div>
     );
 };
 

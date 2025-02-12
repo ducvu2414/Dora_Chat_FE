@@ -8,9 +8,8 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
-// eslint-disable-next-line react/prop-types
 const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
     const categories = [
         { id: "customer", label: "Customer", color: "bg-red-500" },
@@ -21,25 +20,34 @@ const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
         { id: "study", label: "Study", color: "bg-blue-500" },
     ];
 
+    const handleCategoryClick = (categoryId) => {
+        if (onCategoryChange) {
+            onCategoryChange(categoryId);
+        }
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="bg-white text-gray-400 hover:text-gray-600 border-none focus:outline-none flex-shrink-0">
-                    <MoreVertical className="w-5 h-5" />
-                </div>
+                <button
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none bg-white rounded-full p-2"
+                >
+                    <MoreHorizontal className="w-5 h-5" />
+                </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="flex items-center cursor-pointer">
                         <span>Classify as</span>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
                         {categories.map((category) => (
                             <DropdownMenuItem
                                 key={category.id}
-                                onClick={() => onCategoryChange(category.id)}
+                                onClick={() => handleCategoryClick(category.id)}
+                                className="flex items-center cursor-pointer"
                             >
-                                <div className={`z-10 w-3 h-3 rounded-full ${category.color} mr-2`} />
+                                <div className={`w-3 h-3 rounded-full ${category.color} mr-2`} />
                                 <span>{category.label}</span>
                             </DropdownMenuItem>
                         ))}
@@ -47,13 +55,13 @@ const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    className="text-red-600"
                     onClick={onLeaveGroup}
                 >
-                    <span>Leave group</span>
+                    <span className="text-red">Leave group</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
-}
+};
+
 export default GroupCardDropdown;
