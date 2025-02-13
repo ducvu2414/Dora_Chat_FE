@@ -68,7 +68,7 @@ const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDe
                     onClick={onDelete}
                     className="flex items-center cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 >
-                    <span>Delete contact</span>
+                    <span className="text-red-500">Delete contact</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
