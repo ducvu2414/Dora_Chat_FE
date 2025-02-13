@@ -100,7 +100,7 @@ export function Conversation({ onClick, isActive, activeTab, avatar, name, messa
           >
             {activeTab === "messages" || activeTab === "requests" ? (
               <ContactCardDropdown
-                onViewInfo={() => console.log("View info")}
+                onViewInfo={() => (window.location.href = "/friend-information")}
                 onCategoryChange={(category) => console.log("Category changed:", category)}
                 onSetNickname={() => console.log("Set nickname")}
                 onDelete={() => console.log("Delete contact")}
