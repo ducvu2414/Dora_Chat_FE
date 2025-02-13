@@ -28,7 +28,7 @@ const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDe
     };
 
     return (
-        <DropdownMenu className="bg-red-500">
+        <DropdownMenu className="z-50">
             <DropdownMenuTrigger asChild>
                 <button
                     className="text-gray-400 hover:text-gray-600 focus:outline-none bg-white rounded-full p-2"
@@ -36,7 +36,7 @@ const ContactCardDropdown = ({ onViewInfo, onCategoryChange, onSetNickname, onDe
                     <MoreHorizontal className="w-5 h-5" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent className="z-[9999] w-56">
                 <DropdownMenuItem onClick={onViewInfo}>
                     <span>View info</span>
                 </DropdownMenuItem>

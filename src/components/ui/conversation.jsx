@@ -11,9 +11,8 @@ export function Conversation({ onClick, isActive, activeTab, avatar, name, messa
   return (
     <div
       onClick={onClick}
-      className={`h-15 flex items-center gap-3 p-3 rounded-lg cursor-pointer ${
-        isActive ? "bg-blue-100" : "hover:bg-gray-100"
-      }`}
+      className={`h-15 flex items-center gap-3 p-3 rounded-lg cursor-pointer ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
+        }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -56,3 +55,87 @@ export function Conversation({ onClick, isActive, activeTab, avatar, name, messa
   )
 }
 
+// import { useState } from "react";
+// import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
+// import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
+
+// export function Conversation({ onClick, isActive, activeTab, avatar, name, message, time }) {
+//   const [isConversationHovered, setIsConversationHovered] = useState(false);
+//   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
+
+//   const showDropdown = isConversationHovered || isDropdownHovered;
+
+//   const handleConversationEnter = () => {
+//     setIsConversationHovered(true);
+//   };
+
+//   const handleConversationLeave = () => {
+//     setTimeout(() => {
+//       if (!isDropdownHovered) {
+//         setIsConversationHovered(false);
+//       }
+//     }, 100);
+//   };
+
+//   const handleDropdownEnter = () => {
+//     setIsDropdownHovered(true);
+//   };
+
+//   const handleDropdownLeave = () => {
+//     setIsDropdownHovered(false);
+//     if (!isConversationHovered) {
+//       setIsConversationHovered(false);
+//     }
+//   };
+
+//   return (
+//     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
+//       <div
+//         className={`flex items-center p-4 cursor-pointer relative ${isActive ? "bg-gray-100" : "hover:bg-gray-50"
+//           }`}
+//         onClick={onClick}
+//         onMouseEnter={handleConversationEnter}
+//         onMouseLeave={handleConversationLeave}
+//       >
+//         <div className="flex-shrink-0">
+//           <img
+//             src={avatar}
+//             alt={name}
+//             className="w-12 h-12 rounded-full"
+//           />
+//         </div>
+
+//         <div className="ml-4 flex-grow">
+//           <h3 className="text-lg font-medium">{name}</h3>
+//           <p className="text-gray-500">{message}</p>
+//         </div>
+
+//         {!showDropdown && (
+//           <span className="text-sm text-gray-400">{time}</span>
+//         )}
+
+//         {showDropdown && (
+//           <div
+//             onMouseEnter={handleDropdownEnter}
+//             onMouseLeave={handleDropdownLeave}
+//           >
+//             {activeTab === "messages" ? (
+//               <ContactCardDropdown
+//                 onViewInfo={() => console.log("View info")}
+//                 onCategoryChange={(category) => console.log("Category changed:", category)}
+//                 onSetNickname={() => console.log("Set nickname")}
+//                 onDelete={() => console.log("Delete contact")}
+//               />
+//             ) : (
+//               <GroupCardDropdown
+//                 onViewInfo={() => console.log("View info")}
+//                 onCategoryChange={(category) => console.log("Category changed:", category)}
+//                 onLeaveGroup={() => console.log("Leave group")}
+//               />
+//             )}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }

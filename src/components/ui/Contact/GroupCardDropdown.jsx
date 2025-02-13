@@ -27,7 +27,7 @@ const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
     };
 
     return (
-        <DropdownMenu>
+        <DropdownMenu className="z-50">
             <DropdownMenuTrigger asChild>
                 <button
                     className="text-gray-400 hover:text-gray-600 focus:outline-none bg-white rounded-full p-2"
@@ -35,7 +35,7 @@ const GroupCardDropdown = ({ onCategoryChange, onLeaveGroup }) => {
                     <MoreHorizontal className="w-5 h-5" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent className="z-[9999] w-56">
                 <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="flex items-center cursor-pointer">
                         <span>Classify as</span>
