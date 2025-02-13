@@ -29,6 +29,7 @@ export function UserMenuDropdown({ isOpen, onClose }) {
         icon={LogOut}
         onClick={() => {
           onClose()
+          navigate("/")
         }}
       >
         Log out
