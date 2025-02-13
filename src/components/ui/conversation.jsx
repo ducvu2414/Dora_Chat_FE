@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 // data: { avatar, name, message, time, onClick, isActive, activeTab }
 // import { useState } from "react"
 // import { MoreHorizontal } from "lucide-react"
 // import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown"
 // import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown"
 
-// eslint-disable-next-line react/prop-types
 // export function Conversation({ onClick, isActive, activeTab, avatar, name, message, time }) {
 //   const [isHovered, setIsHovered] = useState(false)
 //   const [showDropdown, setShowDropdown] = useState(false)

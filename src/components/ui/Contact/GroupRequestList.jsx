@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { GroupRequestItem } from '@/components/ui/Contact/GroupRequestItem';
 
 export function GroupRequestList({ groupRequests }) {

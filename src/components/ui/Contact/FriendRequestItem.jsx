@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";

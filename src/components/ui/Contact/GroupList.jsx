@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import GroupCard from '@/components/ui/Contact/GroupCard';
 
 const GroupList = ({ groups }) => {

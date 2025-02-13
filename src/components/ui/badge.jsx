@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react-refresh/only-export-components */
 import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -22,7 +24,6 @@ const badgeVariants = cva(
   }
 );
 
-// eslint-disable-next-line react/prop-types
 function Badge({ className, variant, ...props }) {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />
