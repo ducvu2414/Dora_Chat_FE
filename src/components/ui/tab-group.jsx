@@ -9,11 +9,9 @@ export function TabGroup({ tabs, activeTab, onTabChange, rightContent }) {
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
-            activeTab === tab.id 
-            ? "text-regal-blue border-regal-blue"
-            : "text-gray-500 hover:text-regal-blue"
-            // ? 'text-white !bg-regal-blue border-regal-blue' 
-            // : 'text-regal-blue !bg-white hover:text-regal-blue'
+            activeTab === tab.id
+              ? "text-regal-blue border-regal-blue"
+              : "text-gray-500 hover:text-regal-blue"
           }`}
         >
           {tab.label}
@@ -24,5 +22,5 @@ export function TabGroup({ tabs, activeTab, onTabChange, rightContent }) {
       ))}
       {rightContent && <div className="ml-auto">{rightContent}</div>}
     </div>
-  )
+  );
 }

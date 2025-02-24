@@ -1,13 +1,19 @@
-import { useState } from "react"
-import { SideBar } from "@/components/ui/side-bar"
-import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { Icons } from "@/components/ui/icons"
-import { AlertMessage } from '@/components/ui/alert-message';
-import BannerImage from "@/assets/banner-user-info.png"
+import { useState } from "react";
+import { SideBar } from "@/components/ui/side-bar";
+import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Icons } from "@/components/ui/icons";
+import { AlertMessage } from "@/components/ui/alert-message";
+import BannerImage from "@/assets/banner-user-info.png";
 
 const messages = [
   {
@@ -59,43 +65,48 @@ const messages = [
     message: "How are you?",
     time: "Yesterday",
   },
-]
+];
 
 const groups = [
   {
-    avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+    avatar:
+      "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
     name: "Design Team",
     message: "New project discussion",
     time: "5 mins",
   },
   {
-    avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
+    avatar:
+      "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
     name: "Development Team",
     message: "Sprint planning",
     time: "1 hour",
   },
   {
-    avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
+    avatar:
+      "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
     name: "Marketing Team",
     message: "Campaign updates",
     time: "3 hours",
   },
-]
+];
 
 const requests = [
   {
-    avatar: "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
+    avatar:
+      "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
     name: "John Doe",
     message: "Hi, I'd like to connect!",
     time: "2 hours ago",
   },
   {
-    avatar: "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
+    avatar:
+      "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
     name: "Jane Smith",
     message: "Hello, can we chat?",
     time: "1 day ago",
   },
-]
+];
 
 const availableHobbies = [
   {
@@ -151,11 +162,11 @@ const availableHobbies = [
 ];
 
 export default function UserInformation() {
-  const [activeTab, setActiveTab] = useState("information")
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState("information");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const [userInfo, setUserInfo] = useState({
     firstName: "User",
@@ -163,78 +174,101 @@ export default function UserInformation() {
     dateOfBirth: "2003-02-25",
     gender: "Male",
     hobbies: ["Singing", "Dancing"],
-  })
+  });
 
   const handleSubmitPassword = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!currentPassword) {
-      AlertMessage({ type: "error", message: "Please enter your current password" });
-      return
+      AlertMessage({
+        type: "error",
+        message: "Please enter your current password",
+      });
+      return;
     }
 
     if (!newPassword) {
-      AlertMessage({ type: "error", message: "Please enter your new password" });
-      return
+      AlertMessage({
+        type: "error",
+        message: "Please enter your new password",
+      });
+      return;
     }
 
     if (!confirmPassword) {
-      AlertMessage({ type: "error", message: "Please enter your confirm password" });
-      return
+      AlertMessage({
+        type: "error",
+        message: "Please enter your confirm password",
+      });
+      return;
     }
 
     if (currentPassword !== "12345678") {
       AlertMessage({ type: "error", message: "Current password is incorrect" });
-      return
-    } 
-
-    if (newPassword !== confirmPassword) {
-      AlertMessage({ type: "error", message: "Confirm password does not match" });
-      return
+      return;
     }
 
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
+    if (newPassword !== confirmPassword) {
+      AlertMessage({
+        type: "error",
+        message: "Confirm password does not match",
+      });
+      return;
+    }
+
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
-      AlertMessage({ type: "error", message: "Password must be at least 8 characters long, containing uppercase and lowercase letters and numbers" });
-      return
+      AlertMessage({
+        type: "error",
+        message:
+          "Password must be at least 8 characters long, containing uppercase and lowercase letters and numbers",
+      });
+      return;
     }
 
     AlertMessage({ type: "success", message: "Password changed successfully" });
-  }
+  };
 
   const handleSubmitInfo = (e) => {
-    e.preventDefault()
-    setIsEditing(false)
+    e.preventDefault();
+    setIsEditing(false);
 
     const regexName = /^[A-Za-zÀ-ỹ\s]+$/;
     if (!userInfo.firstName) {
       AlertMessage({ type: "error", message: "Please enter your first name" });
-      return
+      return;
     }
 
     if (!regexName.test(userInfo.firstName)) {
       AlertMessage({ type: "error", message: "First name must be characters" });
-      return
+      return;
     }
 
     if (!userInfo.lastName) {
       AlertMessage({ type: "error", message: "Please enter your last name" });
-      return
+      return;
     }
 
     if (!regexName.test(userInfo.lastName)) {
       AlertMessage({ type: "error", message: "Last name must be characters" });
-      return
+      return;
     }
 
     // under 18
-    if (new Date().getFullYear() - new Date(userInfo.dateOfBirth).getFullYear() < 18) {
+    if (
+      new Date().getFullYear() - new Date(userInfo.dateOfBirth).getFullYear() <
+      18
+    ) {
       AlertMessage({ type: "error", message: "Age must be over 18" });
-      return
+      return;
     }
 
-    AlertMessage({ type: "success", message: "Information updated successfully" });
-  }
+    AlertMessage({
+      type: "success",
+      message: "Information updated successfully",
+    });
+  };
 
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
@@ -260,7 +294,9 @@ export default function UserInformation() {
                 alt="User Admin"
                 className="w-24 h-24 rounded-full border-4 border-white mb-4 object-cover"
               />
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">User Admin</h1>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                User Admin
+              </h1>
               <p className="text-gray-600 mb-6">⭐ Have a nice day! 🌊</p>
 
               {/* QR Code */}
@@ -270,7 +306,9 @@ export default function UserInformation() {
                   alt="QR Code"
                   className="w-32 h-32 mb-2"
                 />
-                <p className="text-sm text-orange-500 font-bold">QR code helps people follow you quickly</p>
+                <p className="text-sm text-orange-500 font-bold">
+                  QR code helps people follow you quickly
+                </p>
                 <button className="mt-2 p-2 rounded-full bg-orange-100 hover:bg-orange-200 border-none transition-colors">
                   <svg
                     width="24"
@@ -280,7 +318,12 @@ export default function UserInformation() {
                     stroke="currentColor"
                     className="text-orange-400"
                   >
-                    <path d="M12 4v12m0 0l-4-4m4 4l4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M12 4v12m0 0l-4-4m4 4l4-4"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                     <path
                       d="M4 16.8v.8a2.4 2.4 0 0 0 2.4 2.4h11.2a2.4 2.4 0 0 0 2.4-2.4v-.8"
                       strokeWidth="2"
@@ -315,40 +358,62 @@ export default function UserInformation() {
                 <form onSubmit={handleSubmitInfo} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">First name</label>
+                      <label className="block text-sm font-medium mb-1 text-left">
+                        First name
+                      </label>
                       <Input
                         value={userInfo.firstName}
-                        onChange={(e) => setUserInfo({ ...userInfo, firstName: e.target.value })}
+                        onChange={(e) =>
+                          setUserInfo({
+                            ...userInfo,
+                            firstName: e.target.value,
+                          })
+                        }
                         disabled={!isEditing}
                         className="bg-gray-50 text-regal-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">Last name</label>
+                      <label className="block text-sm font-medium mb-1 text-left">
+                        Last name
+                      </label>
                       <Input
                         value={userInfo.lastName}
-                        onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
+                        onChange={(e) =>
+                          setUserInfo({ ...userInfo, lastName: e.target.value })
+                        }
                         disabled={!isEditing}
                         className="bg-gray-50 text-regal-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">Date of Birth</label>
+                      <label className="block text-sm font-medium mb-1 text-left">
+                        Date of Birth
+                      </label>
                       <div className="relative">
                         <Input
                           type="date"
                           value={userInfo.dateOfBirth}
-                          onChange={(e) => setUserInfo({ ...userInfo, dateOfBirth: e.target.value })}
+                          onChange={(e) =>
+                            setUserInfo({
+                              ...userInfo,
+                              dateOfBirth: e.target.value,
+                            })
+                          }
                           disabled={!isEditing}
                           className="bg-gray-50 text-regal-blue"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">Gender</label>
+                      <label className="block text-sm font-medium mb-1 text-left">
+                        Gender
+                      </label>
                       <Select
                         value={userInfo.gender}
-                        onValueChange={(value) => setUserInfo({ ...userInfo, gender: value })}
+                        onValueChange={(value) =>
+                          setUserInfo({ ...userInfo, gender: value })
+                        }
                         disabled={!isEditing}
                       >
                         <SelectTrigger className="bg-gray-50 text-regal-blue">
@@ -363,11 +428,15 @@ export default function UserInformation() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-left">Your hobbies</label>
+                    <label className="block text-sm font-medium mb-1 text-left">
+                      Your hobbies
+                    </label>
                     <MultiSelect
                       disabled={!isEditing}
                       options={availableHobbies}
-                      onValueChange={(value) => setUserInfo({ ...userInfo, hobbies: value })}
+                      onValueChange={(value) =>
+                        setUserInfo({ ...userInfo, hobbies: value })
+                      }
                       defaultValue={userInfo.hobbies}
                       placeholder="Select options"
                       variant="inverted"
@@ -377,7 +446,10 @@ export default function UserInformation() {
                   </div>
                   {isEditing && (
                     <div className="flex justify-end">
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
                         Save Changes
                       </Button>
                     </div>
@@ -394,7 +466,15 @@ export default function UserInformation() {
                       stroke="currentColor"
                       className="text-blue-600"
                     >
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeWidth="2" />
+                      <rect
+                        x="3"
+                        y="11"
+                        width="18"
+                        height="11"
+                        rx="2"
+                        ry="2"
+                        strokeWidth="2"
+                      />
                       <path d="M7 11V7a5 5 0 0110 0v4" strokeWidth="2" />
                     </svg>
                     Change password
@@ -402,7 +482,9 @@ export default function UserInformation() {
 
                   <form onSubmit={handleSubmitPassword} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">Current password</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                        Current password
+                      </label>
                       <Input
                         type="password"
                         name="currentPassword"
@@ -413,7 +495,9 @@ export default function UserInformation() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">New password</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                        New password
+                      </label>
                       <Input
                         type="password"
                         name="newPassword"
@@ -424,7 +508,9 @@ export default function UserInformation() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">Confirm password</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                        Confirm password
+                      </label>
                       <Input
                         type="password"
                         name="confirmPassword"
@@ -433,12 +519,15 @@ export default function UserInformation() {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
                       <p className="mt-1 text-xs text-gray-500">
-                        Password must be at least 8 characters long, containing uppercase and lowercase letters and
-                        numbers
+                        Password must be at least 8 characters long, containing
+                        uppercase and lowercase letters and numbers
                       </p>
                     </div>
 
-                    <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
                       Save
                     </Button>
                   </form>
@@ -449,6 +538,5 @@ export default function UserInformation() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

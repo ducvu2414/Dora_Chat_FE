@@ -46,10 +46,17 @@ import { useState } from "react";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 
-export function Conversation({ onClick, isActive, activeTab, avatar, name, message, time }) {
+export function Conversation({
+  onClick,
+  isActive,
+  activeTab,
+  avatar,
+  name,
+  message,
+  time,
+}) {
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
-
   const showDropdown = isConversationHovered || isDropdownHovered;
 
   const handleConversationEnter = () => {
@@ -78,20 +85,24 @@ export function Conversation({ onClick, isActive, activeTab, avatar, name, messa
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"}`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
+          isActive ? "bg-blue-100" : "hover:bg-gray-100"
+        }`}
         onClick={onClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
       >
-        <img src={avatar || "/placeholder.svg"} alt={name} className="w-14 h-14 rounded-full object-cover" />
+        <img
+          src={avatar || "/placeholder.svg"}
+          alt={name}
+          className="w-14 h-14 rounded-full object-cover"
+        />
         <div className="flex-1 min-w-0 pl-3">
           <h3 className="font-medium text-sm text-left">{name}</h3>
           <p className="text-sm text-gray-500 truncate text-left">{message}</p>
         </div>
 
-        {!showDropdown && (
-          <span className="text-sm text-gray-400">{time}</span>
-        )}
+        {!showDropdown && <span className="text-sm text-gray-400">{time}</span>}
 
         {showDropdown && (
           <div
@@ -100,15 +111,21 @@ export function Conversation({ onClick, isActive, activeTab, avatar, name, messa
           >
             {activeTab === "messages" || activeTab === "requests" ? (
               <ContactCardDropdown
-                onViewInfo={() => (window.location.href = "/friend-information")}
-                onCategoryChange={(category) => console.log("Category changed:", category)}
+                onViewInfo={() =>
+                  (window.location.href = "/friend-information")
+                }
+                onCategoryChange={(category) =>
+                  console.log("Category changed:", category)
+                }
                 onSetNickname={() => console.log("Set nickname")}
                 onDelete={() => console.log("Delete contact")}
               />
             ) : (
               <GroupCardDropdown
                 onViewInfo={() => console.log("View info")}
-                onCategoryChange={(category) => console.log("Category changed:", category)}
+                onCategoryChange={(category) =>
+                  console.log("Category changed:", category)
+                }
                 onLeaveGroup={() => console.log("Leave group")}
               />
             )}

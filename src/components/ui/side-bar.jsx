@@ -88,31 +88,31 @@
 //   )
 // }
 
-import { useState } from "react"
-import { SearchBar } from "@/components/ui/search-bar"
-import { TabConversation } from "@/components/ui/tab-conversation"
-import { Conversation } from "@/components/ui/conversation"
-import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown"
+import { useState } from "react";
+import { SearchBar } from "@/components/ui/search-bar";
+import { TabConversation } from "@/components/ui/tab-conversation";
+import { Conversation } from "@/components/ui/conversation";
+import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
 
 export function SideBar({ messages, groups, requests }) {
-  const [activeTab, setActiveTab] = useState("messages")
-  const [activeConversation, setActiveConversation] = useState(null)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("messages");
+  const [activeConversation, setActiveConversation] = useState(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const getConversations = () => {
     switch (activeTab) {
       case "messages":
-        return messages
+        return messages;
       case "group":
-        return groups
+        return groups;
       case "requests":
-        return requests
+        return requests;
       default:
-        return []
+        return [];
     }
-  }
+  };
 
-  const conversations = getConversations()
+  const conversations = getConversations();
 
   return (
     <div className="w-[380px] bg-white border-r flex flex-col relative">
@@ -120,7 +120,11 @@ export function SideBar({ messages, groups, requests }) {
         <SearchBar />
       </div>
 
-      <TabConversation activeTab={activeTab} onTabChange={setActiveTab} requestCount={requests.length} />
+      <TabConversation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        requestCount={requests.length}
+      />
 
       <div className="flex-1 overflow-y-auto px-2 scrollbar-hide relative z-10">
         {conversations.map((conv, i) => (
@@ -142,7 +146,9 @@ export function SideBar({ messages, groups, requests }) {
             className="w-12 h-12 rounded-full object-cover cursor-pointer"
           />
           <div>
-            <p className="text-sm text-regal-blue font-bold cursor-pointer">User admin</p>
+            <p className="text-sm text-regal-blue font-bold cursor-pointer">
+              User admin
+            </p>
             <p className="text-xs text-green-500 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
               Active
@@ -154,7 +160,13 @@ export function SideBar({ messages, groups, requests }) {
             className="p-2 hover:bg-gray-200 rounded-md bg-white focus:outline-none"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M8 3.5C8.41421 3.5 8.75 3.16421 8.75 2.75C8.75 2.33579 8.41421 2 8 2C7.58579 2 7.25 2.33579 7.25 2.75C7.25 3.16421 7.58579 3.5 8 3.5Z"
                 fill="#6B7280"
@@ -169,9 +181,12 @@ export function SideBar({ messages, groups, requests }) {
               />
             </svg>
           </button>
-          <UserMenuDropdown isOpen={isUserMenuOpen} onClose={() => setIsUserMenuOpen(false)} />
+          <UserMenuDropdown
+            isOpen={isUserMenuOpen}
+            onClose={() => setIsUserMenuOpen(false)}
+          />
         </div>
       </div>
     </div>
-  )
+  );
 }
