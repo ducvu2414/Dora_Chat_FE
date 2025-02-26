@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { SideBar } from "../../components/ui/side-bar";
+import ChatBox from "./components/ChatBox";
 import HeaderSignleChat from "./components/HeaderSignleChat";
+import MessageInput from "./components/MessageInput";
 
-const messages = [
+const messagesDemo = [
   {
     avatar:
       "https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__",
@@ -94,14 +97,27 @@ const requests = [
   },
 ];
 export default function ChatSingle() {
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Hello!", sender: "other" },
+    {
+      id: 2,
+      text: "Kính gửi các chiến hữu trong cộng đồng Pi 🥲 Hôm nay, tôi ngồi xuống viết những dòng này với một tấm lòng đầy ăn năn và hối lỗi. Ngày xưa, vì sự nông nổi và thiếu hiểu biết, tôi đã buông lời ch-ê bai, mỉ-a mai những con người kiên trung, vững chí như các bạn – những người vẫn ngày đêm kiên trì đào Pi với một niềm tin sắt đá vào tương lai tươi sáng. Và giờ đây, tôi nhận ra mình đã sai. Sai đến mức có thể mất đi cơ hội trở thành triệu phú Pi mà bấy lâu nay tôi không hay biết! Tôi từng cười khi thấy mọi người kiên trì nhấn nút mỗi ngày, nhưng giờ đây, khi nhìn lại, tôi mới hiểu đó là sự kiên trì hiếm có. Tôi từng hoài nghi về giá trị thực sự của Pi, nhưng nay tôi nhận ra rằng, trong thế giới này, niềm tin có thể tạo ra phép màu – dù là niềm tin vào một thứ chưa thể quy đổi thành tiền! Vậy nên, tôi xin được cúi đầu xin lỗi toàn thể cộng đồng Pi. Tôi mong rằng sự rộng lượng và bao dung của các bạn sẽ cho tôi một cơ hội để sửa sai. Nếu một ngày nào đó Pi chính thức lên sàn với giá hàng chục, hàng trăm đô, xin đừng quên tôi – kẻ đã từng lầm lỡ nhưng nay đã biết quay đầu. Và nếu điều đó không xảy ra, thì chí ít tôi cũng đã học được một bài học quý giá về niềm tin và sự đoàn kết của cộng đồn",
+      sender: "other",
+    },
+    { id: 3, text: "Hi! How are you?", sender: "me" },
+  ]);
+  const handleSendMessage = (message) => {
+    if (!message.trim()) return;
+    setMessages([...messages, { id: Date.now(), text: message, sender: "me" }]);
+  };
   return (
-    <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
-      <SideBar messages={messages} groups={groups} requests={requests} />
+    <div className="flex bg-gradient-to-b from-blue-50/50 to-white w-full h-screen">
+      <SideBar messages={messagesDemo} groups={groups} requests={requests} />
       {/* Main Content */}
-      <div className="flex-1  px-2">
-        <div>
-          <HeaderSignleChat />
-        </div>
+      <div className="flex-1 flex flex-col px-2">
+        <HeaderSignleChat />
+        <ChatBox messages={messages} />
+        <MessageInput onSend={handleSendMessage} />
       </div>
     </div>
   );
