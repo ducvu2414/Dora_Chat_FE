@@ -6,7 +6,8 @@ export default function MessageItem({ msg, showAvatar }) {
   const [expanded, setExpanded] = useState(false);
   const MAX_TEXT_LENGTH = 350;
 
-  const isImage = (url) => /\.(jpeg|jpg|gif|png|webp|svg)$/i.test(url);
+  const isImage = (type) => type === "IMAGE";
+  const isMe = msg.sender === "me";
   return (
     <div
       key={msg.id}
@@ -24,15 +25,10 @@ export default function MessageItem({ msg, showAvatar }) {
       {/* Nội dung tin nhắn */}
       <div
         key={msg.id}
-        className={` px-3 py-[14px] rounded-2xl max-w-[45%] text-sm  break-words w-fit ${
-          msg.sender === "me"
-            ? "bg-[#EFF8FF] text-[#000000] ml-auto"
-            : "bg-[#F5F5F5] text-[#000000]"
-        }
-              ${msg.sender === "me" ? "text-end" : "text-start"}`}
+        className="flex flex-col max-w-[45%] break-words w-fit text-start"
       >
         {/* Nếu tin nhắn là hình ảnh */}
-        {isImage(msg.text) ? (
+        {isImage(msg.type) ? (
           <img
             src={msg.text}
             alt="sent image"
@@ -40,7 +36,14 @@ export default function MessageItem({ msg, showAvatar }) {
             loading="lazy"
           />
         ) : (
-          <>
+          <p
+            className={`px-3 py-[14px] rounded-2xl text-sm
+           ${
+             isMe
+               ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+               : "bg-[#F5F5F5] text-[#000000]"
+           }`}
+          >
             {expanded ? msg.text : msg.text.slice(0, MAX_TEXT_LENGTH) + "..."}
             {msg.text.length > MAX_TEXT_LENGTH && (
               <span
@@ -50,7 +53,16 @@ export default function MessageItem({ msg, showAvatar }) {
                 {expanded ? "Thu gọn" : "Xem thêm"}
               </span>
             )}
-          </>
+          </p>
+        )}
+        {showAvatar && (
+          <span
+            className={`text-xs text-[#959595F3] mt-2 ${
+              isMe ? "self-end" : ""
+            }`}
+          >
+            {msg.time}
+          </span>
         )}
       </div>
     </div>
