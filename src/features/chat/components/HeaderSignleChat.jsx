@@ -6,7 +6,7 @@ import Avatar from "@assets/chat/avatar.png";
 export default function HeaderSignleChat() {
   return (
     <div>
-      <div className="flex flex-row items-center px-4 py-5 border-b">
+      <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
           src={Avatar}
           className="w-[70px] h-[70px] object-cover rounded-full"
@@ -19,13 +19,13 @@ export default function HeaderSignleChat() {
           </div>
         </div>
         <div className="ml-auto flex flex-row space-x-4">
-          <div className="cursor-pointer p-2">
+          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
             <img src={Call} alt="Call" />
           </div>
-          <div className="cursor-pointer p-2">
+          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
             <img src={VideoCall} alt="Video Call" />
           </div>
-          <div className="cursor-pointer p-2">
+          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
             <img src={DetailChatIcon} alt="Detail Chat" />
           </div>
         </div>

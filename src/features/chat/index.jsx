@@ -127,16 +127,31 @@ export default function ChatSingle() {
       time: "10:35",
       sender: "me",
     },
+    {
+      id: 6,
+      text: "https://example.com/image.word",
+      type: "FILE",
+      sender: "other",
+      time: "10:02 ",
+    },
+    {
+      id: 7,
+      text: "https://example.com/document.pdf",
+      type: "FILE",
+      fileName: "document.pdf",
+      sender: "me",
+      time: "10:05 ",
+    },
   ]);
   const handleSendMessage = (message) => {
     if (!message.trim()) return;
     setMessages([...messages, { id: Date.now(), text: message, sender: "me" }]);
   };
   return (
-    <div className="flex bg-gradient-to-b from-blue-50/50 to-white w-full h-screen">
+    <div className="flex w-full h-screen">
       <SideBar messages={messagesDemo} groups={groups} requests={requests} />
       {/* Main Content */}
-      <div className="flex-1 flex flex-col px-2">
+      <div className="flex-1 flex flex-col px-2 bg-gradient-to-b from-blue-50/50 to-white">
         <HeaderSignleChat />
         <ChatBox messages={messages} />
         <MessageInput onSend={handleSendMessage} />

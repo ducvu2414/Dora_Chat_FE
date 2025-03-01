@@ -15,14 +15,21 @@ export default function ChatBox({ messages }) {
     <div className="flex-1 flex flex-col bg-[#fff] py-2">
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto space-y-2 p-4 max-h-[calc(100vh-195px)]"
+        className="flex-1 overflow-y-auto space-y-2 p-4 max-h-[calc(100vh-210px)]"
       >
         {messages.map((msg, index) => {
+          const isFirstInGroup =
+            index === 0 || messages[index - 1].sender !== msg.sender;
           const isLastInGroup =
             index === messages.length - 1 ||
             messages[index + 1].sender !== msg.sender;
           return (
-            <MessageItem key={msg.id} msg={msg} showAvatar={isLastInGroup} />
+            <MessageItem
+              key={msg.id}
+              msg={msg}
+              showAvatar={isFirstInGroup}
+              showTime={isLastInGroup}
+            />
           );
         })}
       </div>
