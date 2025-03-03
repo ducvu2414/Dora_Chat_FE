@@ -3,6 +3,7 @@ import { SideBar } from "../../components/ui/side-bar";
 import ChatBox from "./components/ChatBox";
 import HeaderSignleChat from "./components/HeaderSignleChat";
 import MessageInput from "./components/MessageInput";
+import DetailChat from "./components/DetailChat";
 
 const messagesDemo = [
   {
@@ -147,14 +148,27 @@ export default function ChatSingle() {
     if (!message.trim()) return;
     setMessages([...messages, { id: Date.now(), text: message, sender: "me" }]);
   };
+  const [showDetail, setShowDetail] = useState(false);
   return (
     <div className="flex w-full h-screen">
       <SideBar messages={messagesDemo} groups={groups} requests={requests} />
       {/* Main Content */}
-      <div className="flex-1 flex flex-col px-2 bg-gradient-to-b from-blue-50/50 to-white">
-        <HeaderSignleChat />
-        <ChatBox messages={messages} />
-        <MessageInput onSend={handleSendMessage} />
+      <div className="flex flex-1 overflow-auto ">
+        {/* ChatBox  */}
+        <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
+          <HeaderSignleChat handleDetail={setShowDetail} />
+          <ChatBox messages={messages} />
+          <MessageInput onSend={handleSendMessage} />
+        </div>
+
+        {/* DetailChat*/}
+        <div
+          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
+            showDetail ? "w-[385px]" : "w-0"
+          }`}
+        >
+          {showDetail && <DetailChat />}
+        </div>
       </div>
     </div>
   );

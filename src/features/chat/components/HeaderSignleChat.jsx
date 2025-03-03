@@ -1,9 +1,10 @@
+/* eslint-disable react/prop-types */
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
 import Call from "@assets/chat/call.svg";
 import Avatar from "@assets/chat/avatar.png";
 
-export default function HeaderSignleChat() {
+export default function HeaderSignleChat({ handleDetail }) {
   return (
     <div>
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
@@ -18,14 +19,17 @@ export default function HeaderSignleChat() {
             <span className="text-sm">Active</span>
           </div>
         </div>
-        <div className="ml-auto flex flex-row space-x-4">
-          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
+        <div className="flex flex-row ml-auto space-x-4">
+          <div className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110">
             <img src={Call} alt="Call" />
           </div>
-          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
+          <div className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110">
             <img src={VideoCall} alt="Video Call" />
           </div>
-          <div className="cursor-pointer p-2 hover:scale-110 duration-200 ease-in-out">
+          <div
+            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110"
+            onClick={() => handleDetail((prev) => !prev)}
+          >
             <img src={DetailChatIcon} alt="Detail Chat" />
           </div>
         </div>

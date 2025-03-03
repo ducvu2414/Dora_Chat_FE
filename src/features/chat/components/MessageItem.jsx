@@ -23,17 +23,14 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         <img
           src={Avatar}
           alt="avatar"
-          className="w-10 h-10 rounded-full self-start"
+          className="self-start w-10 h-10 rounded-full"
         />
       ) : (
         <div className="w-10 h-10 rounded-full"></div>
       )}
 
       {/* Nội dung tin nhắn */}
-      <div
-        key={msg.id}
-        className="flex flex-col max-w-[45%] break-words w-fit text-start"
-      >
+      <div key={msg.id} className="flex flex-col max-w-[468px]   text-start">
         {/* Nếu tin nhắn là hình ảnh */}
         {isImage(msg.type) ? (
           <img
@@ -63,14 +60,14 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
           </div>
         ) : (
           <p
-            className={`px-3 py-[14px] rounded-2xl text-sm
+            className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
            ${
              isMe
                ? "bg-[#EFF8FF] text-[#000000] ml-auto"
                : "bg-[#F5F5F5] text-[#000000]"
            }`}
           >
-            {expanded ? msg.text : msg.text.slice(0, MAX_TEXT_LENGTH) + "..."}
+            {expanded ? msg.text : msg.text.slice(0, MAX_TEXT_LENGTH)}
             {msg.text.length > MAX_TEXT_LENGTH && (
               <span
                 className="text-[#086DC0] hover:underline ml-1 cursor-pointer"
