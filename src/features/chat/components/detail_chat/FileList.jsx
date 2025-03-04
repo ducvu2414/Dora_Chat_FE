@@ -1,4 +1,5 @@
-export default function FileList() {
+/* eslint-disable react/prop-types */
+export default function FileList({ limit }) {
   const files = [
     { name: "file1.docx", size: "1MB" },
     { name: "file2.pdf", size: "2MB" },
@@ -18,9 +19,10 @@ export default function FileList() {
         return "../src/assets/chat/default.png";
     }
   };
+  const displayedFiles = limit ? files.slice(0, limit) : files;
   return (
     <ul className="px-4 mt-2">
-      {files.slice(0, 3).map((file, index) => (
+      {displayedFiles.map((file, index) => (
         <li
           key={index}
           className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"

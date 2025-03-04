@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 
-export default function PictureList() {
+export default function PictureList({ limit }) {
   const [previewImage, setPreviewImage] = useState(null);
 
   const images = [
@@ -11,7 +12,20 @@ export default function PictureList() {
     "../src/assets/tiger_demo.png",
     "../src/assets/tiger_demo.png",
     "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
+    "../src/assets/tiger_demo.png",
   ];
+  const displayedImages = limit ? images.slice(0, limit) : images;
   return (
     <>
       {previewImage && (
@@ -32,7 +46,7 @@ export default function PictureList() {
         </div>
       )}
       <div className="grid grid-cols-3 gap-2 px-4 mt-2">
-        {images.map((src, index) => (
+        {displayedImages.map((src, index) => (
           <img
             key={index}
             src={src}

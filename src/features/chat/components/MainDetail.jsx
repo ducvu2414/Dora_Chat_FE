@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Avatar from "@assets/chat/avatar.png";
@@ -6,13 +7,14 @@ import File from "@assets/chat/file_detail.svg";
 import Link from "@assets/chat/link_detail.svg";
 import MarkChat from "@assets/chat/mark_chat.svg";
 import Member from "@assets/chat/member.svg";
-import Picutre from "@assets/chat/picture_detail.svg";
+import Picture from "@assets/chat/picture_detail.svg";
 import Setting from "@assets/chat/setting_group.svg";
 import { Check, Pencil } from "lucide-react";
 import { useState } from "react";
 import PictureList from "./detail_chat/PictureList";
 import FileList from "./detail_chat/FileList";
-export default function MainDetail() {
+import LinkList from "./detail_chat/LinkList";
+export default function MainDetail({ handleSetActiveTab }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("John Doe");
   const [isMuted, setIsMuted] = useState(false);
@@ -83,42 +85,57 @@ export default function MainDetail() {
             <img src={Member} />
           </div>
           <p className="text-[#086DC0] ml-2">Members (3)</p>
-          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+          <div
+            onClick={() => handleSetActiveTab("members")}
+            className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
+          >
             <img src={ArrowRight} />
           </div>
         </div>
         <div className="w-full mt-3">
           <div className="flex items-center ">
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
-              <img src={Picutre} />
+              <img src={Picture} />
             </div>
             <p className="text-[#086DC0] ml-2">Photo/videos (125)</p>
-            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+            <div
+              onClick={() => handleSetActiveTab("media")}
+              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
+            >
               <img src={ArrowRight} />
             </div>
           </div>
-          <PictureList />
+          <PictureList limit={6} />
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center w-full mt-3">
+          <div className="flex items-center">
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={File} />
             </div>
             <p className="text-[#086DC0] ml-2">Files (3)</p>
-            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+            <div
+              onClick={() => handleSetActiveTab("media")}
+              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
+            >
               <img src={ArrowRight} />
             </div>
           </div>
-          <FileList />
+          <FileList limit={3} />
         </div>
-        <div className="flex items-center w-full mt-3">
-          <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
-            <img src={Link} />
+        <div className="w-full mt-3">
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+              <img src={Link} />
+            </div>
+            <p className="text-[#086DC0] ml-2">Link</p>
+            <div
+              onClick={() => handleSetActiveTab("media")}
+              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
+            >
+              <img src={ArrowRight} />
+            </div>
           </div>
-          <p className="text-[#086DC0] ml-2">Link</p>
-          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
-            <img src={ArrowRight} />
-          </div>
+          <LinkList limit={3} />
         </div>
         <div className="flex items-center w-full mt-3">
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import MainDetail from "./MainDetail";
+import MediaDetail from "./detail_chat/MediaDetail";
+import MemberList from "./detail_chat/MemberList";
 export default function DetailChat() {
   const [activeTab, setActiveTab] = useState("main");
   const handleSetActiveTab = (tab) => {
@@ -13,15 +15,12 @@ export default function DetailChat() {
       {activeTab === "main" && (
         <MainDetail handleSetActiveTab={handleSetActiveTab} />
       )}
-      {/* {activeTab === "photos" && (
-        //<PhotoList onBack={() => setActiveTab("main")} />
+      {activeTab === "media" && (
+        <MediaDetail onBack={() => setActiveTab("main")} />
       )}
-      {activeTab === "files" && (
-       // <FileList onBack={() => setActiveTab("main")} />
+      {activeTab === "members" && (
+        <MemberList onBack={() => setActiveTab("main")} />
       )}
-      {activeTab === "links" && (
-       // <LinkList onBack={() => setActiveTab("main")} />
-      )} */}
     </div>
   );
 }
