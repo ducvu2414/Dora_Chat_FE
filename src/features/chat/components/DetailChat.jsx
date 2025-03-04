@@ -5,21 +5,40 @@ import MainDetail from "./MainDetail";
 import MediaDetail from "./detail_chat/MediaDetail";
 import MemberList from "./detail_chat/MemberList";
 export default function DetailChat() {
-  const [activeTab, setActiveTab] = useState("main");
+  const [activeTab, setActiveTab] = useState({
+    tab: "detail",
+  });
   const handleSetActiveTab = (tab) => {
-    setActiveTab(tab);
+    setActiveTab((prev) => ({
+      ...prev,
+      ...tab,
+    }));
   };
-
   return (
     <div className="h-full w-[385px] p-4 bg-[#E8F4FF] rounded-[20px]">
-      {activeTab === "main" && (
+      {activeTab.tab === "detail" && (
         <MainDetail handleSetActiveTab={handleSetActiveTab} />
       )}
-      {activeTab === "media" && (
-        <MediaDetail onBack={() => setActiveTab("main")} />
+      {activeTab.tab === "media" && (
+        <MediaDetail
+          onBack={() =>
+            setActiveTab((prev) => ({
+              ...prev,
+              tab: "detail",
+            }))
+          }
+          media={activeTab?.media}
+        />
       )}
-      {activeTab === "members" && (
-        <MemberList onBack={() => setActiveTab("main")} />
+      {activeTab.tab === "members" && (
+        <MemberList
+          onBack={() =>
+            setActiveTab((prev) => ({
+              ...prev,
+              tab: "detail",
+            }))
+          }
+        />
       )}
     </div>
   );

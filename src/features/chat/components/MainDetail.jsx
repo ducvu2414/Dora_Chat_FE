@@ -86,7 +86,7 @@ export default function MainDetail({ handleSetActiveTab }) {
           </div>
           <p className="text-[#086DC0] ml-2">Members (3)</p>
           <div
-            onClick={() => handleSetActiveTab("members")}
+            onClick={() => handleSetActiveTab({ tab: "members" })}
             className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
           >
             <img src={ArrowRight} />
@@ -99,7 +99,12 @@ export default function MainDetail({ handleSetActiveTab }) {
             </div>
             <p className="text-[#086DC0] ml-2">Photo/videos (125)</p>
             <div
-              onClick={() => handleSetActiveTab("media")}
+              onClick={() =>
+                handleSetActiveTab({
+                  tab: "media",
+                  media: "photos/videos",
+                })
+              }
               className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
             >
               <img src={ArrowRight} />
@@ -114,7 +119,12 @@ export default function MainDetail({ handleSetActiveTab }) {
             </div>
             <p className="text-[#086DC0] ml-2">Files (3)</p>
             <div
-              onClick={() => handleSetActiveTab("media")}
+              onClick={() =>
+                handleSetActiveTab({
+                  tab: "media",
+                  media: "files",
+                })
+              }
               className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
             >
               <img src={ArrowRight} />
@@ -129,7 +139,12 @@ export default function MainDetail({ handleSetActiveTab }) {
             </div>
             <p className="text-[#086DC0] ml-2">Link</p>
             <div
-              onClick={() => handleSetActiveTab("media")}
+              onClick={() =>
+                handleSetActiveTab({
+                  tab: "media",
+                  media: "links",
+                })
+              }
               className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
             >
               <img src={ArrowRight} />

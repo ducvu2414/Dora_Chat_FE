@@ -7,17 +7,16 @@ import FileList from "./FileList";
 import LinkList from "./LinkList";
 
 const TABS = [
-  { id: "photos_videos", label: "Photos/Videos" },
+  { id: "photos/videos", label: "Photos/Videos" },
   { id: "files", label: "Files" },
   { id: "links", label: "Links" },
 ];
 
-export default function MediaDetail({ onBack }) {
-  const [activeTab, setActiveTab] = useState("photos_videos");
-
+export default function MediaDetail({ onBack, media }) {
+  const [activeTab, setActiveTab] = useState(media || "photos/videos");
   const renderContent = () => {
     switch (activeTab) {
-      case "photos_videos":
+      case "photos/videos":
         return <PictureList />;
       case "files":
         return <FileList />;
