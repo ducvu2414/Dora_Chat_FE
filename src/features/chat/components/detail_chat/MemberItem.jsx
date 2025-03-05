@@ -3,6 +3,8 @@ import Avatar from "@assets/chat/avatar.png";
 import { useState } from "react";
 import { MoreVertical, UserPlus, MessageSquare, Trash2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
+import InfoContent from "@components/ui/Info/InfoContent";
+import { Modal } from "@/components/ui/modal";
 export default function MemberItem({
   members,
   onAddFriend,
@@ -14,12 +16,28 @@ export default function MemberItem({
   const toggleDropdown = (id) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
+  const [showInfo, setShowInfo] = useState(false);
+  const [info, setInfo] = useState(null);
+  const handleShowInfo = (id) => {
+    setShowInfo(!showInfo);
+    setInfo(id);
+  };
 
   return (
     <div>
+      {showInfo && (
+        <Modal
+          onClose={handleShowInfo}
+          isOpen={showInfo}
+          title={"Thông tin tài khoản"}
+        >
+          <InfoContent info={info} />
+        </Modal>
+      )}
       {members.map((member) => (
         <div
           key={member.id}
+          onClick={() => handleShowInfo(member.id)}
           className="relative flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
         >
           <div className="flex items-center gap-2">
@@ -27,7 +45,6 @@ export default function MemberItem({
             <p className="text-sm font-medium">{member.name}</p>
           </div>
 
-          {/* Nút mở menu */}
           <button
             onClick={() => toggleDropdown(member.id)}
             className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
