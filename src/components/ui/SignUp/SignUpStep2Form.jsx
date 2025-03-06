@@ -10,13 +10,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-export function SignUpStep3Form({ onSubmit }) {
+export function SignUpStep2Form({ onSubmit }) {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         dateOfBirth: '',
         gender: '',
-        bio: ''
+        bio: '',
+        password: '',
+        retypePassword: '',
     });
 
     const handleChange = (e) => {
@@ -30,13 +32,17 @@ export function SignUpStep3Form({ onSubmit }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (formData.password !== formData.retypePassword) {
+            alert('Passwords do not match');
+            return;
+        }
         onSubmit(formData);
     };
 
     return (
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* First Name */}
                 <div className="space-y-2">
                     <label className="text-sm text-gray-700 font-semibold">
@@ -69,7 +75,9 @@ export function SignUpStep3Form({ onSubmit }) {
 
                 {/* Date of Birth */}
                 <div className="space-y-2">
-                    <label className="text-sm text-gray-700 font-semibold">Date of Birth</label>
+                    <label className="text-sm text-gray-700 font-semibold">
+                        Date of Birth <span className="text-red-500">*</span>
+                    </label>
                     <div className="relative">
                         <Input
                             type="date"
@@ -77,18 +85,23 @@ export function SignUpStep3Form({ onSubmit }) {
                             value={formData.dateOfBirth}
                             onChange={handleChange}
                             className={`w-full px-4 py-2 bg-gray-50`}
+                            required
                         />
                     </div>
+
                 </div>
 
                 {/* Gender */}
                 <div className="space-y-2">
-                    <label className="text-sm text-gray-700 font-semibold">Gender</label>
+                    <label className="text-sm text-gray-700 font-semibold">
+                        Gender <span className="text-red-500">*</span>
+                    </label>
                     <Select
                         value={formData.gender}
                         onValueChange={(value) =>
                             setFormData(prev => ({ ...prev, gender: value }))
                         }
+                        required
                     >
                         <SelectTrigger className={`w-full bg-gray-50`}
                         >
@@ -101,17 +114,49 @@ export function SignUpStep3Form({ onSubmit }) {
                         </SelectContent>
                     </Select>
                 </div>
+
+                {/* Password */}
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-700 font-semibold">Password <span className="text-red-500">*</span></label>
+                    <Input
+                        type="password"
+                        name="password"
+                        placeholder="Your password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500 placeholder-[var(--color-blue-500)]"
+                        required
+                    />
+                </div>
+
+                {/* retype password */}
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-700 font-semibold">Retype Password <span className="text-red-500">*</span></label>
+                    <Input
+                        type="password"
+                        name="retypePassword"
+                        placeholder="Your password"
+                        value={formData.retypePassword}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-gray-50 text-blue-500 placeholder-[var(--color-blue-500)]"
+                        required
+                    />
+                </div>
             </div>
+
 
             {/* Bio */}
             <div className="space-y-2">
-                <label className="text-sm text-gray-700 font-semibold">Bio</label>
+                <label className="text-sm text-gray-700 font-semibold">
+                    Bio <span className="text-red-500">*</span>
+                </label>
                 <Textarea
                     name="bio"
                     placeholder="✨ Say something about yourself..."
                     value={formData.bio}
                     onChange={handleChange}
                     className="w-full px-4 py-2 bg-gray-50 min-h-[50px] text-blue-500"
+                    required
                 />
             </div>
 

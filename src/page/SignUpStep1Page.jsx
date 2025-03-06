@@ -7,6 +7,8 @@ import { SignUpStep1Form } from "@/components/ui/SignUp/SignUpStep1Form";
 import { AlertMessage } from "@/components/ui/alert-message";
 import { Spinner } from "@/page/Spinner";
 
+import authApi from "@/api/auth";
+
 export default function SignUpStep1Page() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,17 +39,29 @@ export default function SignUpStep1Page() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      AlertMessage({
-        type: "success",
-        message: "Verification code sent to your email!",
-      });
-      navigate("/signup/otp");
+      const response = await authApi.registerContact(email);
+      console.log("API response:", response);
+      if (!response || response.error) {
+        AlertMessage({
+          type: "error",
+          message: "Something fetch went wrong. Please try again.",
+        });
+        setLoading(false);
+        return;
+      } else {
+        AlertMessage({
+          type: "success",
+          message: "Verification code sent to your email!",
+        });
+        navigate("/signup/info", { state: { email } });
+      }
     } catch (error) {
-      console.error("API call failed:", error);
-      AlertMessage({
-        type: "error",
-        message: "Something went wrong. Please try again.",
-      });
+
+      console.error(
+        "API call failed:",
+        error.response?.data?.message || error.message || "Unknown error"
+      );
+      AlertMessage({ type: "error", message: error.response.data.message });
     } finally {
       setLoading(false);
     }

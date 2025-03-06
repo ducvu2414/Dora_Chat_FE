@@ -14,17 +14,18 @@ export function ProgressSteps({ currentStep }) {
             <Line />
             <Step
                 number={2}
-                label="OTP code"
-                icon={<Mail className="w-4 h-4" />}
+                label="Your information"
+                icon={<Info className="w-4 h-4" />}
                 active={currentStep === 2}
             />
             <Line />
             <Step
                 number={3}
-                label="Your information"
-                icon={<Info className="w-4 h-4" />}
+                label="OTP code"
+                icon={<Mail className="w-4 h-4" />}
                 active={currentStep === 3}
             />
+
             <Line />
             <Step
                 number={4}

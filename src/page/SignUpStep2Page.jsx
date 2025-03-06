@@ -1,44 +1,98 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
 import { ProgressSteps } from "@/components/ui/SignUp/ProgressSteps";
-import { SignUpOTPForm } from "@/components/ui/SignUp/SignUpOTPForm";
 import { AlertMessage } from '@/components/ui/alert-message';
-import { useNavigate } from "react-router-dom";
+import { SignUpStep2Form } from "@/components/ui/SignUp/SignUpStep2Form";
 import { Spinner } from "@/page/Spinner";
 
+import authApi from "@/api/auth";
 
 export default function SignUpStep2Page() {
-    const [otpCode, setOtpCode] = useState("");
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const email = location.state?.email;
+    const [loading, setLoading] = useState(false);
 
-    const Max_Length = 6;
+    const validateDateOfBirth = (date) => {
+        if (!date) return false;
 
-    async function handleSignUpStep2(e) {
-        e.preventDefault();
-        console.log("OTP Code:", otpCode);
-        if (otpCode.length !== Max_Length) {
-            AlertMessage({ type: "error", message: "Please enter a valid OTP code" });
+        const { day, month, year } = date;
 
-            return;
-        }
+        if (!day || !month || !year) return false;
 
+        if (year < 1900) return false;
+
+        const dateTempt = new Date(`${year}-${month}-${day}`);
+        if (dateTempt.toDateString() === 'Invalid Date') return false;
+
+        const fullyear = dateTempt.getFullYear();
+        dateTempt.setFullYear(fullyear + 10);
+
+        if (dateTempt > new Date()) return false;
+
+        return true;
+    };
+
+    const handleSignUpStep2 = async (formData) => {
         setLoading(true);
-
         try {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            AlertMessage({ type: "success", message: "Account created successfully!" });
-            navigate('/signup/info');
+            delete formData.retypepassword;
+
+            const dateParts = formData.dateOfBirth.split('-');
+            const dateObj = {
+                year: parseInt(dateParts[0]),
+                month: parseInt(dateParts[1]),
+                day: parseInt(dateParts[2])
+            };
+
+            if (!validateDateOfBirth(dateObj)) {
+                AlertMessage({
+                    type: "error",
+                    message: "Invalid date of birth. You must be at least 10 years old."
+                });
+                setLoading(false);
+                return;
+            }
+
+            // Format date to dd/MM/yyyy
+            const dateOfBirth = new Date(formData.dateOfBirth);
+            const formattedDate = `${dateOfBirth.getFullYear()}-${String(dateOfBirth.getMonth() + 1).padStart(2, '0')}-${String(dateOfBirth.getDate()).padStart(2, '0')}`;
+
+            const submitData = {
+                ...formData,
+                dateOfBirth: formattedDate,
+                contact: email
+            }
+
+            console.log(submitData);
+            const response = await authApi.submitInformation(submitData);
+
+            if (!response || response.error) {
+                AlertMessage({ type: "error", message: response.data.message });
+                return;
+            } else {
+                AlertMessage({ type: "success", message: "Information saved successfully!" });
+                navigate('/signup/otp', {
+                    state: {
+                        email,
+                    }
+                });
+            }
         } catch (error) {
-            console.error("API call failed:", error);
-            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
+            console.log("Response data:", error.response.data);
+
+            console.error(
+                "API call failed:",
+                error.response?.data?.message || error.message || "Unknown error"
+            );
+            AlertMessage({ type: "error", message: error.response.data });
         } finally {
             setLoading(false);
         }
-
-        console.log("Sign Up Step 2");
-    }
+    };
 
     return (
         <div className='max-w-screen-2xl h-full w-full flex justify-center items-center bg-[#D8EDFF] h-screen'>
@@ -75,16 +129,11 @@ export default function SignUpStep2Page() {
                         </div>
 
                         <ProgressSteps currentStep={2} />
-
                         {/* Show spinner if loading */}
                         {loading ? (
                             <Spinner />
                         ) : (
-                            <SignUpOTPForm
-                                otpCode={otpCode}
-                                setOtpCode={setOtpCode}
-                                onSubmit={handleSignUpStep2}
-                            />
+                            <SignUpStep2Form onSubmit={handleSignUpStep2} />
                         )}
                     </div>
                 </div>

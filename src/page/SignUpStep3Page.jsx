@@ -2,29 +2,61 @@ import { useState } from "react";
 import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
 import { ProgressSteps } from "@/components/ui/SignUp/ProgressSteps";
+import { SignUpOTPForm } from "@/components/ui/SignUp/SignUpOTPForm";
 import { AlertMessage } from '@/components/ui/alert-message';
-import { useNavigate } from "react-router-dom";
-import { SignUpStep3Form } from "@/components/ui/SignUp/SignUpStep3Form";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Spinner } from "@/page/Spinner";
 
+import authApi from "@/api/auth";
+
+
 export default function SignUpStep3Page() {
+    const [otpCode, setOtpCode] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
+    const email = location.state?.email;
     const [loading, setLoading] = useState(false);
 
-    const handleSignUpStep3 = async () => {
+    const Max_Length = 6;
+
+    async function handleSignUpStep3(e) {
+        e.preventDefault();
+        console.log("OTP Code:", otpCode);
+        if (otpCode.length !== Max_Length) {
+            AlertMessage({ type: "error", message: "Please enter a valid OTP code" });
+
+            return;
+        }
+
         setLoading(true);
+
         try {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            AlertMessage({ type: "success", message: "Information saved successfully!" });
+            const response = await authApi.verifyOTP({
+                contact: email,
+                otp: otpCode,
+            });
+            if (!response || response.error) {
+                AlertMessage({
+                    type: "error",
+                    message: response?.data?.message || "Verification failed. Please try again."
+                });
+                return;
+            }
             navigate('/signup/complete');
         } catch (error) {
-            console.error("API call failed:", error);
-            AlertMessage({ type: "error", message: "Something went wrong. Please try again." });
+            console.log("Response data:", error.response);
 
+            const errorMessage = error.response?.data?.message ||
+                (typeof error.response?.data === 'string' ? error.response.data : "Verification failed. Please try again.");
+
+            AlertMessage({
+                type: "error",
+                message: errorMessage
+            });
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div className='max-w-screen-2xl h-full w-full flex justify-center items-center bg-[#D8EDFF] h-screen'>
@@ -66,7 +98,11 @@ export default function SignUpStep3Page() {
                         {loading ? (
                             <Spinner />
                         ) : (
-                            <SignUpStep3Form onSubmit={handleSignUpStep3} />
+                            <SignUpOTPForm
+                                otpCode={otpCode}
+                                setOtpCode={setOtpCode}
+                                onSubmit={handleSignUpStep3}
+                            />
                         )}
                     </div>
                 </div>
