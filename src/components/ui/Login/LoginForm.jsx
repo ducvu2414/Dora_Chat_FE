@@ -32,7 +32,7 @@ export const LoginForm = ({ onSubmit }) => {
                     className="h-12 px-4 rounded-xl w-full"
                 />
                 <div className="flex justify-end">
-                    <Link to="/forgot-password" className="text-sm text-gray-600 hover:underline">
+                    <Link to="/reset-password/contact" className="text-sm text-gray-600 hover:underline">
                         Forgot password
                     </Link>
                 </div>

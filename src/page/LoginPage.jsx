@@ -54,23 +54,23 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
-    const handleGoogleLogin = async () => {
-        setLoading(true);
-        try {
-            // Replace with actual Google OAuth logic
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            AlertMessage({ type: "success", message: "Google login successful!" });
-            navigate('/home');
-        } catch (error) {
-            console.error("Google login failed:", error);
-            AlertMessage({
-                type: "error",
-                message: "Google login failed. Please try again."
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    // const handleGoogleLogin = async () => {
+    //     setLoading(true);
+    //     try {
+    //         // Replace with actual Google OAuth logic
+    //         await new Promise((resolve) => setTimeout(resolve, 2000));
+    //         AlertMessage({ type: "success", message: "Google login successful!" });
+    //         navigate('/home');
+    //     } catch (error) {
+    //         console.error("Google login failed:", error);
+    //         AlertMessage({
+    //             type: "error",
+    //             message: "Google login failed. Please try again."
+    //         });
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
     return (
         <div className="max-w-screen-2xl w-full min-h-screen">
             <div className="h-full flex flex-col md:flex-row items-center justify-center">
@@ -85,7 +85,7 @@ export default function LoginPage() {
                     ) : (
                         <>
                             <LoginForm onSubmit={handleLogin} loading={loading} />
-                            <div className="mt-4 relative flex items-center justify-center">
+                            {/* <div className="mt-4 relative flex items-center justify-center">
                                 <div className="border-t border-gray-300 w-full"></div>
                                 <div className="absolute bg-white px-4 text-sm text-gray-500">
                                     Or
@@ -94,7 +94,7 @@ export default function LoginPage() {
                             <GoogleLoginButton
                                 onClick={handleGoogleLogin}
                                 loading={loading}
-                            />
+                            /> */}
                         </>
                     )}
                 </div>

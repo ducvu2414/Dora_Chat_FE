@@ -2,19 +2,19 @@ import Logo from "@/assets/dorachat_logo.png";
 import SignUpBanner from "@/assets/signup.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProgressSteps } from "@/components/ui/SignUp/ProgressSteps";
-import { SignUpStep1Form } from "@/components/ui/SignUp/SignUpStep1Form";
+import { ProgressSteps } from "@/components/ui/ResetPass/ProgressSteps";
 import { AlertMessage } from "@/components/ui/alert-message";
 import { Spinner } from "@/page/Spinner";
+import { ResetPassStep1Form } from "@/components/ui/ResetPass/ResetPassStep1Form";
 
 import authApi from "@/api/auth";
 
-export default function SignUpStep1Page() {
+export default function ResetPassStep1Page() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSignUpStep1(e) {
+  async function handleResetStep1(e) {
     e.preventDefault();
     setLoading(true);
 
@@ -38,11 +38,13 @@ export default function SignUpStep1Page() {
     }
 
     try {
-      const response = await authApi.registerContact(email);
+      console.log("Email:", email);
+      const response = await authApi.verifyEmailResetPassword(email);
+      console.log("API response:", response);
       if (!response || response.error) {
         AlertMessage({
           type: "error",
-          message: "Something fetch went wrong. Please try again.",
+          message: "Something went wrong. Please try again.",
         });
         setLoading(false);
         return;
@@ -51,7 +53,7 @@ export default function SignUpStep1Page() {
           type: "success",
           message: "Verification code sent to your email!",
         });
-        navigate("/signup/info", { state: { email } });
+        navigate("/reset-password", { state: { email } });
       }
     } catch (error) {
       console.log("Response data:", error.response);
@@ -109,10 +111,10 @@ export default function SignUpStep1Page() {
             {loading ? (
               <Spinner />
             ) : (
-              <SignUpStep1Form
+              <ResetPassStep1Form
                 email={email}
                 setEmail={setEmail}
-                onSubmit={handleSignUpStep1}
+                onSubmit={handleResetStep1}
               />
             )}
           </div>

@@ -30,9 +30,9 @@ const authApi = {
         const url = 'api/auth/logout';
         return axios.post(url, params);
     },
-    verifyEmailResetPassword: (params) => {
+    verifyEmailResetPassword: (email) => {
         const url = 'api/auth/verify-email-forgot-password';
-        return axios.post(url, params);
+        return axios.post(url, { email });
     },
     resetPassword: (params) => {
         const url = 'api/auth/forgot-password';
