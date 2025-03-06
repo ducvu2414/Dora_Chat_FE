@@ -56,12 +56,15 @@ export default function SignUpStep1Page() {
         navigate("/signup/info", { state: { email } });
       }
     } catch (error) {
+      console.log("Response data:", error.response);
 
-      console.error(
-        "API call failed:",
-        error.response?.data?.message || error.message || "Unknown error"
-      );
-      AlertMessage({ type: "error", message: error.response.data.message });
+      const errorMessage = error.response?.data?.message ||
+        (typeof error.response?.data === 'string' ? error.response.data : "Please try again.");
+
+      AlertMessage({
+        type: "error",
+        message: errorMessage
+      });
     } finally {
       setLoading(false);
     }

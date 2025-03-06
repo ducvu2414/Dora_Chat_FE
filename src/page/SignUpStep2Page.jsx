@@ -82,13 +82,15 @@ export default function SignUpStep2Page() {
                 });
             }
         } catch (error) {
-            console.log("Response data:", error.response.data);
+            console.log("Response data:", error.response);
 
-            console.error(
-                "API call failed:",
-                error.response?.data?.message || error.message || "Unknown error"
-            );
-            AlertMessage({ type: "error", message: error.response.data });
+            const errorMessage = error.response?.data?.message ||
+                (typeof error.response?.data === 'string' ? error.response.data : "Please try again.");
+
+            AlertMessage({
+                type: "error",
+                message: errorMessage
+            });
         } finally {
             setLoading(false);
         }

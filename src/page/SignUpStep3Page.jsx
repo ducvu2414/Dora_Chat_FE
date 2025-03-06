@@ -21,10 +21,8 @@ export default function SignUpStep3Page() {
 
     async function handleSignUpStep3(e) {
         e.preventDefault();
-        console.log("OTP Code:", otpCode);
         if (otpCode.length !== Max_Length) {
             AlertMessage({ type: "error", message: "Please enter a valid OTP code" });
-
             return;
         }
 
@@ -42,13 +40,11 @@ export default function SignUpStep3Page() {
                 });
                 return;
             }
+            AlertMessage({ type: "success", message: "OTP verified successfully!" });
             navigate('/signup/complete');
         } catch (error) {
-            console.log("Response data:", error.response);
-
             const errorMessage = error.response?.data?.message ||
                 (typeof error.response?.data === 'string' ? error.response.data : "Verification failed. Please try again.");
-
             AlertMessage({
                 type: "error",
                 message: errorMessage
@@ -57,6 +53,32 @@ export default function SignUpStep3Page() {
             setLoading(false);
         }
     }
+
+    const handleResendOTP = async () => {
+        try {
+            const contact = email;
+            const response = await authApi.resendOTP({ contact });
+
+            if (!response || response.error) {
+                AlertMessage({
+                    type: "error",
+                    message: response?.data?.message || "Failed to resend OTP"
+                });
+                return false;
+            }
+
+            AlertMessage({
+                type: "success",
+                message: "OTP code resent successfully!"
+            });
+            return true;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message ||
+                "Failed to resend OTP. Please try again.";
+            AlertMessage({ type: "error", message: errorMessage });
+            return false;
+        }
+    };
 
     return (
         <div className='max-w-screen-2xl h-full w-full flex justify-center items-center bg-[#D8EDFF] h-screen'>
@@ -102,6 +124,7 @@ export default function SignUpStep3Page() {
                                 otpCode={otpCode}
                                 setOtpCode={setOtpCode}
                                 onSubmit={handleSignUpStep3}
+                                onResendOTP={handleResendOTP}
                             />
                         )}
                     </div>

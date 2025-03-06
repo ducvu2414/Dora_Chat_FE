@@ -1,4 +1,6 @@
 import React from "react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PublicRoute } from "@/components/PublicRoute";
 
 const LoginPage = React.lazy(() => import("@/page/LoginPage"));
 const SignUpPage = React.lazy(() => import("@/page/SignUpStep1Page"));
@@ -19,19 +21,56 @@ const OtherPeopleInformation = React.lazy(() =>
 );
 
 const routes = [
-  { path: "/", element: <LoginPage /> },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/signup", element: <SignUpPage /> },
-  { path: "/signup/otp", element: <SignUpStep3Page /> },
-  { path: "/signup/info", element: <SignUpStep2Page /> },
-  { path: "/signup/complete", element: <SignUpStep4Page /> },
-  { path: "/forgot-password", element: <div>Forgot Password Page</div> },
-  { path: "/home", element: <HomePage /> },
-  { path: "/chat/:id", element: <ChatSingle /> },
-  { path: "/user-information", element: <UserInformationPage /> },
-  { path: "/contacts", element: <ContactsPage /> },
-  { path: "/friend-information", element: <FriendInformationPage /> },
-  { path: "/other-people-information", element: <OtherPeopleInformation /> },
+  {
+    path: "/",
+    element: <PublicRoute><LoginPage /></PublicRoute>
+  },
+  {
+    path: "/login",
+    element: <PublicRoute><LoginPage /></PublicRoute>
+  },
+  {
+    path: "/signup",
+    element: <PublicRoute><SignUpPage /></PublicRoute>
+  },
+  {
+    path: "/signup/otp",
+    element: <PublicRoute><SignUpStep3Page /></PublicRoute>
+  },
+  {
+    path: "/signup/info",
+    element: <PublicRoute><SignUpStep2Page /></PublicRoute>
+  },
+  {
+    path: "/signup/complete",
+    element: <PublicRoute><SignUpStep4Page /></PublicRoute>
+  },
+
+  // Protected Routes
+  {
+    path: "/home",
+    element: <ProtectedRoute><HomePage /></ProtectedRoute>
+  },
+  {
+    path: "/chat/:id",
+    element: <ProtectedRoute><ChatSingle /></ProtectedRoute>
+  },
+  {
+    path: "/user-information",
+    element: <ProtectedRoute><UserInformationPage /></ProtectedRoute>
+  },
+  {
+    path: "/contacts",
+    element: <ProtectedRoute><ContactsPage /></ProtectedRoute>
+  },
+  {
+    path: "/friend-information",
+    element: <ProtectedRoute><FriendInformationPage /></ProtectedRoute>
+  },
+  {
+    path: "/other-people-information",
+    element: <ProtectedRoute><OtherPeopleInformation /></ProtectedRoute>
+  },
 ];
 
 export default routes;

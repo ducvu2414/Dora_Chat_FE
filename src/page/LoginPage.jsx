@@ -7,11 +7,14 @@ import { LoginForm } from "@/components/ui/Login/LoginForm";
 import { GoogleLoginButton } from "@/components/ui/Login/GoogleLoginButton";
 import { AlertMessage } from '@/components/ui/alert-message';
 import { Spinner } from "@/page/Spinner";
+import authApi from "@/api/auth";
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '@/features/auth/authSlice';
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-
+    const dispatch = useDispatch();
     const handleLogin = async ({ username, password }) => {
         if (!username || !password) {
             AlertMessage({ type: "error", message: "Please fill in all fields" });
@@ -20,10 +23,27 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            // Replace with actual API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            AlertMessage({ type: "success", message: "Login successful!" });
-            navigate('/home');
+            const response = await authApi.login({ username, password });
+            if (!response || response.error) {
+                AlertMessage({
+                    type: "error",
+                    message: response?.data?.message || "Login failed. Please check your credentials and try again."
+                });
+                return;
+            } else {
+                const { token, refreshToken, user } = response.data;
+                console.log("Login response:", response.data);
+                // Dispatch user data to Redux store
+                dispatch(setCredentials({ user, token, refreshToken }));
+
+                // Store tokens and user data in localStorage
+                localStorage.setItem("token", token);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("user", JSON.stringify(user));
+
+                AlertMessage({ type: "success", message: "Login successful!" });
+                navigate('/home');
+            }
         } catch (error) {
             console.error("Login failed:", error);
             AlertMessage({
@@ -34,7 +54,6 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
-
     const handleGoogleLogin = async () => {
         setLoading(true);
         try {
@@ -52,7 +71,6 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
-
     return (
         <div className="max-w-screen-2xl w-full min-h-screen">
             <div className="h-full flex flex-col md:flex-row items-center justify-center">

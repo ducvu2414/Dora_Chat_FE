@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield } from 'lucide-react';
 
-export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit }) {
+export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit, onResendOTP }) {
     const [countdown, setCountdown] = useState(0);
     const [resendCount, setResendCount] = useState(0);
     const MAX_RESEND = 3;
@@ -25,7 +25,11 @@ export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit }) {
 
         setCountdown(60);
         setResendCount(prev => prev + 1);
-
+        if (onResendOTP) {
+            onResendOTP();
+        } else {
+            console.log("Resending OTP...");
+        }
         console.log("Resending OTP...");
     };
 
@@ -77,11 +81,6 @@ export function SignUpOTPForm({ otpCode, setOtpCode, onSubmit }) {
                         </p>
                     )}
 
-                    {/* {resendCount > 0 && resendCount < MAX_RESEND && (
-                        <p className="text-sm text-gray-500">
-                            {MAX_RESEND - resendCount} attempts remaining
-                        </p>
-                    )} */}
                 </div>
             </form>
         </div>
