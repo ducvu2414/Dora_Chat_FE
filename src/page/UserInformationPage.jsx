@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { SideBar } from "@/components/ui/side-bar";
 import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -272,7 +271,6 @@ export default function UserInformation() {
 
   return (
     <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
-      <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
       <div className="flex-1 relative bg-blue-100 p-3">

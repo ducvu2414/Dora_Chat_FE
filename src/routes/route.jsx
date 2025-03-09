@@ -1,6 +1,9 @@
 import React from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
+import { Outlet } from "react-router-dom";
+
+const MainLayout = React.lazy(() => import("@/components/layouts/MainLayout"));
 
 const LoginPage = React.lazy(() => import("@/page/LoginPage"));
 const SignUpPage = React.lazy(() => import("@/page/SignUpStep1Page"));
@@ -60,30 +63,36 @@ const routes = [
     element: <PublicRoute><ResetPass /></PublicRoute>
   },
 
-  // Protected Routes
+  // Protected Routes với MainLayout
   {
-    path: "/home",
-    element: <ProtectedRoute><HomePage /></ProtectedRoute>
-  },
-  {
-    path: "/chat/:id",
-    element: <ProtectedRoute><ChatSingle /></ProtectedRoute>
-  },
-  {
-    path: "/user-information",
-    element: <ProtectedRoute><UserInformationPage /></ProtectedRoute>
-  },
-  {
-    path: "/contacts",
-    element: <ProtectedRoute><ContactsPage /></ProtectedRoute>
-  },
-  {
-    path: "/friend-information",
-    element: <ProtectedRoute><FriendInformationPage /></ProtectedRoute>
-  },
-  {
-    path: "/other-people-information",
-    element: <ProtectedRoute><OtherPeopleInformation /></ProtectedRoute>
+    path: "/",
+    element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+    children: [
+      {
+        path: "home",
+        element: <HomePage />
+      },
+      {
+        path: "chat/:id",
+        element: <ChatSingle />
+      },
+      {
+        path: "user-information",
+        element: <UserInformationPage />
+      },
+      {
+        path: "contacts",
+        element: <ContactsPage />
+      },
+      {
+        path: "friend-information",
+        element: <FriendInformationPage />
+      },
+      {
+        path: "other-people-information",
+        element: <OtherPeopleInformation />
+      },
+    ]
   },
 ];
 

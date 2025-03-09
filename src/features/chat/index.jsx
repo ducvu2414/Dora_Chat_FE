@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { SideBar } from "../../components/ui/side-bar";
-import ChatBox from "./components/ChatBox";
+import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import HeaderSignleChat from "./components/HeaderSignleChat";
+import ChatBox from "./components/ChatBox";
 import MessageInput from "./components/MessageInput";
 import DetailChat from "./components/DetailChat";
 
@@ -151,7 +151,6 @@ export default function ChatSingle() {
   const [showDetail, setShowDetail] = useState(false);
   return (
     <div className="flex w-full h-screen">
-      <SideBar messages={messagesDemo} groups={groups} requests={requests} />
       {/* Main Content */}
       <div className="flex flex-1 overflow-auto ">
         {/* ChatBox  */}
@@ -163,9 +162,8 @@ export default function ChatSingle() {
 
         {/* DetailChat*/}
         <div
-          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
-            showDetail ? "w-[385px]" : "w-0"
-          }`}
+          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"
+            }`}
         >
           {showDetail && <DetailChat />}
         </div>
