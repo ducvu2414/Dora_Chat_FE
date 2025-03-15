@@ -1,12 +1,13 @@
-import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+/* eslint-disable react/prop-types */
+import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export const PublicRoute = ({ children }) => {
-    const { isAuthenticated } = useSelector((state) => state.auth);
-    
-    if (isAuthenticated) {
-        return <Navigate to="/home" replace />;
-    }
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
-    return children;
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
 };

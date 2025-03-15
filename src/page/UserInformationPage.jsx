@@ -271,33 +271,33 @@ export default function UserInformation() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
+    <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
       <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
-      <div className="flex-1 relative bg-blue-100 p-3">
+      <div className="relative flex-1 p-3 bg-blue-100">
         {/* Banner Image */}
         <div
-          className="h-72 w-full bg-cover bg-center rounded-3xl"
+          className="w-full bg-center bg-cover h-72 rounded-3xl"
           style={{
             backgroundImage: `url(${BannerImage})`,
           }}
         />
 
         {/* Profile Content */}
-        <div className="flex flex-row gap-x-5 max-w-4xl mx-auto -mt-24 px-8">
+        <div className="flex flex-row max-w-4xl px-8 mx-auto -mt-24 gap-x-5">
           {/* Profile Header */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm mb-6 text-center">
+          <div className="p-6 mb-6 text-center bg-white shadow-sm rounded-3xl">
             <div className="flex flex-col items-center">
               <img
                 src="https://s3-alpha-sig.figma.com/img/20a1/d517/ac424205661ad4fee696bc7f0dcf9d8e?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=aoH6zpyJ3XrNKTtX60RhnUjzWlJt1SRFL0aYWlWPwbpgvkP~kH0Cx1ODjG-dqq-FRG5Mc6VF94ib~lrcrcxnoCLR0y0mEeoN65hFqXGVLGF82cHPR0gnDmVe-k6r5JoXWjUJrQTSilXqvDHQuMTkih5-t2vm27yAodKXOmXdn14cDC3mIbSGOkoP2L1PFDN16RMNOHACx3R-3h-IAAhDuY-s6Lc3pq~RvJbBz-8gVneiQZ4gsXhojMOmYT~m-b0nhCapF1A4eYQq40Rauws2ftnJlEQ0~0MeDDYHRj0AO32wQbRgYXCMbHYXWPMPIR0nJNc7fIJMJBJNXc~VaF~oVw__"
                 alt="User Admin"
-                className="w-24 h-24 rounded-full border-4 border-white mb-4 object-cover"
+                className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
               />
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h1 className="mb-2 text-2xl font-semibold text-gray-900">
                 User Admin
               </h1>
-              <p className="text-gray-600 mb-6">⭐ Have a nice day! 🌊</p>
+              <p className="mb-6 text-gray-600">⭐ Have a nice day! 🌊</p>
 
               {/* QR Code */}
               <div className="flex flex-col items-center">
@@ -306,10 +306,10 @@ export default function UserInformation() {
                   alt="QR Code"
                   className="w-32 h-32 mb-2"
                 />
-                <p className="text-sm text-orange-500 font-bold">
+                <p className="text-sm font-bold text-orange-500">
                   QR code helps people follow you quickly
                 </p>
-                <button className="mt-2 p-2 rounded-full bg-orange-100 hover:bg-orange-200 border-none transition-colors">
+                <button className="p-2 mt-2 transition-colors bg-orange-100 border-none rounded-full hover:bg-orange-200">
                   <svg
                     width="24"
                     height="24"
@@ -337,9 +337,9 @@ export default function UserInformation() {
           </div>
 
           {/* Tabs & Content */}
-          <div className="bg-white rounded-3xl shadow-sm flex-1">
+          <div className="flex-1 bg-white shadow-sm rounded-3xl">
             <div className="border-b">
-              <div className="flex justify-between items-center pr-4">
+              <div className="flex items-center justify-between pr-4">
                 <TabUserInfo activeTab={activeTab} onTabChange={setActiveTab} />
                 {activeTab === "information" && (
                   <Button
@@ -358,7 +358,7 @@ export default function UserInformation() {
                 <form onSubmit={handleSubmitInfo} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">
+                      <label className="block mb-1 text-sm font-medium text-left">
                         First name
                       </label>
                       <Input
@@ -374,7 +374,7 @@ export default function UserInformation() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">
+                      <label className="block mb-1 text-sm font-medium text-left">
                         Last name
                       </label>
                       <Input
@@ -387,7 +387,7 @@ export default function UserInformation() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">
+                      <label className="block mb-1 text-sm font-medium text-left">
                         Date of Birth
                       </label>
                       <div className="relative">
@@ -406,7 +406,7 @@ export default function UserInformation() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-left">
+                      <label className="block mb-1 text-sm font-medium text-left">
                         Gender
                       </label>
                       <Select
@@ -428,7 +428,7 @@ export default function UserInformation() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-left">
+                    <label className="block mb-1 text-sm font-medium text-left">
                       Your hobbies
                     </label>
                     <MultiSelect
@@ -448,7 +448,7 @@ export default function UserInformation() {
                     <div className="flex justify-end">
                       <Button
                         type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="text-white bg-blue-600 hover:bg-blue-700"
                       >
                         Save Changes
                       </Button>
@@ -457,7 +457,7 @@ export default function UserInformation() {
                 </form>
               ) : (
                 <div className="max-w-md mx-auto">
-                  <h2 className="text-xl font-semibold text-regal-blue mb-6 flex items-center justify-center gap-2">
+                  <h2 className="flex items-center justify-center gap-2 mb-6 text-xl font-semibold text-regal-blue">
                     <svg
                       width="24"
                       height="24"
@@ -482,40 +482,40 @@ export default function UserInformation() {
 
                   <form onSubmit={handleSubmitPassword} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                      <label className="block mb-1 text-sm font-bold text-left text-gray-700">
                         Current password
                       </label>
                       <Input
                         type="password"
                         name="currentPassword"
                         placeholder="Enter current password"
-                        className="w-full rounded-full bg-gray-100"
+                        className="w-full bg-gray-100 rounded-full"
                         onChange={(e) => setCurrentPassword(e.target.value)}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                      <label className="block mb-1 text-sm font-bold text-left text-gray-700">
                         New password
                       </label>
                       <Input
                         type="password"
                         name="newPassword"
                         placeholder="Enter new password"
-                        className="w-full rounded-full bg-gray-100"
+                        className="w-full bg-gray-100 rounded-full"
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1 text-left">
+                      <label className="block mb-1 text-sm font-bold text-left text-gray-700">
                         Confirm password
                       </label>
                       <Input
                         type="password"
                         name="confirmPassword"
                         placeholder="Enter confirm password"
-                        className="w-full rounded-full bg-gray-100"
+                        className="w-full bg-gray-100 rounded-full"
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
                       <p className="mt-1 text-xs text-gray-500">
@@ -526,7 +526,7 @@ export default function UserInformation() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      className="w-full text-white bg-blue-600 hover:bg-blue-700"
                     >
                       Save
                     </Button>
