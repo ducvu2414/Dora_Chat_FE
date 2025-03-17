@@ -1,9 +1,6 @@
-import { useState, useEffect, memo } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
 import { SideBar } from "@/components/ui/side-bar";
-import { Suspense } from "react";
-
-
+import { memo, Suspense } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
 const messages = [
   {
@@ -67,28 +64,29 @@ const messages = [
 const groups = [
   {
     id: 1,
-    avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+    avatar:
+      "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
     name: "Design Team",
     message: "New project discussion",
     time: "5 mins",
   },
   {
     id: 2,
-    avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
+    avatar:
+      "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
     name: "Development Team",
     message: "Sprint planning",
     time: "1 hour",
   },
   {
     id: 3,
-    avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
+    avatar:
+      "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
     name: "Marketing Team",
     message: "Campaign updates",
     time: "3 hours",
   },
 ];
-
-
 
 const requests = [
   {
@@ -102,8 +100,6 @@ const requests = [
   // Add more requests as needed
 ];
 
-
-
 const MainLayout = () => {
   const navigate = useNavigate();
 
@@ -114,7 +110,7 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
+    <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
       <SideBar
         messages={messages}
         groups={groups}
@@ -122,7 +118,13 @@ const MainLayout = () => {
         onConversationClick={handleConversationClick}
       />
       <div className="flex-1 overflow-auto">
-        <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-full">
+              Loading...
+            </div>
+          }
+        >
           <Outlet />
         </Suspense>
       </div>
