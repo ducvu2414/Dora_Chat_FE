@@ -25,65 +25,120 @@ const OtherPeopleInformation = React.lazy(() =>
   import("@/page/OtherPeopleInformationPage")
 );
 
-
 const routes = [
   {
     path: "/",
-    element: <PublicRoute><LoginPage /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "/login",
-    element: <PublicRoute><LoginPage /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "/signup",
-    element: <PublicRoute><SignUpPage /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <SignUpPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "/signup/otp",
-    element: <PublicRoute><SignUpStep3Page /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <SignUpStep3Page />
+      </PublicRoute>
+    ),
   },
   {
     path: "/signup/info",
-    element: <PublicRoute><SignUpStep2Page /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <SignUpStep2Page />
+      </PublicRoute>
+    ),
   },
   {
     path: "/signup/complete",
-    element: <PublicRoute><SignUpStep4Page /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <SignUpStep4Page />
+      </PublicRoute>
+    ),
   },
   {
     path: "/reset-password/contact",
-    element: <PublicRoute><ResetPassStep1Page /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <ResetPassStep1Page />
+      </PublicRoute>
+    ),
   },
   {
     path: "/reset-password",
-    element: <PublicRoute><ResetPass /></PublicRoute>
+    element: (
+      <PublicRoute>
+        <ResetPass />
+      </PublicRoute>
+    ),
   },
 
   // Protected Routes
   {
     path: "/home",
-    element: <ProtectedRoute><HomePage /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <HomePage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/chat/:id",
-    element: <ProtectedRoute><ChatSingle /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <ChatSingle />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/user-information",
-    element: <ProtectedRoute><UserInformationPage /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <UserInformationPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/contacts",
-    element: <ProtectedRoute><ContactsPage /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <ContactsPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/friend-information",
-    element: <ProtectedRoute><FriendInformationPage /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <FriendInformationPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/other-people-information",
-    element: <ProtectedRoute><OtherPeopleInformation /></ProtectedRoute>
+    element: (
+      <ProtectedRoute>
+        <OtherPeopleInformation />
+      </ProtectedRoute>
+    ),
   },
 ];
 
