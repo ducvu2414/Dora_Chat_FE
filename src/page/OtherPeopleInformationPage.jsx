@@ -1,8 +1,8 @@
-import { SideBar } from "@/components/ui/side-bar"
-import { Button } from "@/components/ui/button"
-import { MessageCircle, UserRoundPlus } from "lucide-react"
-import BannerImage from "@/assets/banner-user-info.png"
-import CatIllustration from "@/assets/other-people-information.png"
+import { SideBar } from "@/components/ui/side-bar";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, UserRoundPlus } from "lucide-react";
+import BannerImage from "@/assets/banner-user-info.png";
+import CatIllustration from "@/assets/other-people-information.png";
 
 const messages = [
   {
@@ -54,75 +54,82 @@ const messages = [
     message: "How are you?",
     time: "Yesterday",
   },
-]
+];
 
 const groups = [
   {
-      avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
-      name: "Design Team",
-      message: "New project discussion",
-      time: "5 mins",
+    avatar:
+      "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+    name: "Design Team",
+    message: "New project discussion",
+    time: "5 mins",
   },
   {
-      avatar: "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
-      name: "Development Team",
-      message: "Sprint planning",
-      time: "1 hour",
+    avatar:
+      "https://cdn.bap-software.net/2024/01/03211643/How-is-AI-applied-to-Java-programming-e1704266486769.jpg",
+    name: "Development Team",
+    message: "Sprint planning",
+    time: "1 hour",
   },
   {
-      avatar: "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
-      name: "Marketing Team",
-      message: "Campaign updates",
-      time: "3 hours",
+    avatar:
+      "https://osd.vn/media/data/news/2022/06/seo-la-gi-seo-web-la-gi-ban-hieu-the-nao-ve-seo-2.jpg",
+    name: "Marketing Team",
+    message: "Campaign updates",
+    time: "3 hours",
   },
 ];
 
 const requests = [
   {
-    avatar: "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
+    avatar:
+      "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
     name: "John Doe",
     message: "Hi, I'd like to connect!",
     time: "2 hours ago",
   },
   {
-    avatar: "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
+    avatar:
+      "https://s3-alpha-sig.figma.com/img/77c6/8849/96c44a460b55a989d90970fc2b0d81ac?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Sn~-U8HNJIM02fCZz~FQOkPOoJ9pPydiMV77hD380IEC1YwjFA1QIs7pEWfhHe4EtgawfJuVayY-7HUjLtmvR4XWFrWqjD6CS3pp3dN1iSyM2rMwbDKvIvPDOaQAg11Tq8AvuHHQ42CYYDNfURwydgalpaMO4oIaAPNGXIFE6wu9Ha61CqbS7IqOWqGMhJqtb1ufbzL0H52TaBsuvh2OWuOUm~xNP23299fP0rarWbC5yU0T2-n6kBJNzEEZBbP3hFuHFNo2ZDJeQgwsSuXBj6bJAULIC-jftzehDWpSQ1Qz-p8SPEShQ3eMtMGDJx9rwtvjSah24tv1VvZCOOzRVA__",
     name: "Jane Smith",
     message: "Hello, can we chat?",
     time: "1 day ago",
   },
-]
+];
 
 export default function OtherPeopleInformation() {
   return (
-    <div className="flex h-screen bg-gradient-to-b from-blue-50/50 to-white w-full">
+    <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
       <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
-      <div className="flex-1 relative bg-blue-100 p-3">
+      <div className="relative flex-1 p-3 bg-blue-100">
         {/* Banner Image */}
         <div
-          className="h-72 w-full bg-cover bg-center rounded-2xl"
+          className="w-full bg-center bg-cover h-72 rounded-2xl"
           style={{
             backgroundImage: `url(${BannerImage})`,
           }}
         />
 
         {/* Profile Content */}
-        <div className="max-w-2xl mx-auto px-8 -mt-48 relative z-10">
+        <div className="relative z-10 max-w-2xl px-8 mx-auto -mt-48">
           <div className="bg-white rounded-3xl p-8 shadow-sm relative min-h-[400px]">
             {/* Profile Image */}
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
+            <div className="absolute transform -translate-x-1/2 -top-12 left-1/2">
               <img
                 src="https://s3-alpha-sig.figma.com/img/4f96/6c32/0b9a00911f35a7ae254f6846bb1f4021?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=RZT9n-2xU0OV8osbPbAYdd9QxuYH93wC6VE9dRymL0hPPUZ2RrulkhHwVDP9WDfRJ7I2sgUnBX5gtvWi1gXCuM~DJ-9iwXYx9E3IFuWp-zhH14Bm6--o6Vj3ebU9u1GmG0h0Q445KGb9rFAwuGD3N-VDabqhIYv0xy-hmyRzZxfaX9fTzNtctDMCis-~0QNLwxuVBFTUx9TjaCznyHzRvqhq1NHtvhE~H488WFMLDxbFJpy52EZn7fK7ZCS4x98dGgsHTYzwuqReluqWUwLKcPQl0RR-ShqPub-vYnjN-NxMmsVHzoAzPD1Pc4Eu1TYzBAWTzGgchaiYyFXO-FEWuA__"
                 alt="Patricia Capo"
-                className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                className="object-cover w-24 h-24 border-4 border-white rounded-full"
               />
             </div>
 
             <div className="flex flex-col items-center pt-16">
               {/* Name and Bio */}
-              <h1 className="text-2xl font-semibold text-blue-600 mb-1">Patricia Capo</h1>
-              <p className="text-gray-600 mb-6">✨ King of the Coastline ✨</p>
+              <h1 className="mb-1 text-2xl font-semibold text-blue-600">
+                Patricia Capo
+              </h1>
+              <p className="mb-6 text-gray-600">✨ King of the Coastline ✨</p>
 
               {/* Action Buttons */}
               <div className="flex gap-4 mb-8">
@@ -138,7 +145,9 @@ export default function OtherPeopleInformation() {
 
               {/* Message */}
               <p className="text-lg text-gray-700">
-                Make friends with <span className="text-orange-500">Patricia</span> to learn more about her.
+                Make friends with{" "}
+                <span className="text-orange-500">Patricia</span> to learn more
+                about her.
               </p>
 
               {/* Cat Illustration */}
@@ -154,6 +163,5 @@ export default function OtherPeopleInformation() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
