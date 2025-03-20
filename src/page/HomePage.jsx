@@ -25,13 +25,7 @@ const HomeContent = () => {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center flex-1">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center">Loading...</div>}>
       <HomeContent />
     </Suspense>
   );

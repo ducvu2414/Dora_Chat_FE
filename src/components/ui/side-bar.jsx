@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, memo } from "react";
+import { useState, useMemo } from "react";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
 import { Conversation } from "@/components/ui/conversation";

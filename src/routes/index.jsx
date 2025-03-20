@@ -9,9 +9,9 @@ const UserInformationPage = lazy(() => import("@/page/UserInformationPage"));
 const FriendInformationPage = lazy(() =>
   import("@/page/FriendInformationPage")
 );
-const OtherPeopleInformationPage = lazy(() =>
-  import("@/page/OtherPeopleInformationPage")
-);
+// const OtherPeopleInformationPage = lazy(() =>
+//   import("@/page/OtherPeopleInformationPage")
+// );
 const LoginPage = lazy(() => import("@/page/LoginPage"));
 const SignUpStep1Page = lazy(() => import("@/page/SignUpStep1Page"));
 // Import các trang khác...
@@ -39,7 +39,7 @@ const routes = [
       {
         path: "home",
         element: (
-          <Suspense fallback={<Spinner />}>
+          <Suspense Suspense fallback={<Spinner />}>
             <HomePage />
           </Suspense>
         ),

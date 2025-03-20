@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown"
 import { User, LogOut, Users } from "lucide-react"
 import { useNavigate } from "react-router-dom";
