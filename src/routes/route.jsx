@@ -11,22 +11,14 @@ const HomePage = React.lazy(() => import("@/page/HomePage"));
 const SignUpStep3Page = React.lazy(() => import("@/page/SignUpStep3Page"));
 const SignUpStep2Page = React.lazy(() => import("@/page/SignUpStep2Page"));
 const SignUpStep4Page = React.lazy(() => import("@/page/SignUpStep4Page"));
-const ResetPassStep1Page = React.lazy(() =>
-  import("@/page/ResetPassStep1Page")
-);
+const ResetPassStep1Page = React.lazy(() => import("@/page/ResetPassStep1Page"));
 const ResetPass = React.lazy(() => import("@/page/ResetPassStep2Page"));
 
 const ChatSingle = React.lazy(() => import("@/features/chat"));
-const FriendInformationPage = React.lazy(() =>
-  import("@/page/FriendInformationPage")
-);
-const UserInformationPage = React.lazy(() =>
-  import("@/page/UserInformationPage")
-);
+const FriendInformationPage = React.lazy(() =>import("@/page/FriendInformationPage"));
+const UserInformationPage = React.lazy(() =>import("@/page/UserInformationPage"));
 const ContactsPage = React.lazy(() => import("@/page/ContactsPage"));
-const OtherPeopleInformation = React.lazy(() =>
-  import("@/page/OtherPeopleInformationPage")
-);
+const OtherPeopleInformation = React.lazy(() =>import("@/page/OtherPeopleInformationPage"));
 
 
 const routes = [

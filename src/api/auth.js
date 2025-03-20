@@ -5,7 +5,6 @@ const authApi = {
     const url = "/api/auth/contact";
     return axios.post(url, { contact });
   },
-
   submitInformation: (submitInformation) => {
     const url = "/api/auth/register";
     return axios.post(url, submitInformation);
