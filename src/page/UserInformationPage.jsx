@@ -76,6 +76,7 @@ export default function UserInformation() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [qr, setQr] = useState("");
 
   const [userInfo, setUserInfo] = useState(
     null
@@ -102,6 +103,8 @@ export default function UserInformation() {
         setLoading(true);
         const user = JSON.parse(localStorage.getItem("user"));
         const response = await me.getProfile(user._id);
+        const qrResponse = await me.getQR(user._id);
+        setQr(qrResponse);
         setUserInfo(response);
         console.log(response);
       } catch (err) {
@@ -258,7 +261,7 @@ export default function UserInformation() {
                       alt="User Admin"
                       className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full bg-regal-blue"
                     />
-                   )}
+                  )}
 
                   <h1 className="mb-2 text-2xl font-semibold text-gray-900">
                     User Admin
@@ -267,11 +270,14 @@ export default function UserInformation() {
 
                   {/* QR Code */}
                   <div className="flex flex-col items-center">
-                    <img
-                      src="https://s3-alpha-sig.figma.com/img/0374/d850/67166b3ba72139d99902439d7af64208?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=JZ7wxzMSGCy6FylTJdRL-bCaGmeVbzAGd1Zkxp5xu3cCaMUh3dsXDiSN-50xHNl7oBGUXkzk4Cb~FaAFqEV6oY-6LLkhNTiGbU8zf2DobPFipskQ4SH4lcYQXZe1RfPWE2CbPhzm35Ip6GH~HIGKgtuUWydCr6IhHzE6gKkJYIHSISRHUYtNhdy542PfUg9CUHVI5-WN9cfQMhbS7Mv4LL1~oI-7-vy8XUDa6xlwJcBdcyfbDOkAZZYcYcItr8HM48JGa1q3CspnIMkdnpFjR4ymtjQ5xDpWHzpAJoRLMDPxHlv2NHS4i4t8VWw8ZK~TVyGXAZcxW9d-4bSNsLlZaQ__"
-                      alt="QR Code"
-                      className="w-32 h-32 mb-2"
-                    />
+                    {qr ? (
+                      <img src={qr} alt="QR Code" className="w-32 h-32 mb-2" />
+                    ) : (
+                      <>
+                        <img alt="QR Code" className="w-32 h-32 mb-2" />
+                      </>
+                    )}
+
                     <p className="text-sm font-bold text-orange-500">
                       QR code helps people follow you quickly
                     </p>
