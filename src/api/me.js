@@ -8,7 +8,11 @@ const meApi = {
     getQR: (id) => {
         const url = `api/qr/generate/user/${id}`;
         return axios.get(url);
-    }
+    },
+    putProfile: (data) => {
+        const url = `api/me/profile`;
+        return axios.put(url, data);
+    },
 }
 
 export default meApi;

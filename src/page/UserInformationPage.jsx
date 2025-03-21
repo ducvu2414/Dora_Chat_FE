@@ -77,6 +77,7 @@ export default function UserInformation() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [qr, setQr] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState();
 
   const [userInfo, setUserInfo] = useState(
     null
@@ -89,12 +90,13 @@ export default function UserInformation() {
     // }
   );
 
-  const setDateOfBirth = (dateString) => {
-    // dateString format '2003-02-25'
-    const [year, month, day] = dateString.split("-");
-    userInfo.dateOfBirth.year = year;
-    userInfo.dateOfBirth.month = month;
-    userInfo.dateOfBirth.day = day;
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setDateOfBirth(newDate); // Cập nhật state
+    setUserInfo({
+      ...userInfo,
+      dateOfBirth: setDateOfBirth(newDate), // Cập nhật userInfo
+    });
   };
 
   useEffect(() => {
@@ -106,9 +108,10 @@ export default function UserInformation() {
         const qrResponse = await me.getQR(user._id);
         setQr(qrResponse);
         setUserInfo(response);
-        console.log(response);
+        setDateOfBirth(
+          `${response.dateOfBirth.year}-${response.dateOfBirth.month}-${response.dateOfBirth.day}`
+        );
       } catch (err) {
-        setLoading(false);
         console.error("Error fetching user profile:", err);
         AlertMessage({
           type: "error",
@@ -121,6 +124,17 @@ export default function UserInformation() {
 
     fetchUserProfile();
   }, []);
+
+  const handleDownload = () => {
+    if (qr) {
+      const link = document.createElement("a");
+      link.href = qr;
+      link.download = "my-qr-code-dora.png"; // Tên file khi tải xuống
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const handleSubmitPassword = (e) => {
     e.preventDefault();
@@ -176,44 +190,50 @@ export default function UserInformation() {
     AlertMessage({ type: "success", message: "Password changed successfully" });
   };
 
-  const handleSubmitInfo = (e) => {
+  const handleSubmitInfo = async (e) => {
     e.preventDefault();
-    setIsEditing(false);
+
+    if (!userInfo.name) {
+      console.log("check name empty");
+      AlertMessage({ type: "error", message: "Please enter your name" });
+      return;
+    }
 
     const regexName = /^[A-Za-zÀ-ỹ\s]+$/;
-    if (!userInfo.firstName) {
-      AlertMessage({ type: "error", message: "Please enter your first name" });
-      return;
-    }
-
-    if (!regexName.test(userInfo.firstName)) {
-      AlertMessage({ type: "error", message: "First name must be characters" });
-      return;
-    }
-
-    if (!userInfo.lastName) {
-      AlertMessage({ type: "error", message: "Please enter your last name" });
-      return;
-    }
-
-    if (!regexName.test(userInfo.lastName)) {
-      AlertMessage({ type: "error", message: "Last name must be characters" });
+    if (!regexName.test(userInfo.name)) {
+      console.log("check name regex");
+      AlertMessage({ type: "error", message: "Name must be characters" });
       return;
     }
 
     // under 18
-    if (
-      new Date().getFullYear() - new Date(userInfo.dateOfBirth).getFullYear() <
-      18
-    ) {
+    if (new Date().getFullYear() - userInfo.dateOfBirth.year < 18) {
       AlertMessage({ type: "error", message: "Age must be over 18" });
       return;
     }
 
-    AlertMessage({
-      type: "success",
-      message: "Information updated successfully",
-    });
+    try {
+      setLoading(true);
+      setIsEditing(false);
+      const userInfoRequest = {
+        id: userInfo._id,
+        ...userInfo,
+        dateOfBirth: `${userInfo.dateOfBirth.year}-${userInfo.dateOfBirth.month}-${userInfo.dateOfBirth.day}T00:00:00.000Z`,
+      };
+      delete userInfoRequest._id;
+      console.log(userInfoRequest);
+      const userUpdated = await me.putProfile(userInfoRequest);
+      console.log("User updates:", userUpdated);
+      AlertMessage({ type: "success", message: "Updated successful!" });
+    } catch (error) {
+      console.error("Update profile failed:", error);
+      AlertMessage({
+        type: "error",
+        message: "Update profile failed. Please try again."
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -274,14 +294,17 @@ export default function UserInformation() {
                       <img src={qr} alt="QR Code" className="w-32 h-32 mb-2" />
                     ) : (
                       <>
-                        <img alt="QR Code" className="w-32 h-32 mb-2" />
+                        <img alt="QR Code" />
                       </>
                     )}
 
                     <p className="text-sm font-bold text-orange-500">
                       QR code helps people follow you quickly
                     </p>
-                    <button className="p-2 mt-2 transition-colors bg-orange-100 border-none rounded-full hover:bg-orange-200">
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 mt-2 transition-colors bg-orange-100 border-none rounded-full hover:bg-orange-200"
+                    >
                       <svg
                         width="24"
                         height="24"
@@ -362,13 +385,13 @@ export default function UserInformation() {
                           </label>
                           <Input
                             value={userInfo.username}
-                            onChange={(e) =>
-                              setUserInfo({
-                                ...userInfo,
-                                username: e.target.value,
-                              })
-                            }
-                            disabled={!isEditing}
+                            // onChange={(e) =>
+                            //   setUserInfo({
+                            //     ...userInfo,
+                            //     username: e.target.value,
+                            //   })
+                            // }
+                            disabled={true}
                             className="bg-gray-50 text-regal-blue"
                           />
                         </div>
@@ -379,19 +402,9 @@ export default function UserInformation() {
                           <div className="relative">
                             <Input
                               type="date"
-                              value={
-                                userInfo.dateOfBirth.year +
-                                "-" +
-                                userInfo.dateOfBirth.month +
-                                "-" +
-                                userInfo.dateOfBirth.day
-                              }
-                              onChange={(e) =>
-                                setUserInfo({
-                                  ...userInfo,
-                                  dateOfBirth: setDateOfBirth(e.target.value),
-                                })
-                              }
+                              value={dateOfBirth}
+                              // value={`${userInfo.dateOfBirth.year}-${userInfo.dateOfBirth.month}-${userInfo.dateOfBirth.day}`}
+                              onChange={handleDateChange}
                               disabled={!isEditing}
                               className="bg-gray-50 text-regal-blue"
                             />
