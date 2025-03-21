@@ -136,7 +136,7 @@ export default function UserInformation() {
     }
   };
 
-  const handleSubmitPassword = (e) => {
+  const handleSubmitPassword = async (e) => {
     e.preventDefault();
 
     if (!currentPassword) {
@@ -163,11 +163,6 @@ export default function UserInformation() {
       return;
     }
 
-    if (currentPassword !== "12345678") {
-      AlertMessage({ type: "error", message: "Current password is incorrect" });
-      return;
-    }
-
     if (newPassword !== confirmPassword) {
       AlertMessage({
         type: "error",
@@ -187,6 +182,19 @@ export default function UserInformation() {
       return;
     }
 
+    try {
+      setLoading(true);
+      const response = await me.updatePassword({
+        id: userInfo._id,
+        oldPassword: currentPassword,
+        newPassword,
+      });
+      console.log(response);
+    } catch (error) {
+      console.error("Update password failed:", error);
+    } finally {
+      setLoading(false);
+    }
     AlertMessage({ type: "success", message: "Password changed successfully" });
   };
 
@@ -229,7 +237,7 @@ export default function UserInformation() {
       console.error("Update profile failed:", error);
       AlertMessage({
         type: "error",
-        message: "Update profile failed. Please try again."
+        message: "Update profile failed. Please try again.",
       });
     } finally {
       setLoading(false);

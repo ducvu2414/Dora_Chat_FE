@@ -13,6 +13,10 @@ const meApi = {
         const url = `api/me/profile`;
         return axios.put(url, data);
     },
+    updatePassword: (data) => {
+        const url = `api/me/password`;
+        return axios.put(url, data);
+    }
 }
 
 export default meApi;
