@@ -16,7 +16,6 @@ export function SignUpStep2Form({ onSubmit }) {
         lastName: '',
         dateOfBirth: '',
         gender: '',
-        bio: '',
         password: '',
         retypePassword: '',
     });
@@ -144,21 +143,6 @@ export function SignUpStep2Form({ onSubmit }) {
                 </div>
             </div>
 
-
-            {/* Bio */}
-            <div className="space-y-2">
-                <label className="text-sm text-gray-700 font-semibold">
-                    Bio <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                    name="bio"
-                    placeholder="✨ Say something about yourself..."
-                    value={formData.bio}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-gray-50 min-h-[50px] text-blue-500"
-                    required
-                />
-            </div>
 
             {/* Submit Button */}
             <Button
