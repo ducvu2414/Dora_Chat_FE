@@ -6,7 +6,7 @@ const meApi = {
         return axios.get(url);
     },
     getQR: (id) => {
-        const url = `api/qr/generate/user/${id}`;
+        const url = `api/qr/user/${id}`;
         return axios.get(url);
     },
     putProfile: (data) => {
