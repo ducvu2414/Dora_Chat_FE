@@ -1,10 +1,16 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
-// import { Outlet } from "react-router-dom";
 
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
+// Lazy load components
 const MainLayout = React.lazy(() => import("@/components/layouts/MainLayout"));
-
 const LoginPage = React.lazy(() => import("@/page/LoginPage"));
 const SignUpPage = React.lazy(() => import("@/page/SignUpStep1Page"));
 const HomePage = React.lazy(() => import("@/page/HomePage"));
@@ -15,74 +21,85 @@ const ResetPassStep1Page = React.lazy(() => import("@/page/ResetPassStep1Page"))
 const ResetPass = React.lazy(() => import("@/page/ResetPassStep2Page"));
 
 const ChatSingle = React.lazy(() => import("@/features/chat"));
-const FriendInformationPage = React.lazy(() =>import("@/page/FriendInformationPage"));
-const UserInformationPage = React.lazy(() =>import("@/page/UserInformationPage"));
+const FriendInformationPage = React.lazy(() => import("@/page/FriendInformationPage"));
+const UserInformationPage = React.lazy(() => import("@/page/UserInformationPage"));
 const ContactsPage = React.lazy(() => import("@/page/ContactsPage"));
-const OtherPeopleInformation = React.lazy(() =>import("@/page/OtherPeopleInformationPage"));
+const OtherPeopleInformation = React.lazy(() => import("@/page/OtherPeopleInformationPage"));
 
+const withSuspense = (Component) => (
+  <Suspense fallback={<LoadingFallback />}>
+    <Component />
+  </Suspense>
+);
 
 const routes = [
   {
     path: "/",
-    element: <PublicRoute><LoginPage /></PublicRoute>
+    element: <PublicRoute>{withSuspense(LoginPage)}</PublicRoute>
   },
   {
     path: "/login",
-    element: <PublicRoute><LoginPage /></PublicRoute>
+    element: <PublicRoute>{withSuspense(LoginPage)}</PublicRoute>
   },
   {
     path: "/signup",
-    element: <PublicRoute><SignUpPage /></PublicRoute>
+    element: <PublicRoute>{withSuspense(SignUpPage)}</PublicRoute>
   },
   {
     path: "/signup/otp",
-    element: <PublicRoute><SignUpStep3Page /></PublicRoute>
+    element: <PublicRoute>{withSuspense(SignUpStep3Page)}</PublicRoute>
   },
   {
     path: "/signup/info",
-    element: <PublicRoute><SignUpStep2Page /></PublicRoute>
+    element: <PublicRoute>{withSuspense(SignUpStep2Page)}</PublicRoute>
   },
   {
     path: "/signup/complete",
-    element: <PublicRoute><SignUpStep4Page /></PublicRoute>
+    element: <PublicRoute>{withSuspense(SignUpStep4Page)}</PublicRoute>
   },
   {
     path: "/reset-password/contact",
-    element: <PublicRoute><ResetPassStep1Page /></PublicRoute>
+    element: <PublicRoute>{withSuspense(ResetPassStep1Page)}</PublicRoute>
   },
   {
     path: "/reset-password",
-    element: <PublicRoute><ResetPass /></PublicRoute>
+    element: <PublicRoute>{withSuspense(ResetPass)}</PublicRoute>
   },
 
-  // Protected Routes với MainLayout
+  // Protected Routes with MainLayout
   {
     path: "/",
-    element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingFallback />}>
+          <MainLayout />
+        </Suspense>
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "home",
-        element: <HomePage />
+        element: withSuspense(HomePage)
       },
       {
         path: "chat/:id",
-        element: <ChatSingle />
+        element: withSuspense(ChatSingle)
       },
       {
         path: "user-information",
-        element: <UserInformationPage />
+        element: withSuspense(UserInformationPage)
       },
       {
         path: "contacts",
-        element: <ContactsPage />
+        element: withSuspense(ContactsPage)
       },
       {
         path: "friend-information",
-        element: <FriendInformationPage />
+        element: withSuspense(FriendInformationPage)
       },
       {
         path: "other-people-information",
-        element: <OtherPeopleInformation />
+        element: withSuspense(OtherPeopleInformation)
       },
     ]
   },

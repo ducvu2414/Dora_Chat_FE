@@ -1,6 +1,20 @@
 import { SideBar } from "@/components/ui/side-bar";
-import { memo, Suspense } from "react";
+import { memo, Suspense, useRef, useState, useTransition } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
+import { init, socket, isConnected } from '../../utils/socketClient';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setNewFriend,
+  setMyRequestFriend,
+  updateMyRequestFriend,
+  updateRequestFriends,
+  updateFriend,
+  updateFriendChat,
+  setNewRequestFriend,
+  setAmountNotify
+} from '../../features/friend/friendSlice';
 
 const messages = [
   {
@@ -101,12 +115,99 @@ const requests = [
 ];
 
 const MainLayout = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { amountNotify } = useSelector(state => state.friend) || { amountNotify: 0 };
+  const [isPending, startTransition] = useTransition();
+  const [socketInitialized, setSocketInitialized] = useState(false);
 
-  // Handle conversation click to navigate to chat/:id
+  // Initialize socket connection inside useEffect with startTransition
+  useEffect(() => {
+    if (!isConnected()) {
+      // Use startTransition to wrap the socket initialization
+      startTransition(() => {
+        init();
+        setSocketInitialized(true);
+      });
+    }
+
+    // Clean up function
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
+  }, []);
+
+  // Set up socket event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleAcceptFriend = (value) => {
+      startTransition(() => {
+        dispatch(setNewFriend(value));
+        dispatch(setMyRequestFriend(value._id));
+      });
+    };
+
+    const handleFriendInvite = (value) => {
+      startTransition(() => {
+        dispatch(setNewRequestFriend(value));
+        dispatch(setAmountNotify(amountNotify + 1));
+      });
+    };
+
+    const handleDeleteFriendInvite = (_id) => {
+      startTransition(() => {
+        dispatch(updateMyRequestFriend(_id));
+      });
+    };
+
+    const handleDeleteInviteSend = (_id) => {
+      startTransition(() => {
+        dispatch(updateRequestFriends(_id));
+      });
+    };
+
+    const handleDeleteFriend = (_id) => {
+      startTransition(() => {
+        dispatch(updateFriend(_id));
+        dispatch(updateFriendChat(_id));
+      });
+    };
+
+    const handleRevokeToken = ({ key }) => {
+      if (codeRevokeRef.current !== key) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        window.location.reload();
+      }
+    };
+
+    // Add event listeners
+    socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
+    socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
+    socket.on(SOCKET_EVENTS.DELETED_FRIEND_INVITE, handleDeleteFriendInvite);
+    socket.on(SOCKET_EVENTS.DELETED_INVITE_WAS_SEND, handleDeleteInviteSend);
+    socket.on(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
+    socket.on(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
+
+    // Clean up event listeners
+    return () => {
+      socket.off(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
+      socket.off(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
+      socket.off(SOCKET_EVENTS.DELETED_FRIEND_INVITE, handleDeleteFriendInvite);
+      socket.off(SOCKET_EVENTS.DELETED_INVITE_WAS_SEND, handleDeleteInviteSend);
+      socket.off(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
+      socket.off(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
+    };
+  }, [dispatch, amountNotify, socket]);
+
+  // Handle conversation click with startTransition
   const handleConversationClick = (id) => {
-    console.log("Navigating to chat ID:", id);
-    navigate(`/chat/${id}`);
+    startTransition(() => {
+      navigate(`/chat/${id}`);
+    });
   };
 
   return (
@@ -118,15 +219,19 @@ const MainLayout = () => {
         onConversationClick={handleConversationClick}
       />
       <div className="flex-1 overflow-auto">
-        <Suspense
-          fallback={
+        {isPending ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <Suspense fallback={
             <div className="flex items-center justify-center h-full">
-              Loading...
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
-          }
-        >
-          <Outlet />
-        </Suspense>
+          }>
+            <Outlet />
+          </Suspense>
+        )}
       </div>
     </div>
   );
