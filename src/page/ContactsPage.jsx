@@ -403,18 +403,13 @@ export default function ContactsPage() {
       console.log("Friend API response:", response);
 
       if (response) {
-        // Check different possible response structures
         if (Array.isArray(response)) {
-          // If response is directly an array
           setFriendList(response);
         } else if (response.data && Array.isArray(response.data)) {
-          // If response has a data property that is an array
           setFriendList(response.data);
         } else if (response.friendsTempt && Array.isArray(response.friendsTempt)) {
-          // If response has a friendsTempt property that is an array
           setFriendList(response.friendsTempt);
         } else {
-          // Fallback to empty array if structure is unexpected
           console.error("Unexpected response format:", response);
           setFriendList([]);
         }
@@ -456,9 +451,7 @@ export default function ContactsPage() {
     try {
       const response = await friendApi.acceptRequestFriend(userId);
       if (response && !response.error) {
-        // Cập nhật lại danh sách lời mời kết bạn
         fetchFriendRequests();
-        // Cập nhật lại danh sách bạn bè
         fetchFriends();
         AlertMessage({
           type: "success",
@@ -598,7 +591,8 @@ export default function ContactsPage() {
         return <ContactList
           contacts={friendList.length > 0 ? friendList.map(friend => ({
             id: friend._id,
-            avatar: friend.avatar || friend.avatarColor || "/placeholder.svg",
+            avatar: friend.avatar,
+            avatarColor: friend.avatarColor || "blue",
             name: friend.name || "Unknown",
             email: friend.username || friend.email || "",
             isOnline: friend.isOnline || false
@@ -609,7 +603,8 @@ export default function ContactsPage() {
         return <FriendRequestList
           friendRequests={friendRequests.length > 0 ? friendRequests.map(request => ({
             id: request._id,
-            avatar: friend.avatar || friend.avatarColor || "/placeholder.svg",
+            avatar: friend.avatar,
+            avatarColor: friend.avatarColor || "blue",
             name: request.name || "Unknown",
             message: request.message || "Sent you a friend request"
           })) : [
