@@ -208,15 +208,33 @@ export default function ContactsPage() {
   // Xử lý tìm kiếm
   const handleSearch = (term) => {
     setSearchTerm(term);
-    debouncedSearch(term);
+    if (activeTab === "friend-list") {
+      debouncedSearch(term);
+    } else if (activeTab === "friend-requests") {
+      const filteredRequests = friendRequests.filter((request) =>
+        request.name.toLowerCase().includes(term.toLowerCase())
+      );
+      dispatch(setRequestFriends(filteredRequests));
+
+      if (!term) {
+        fetchFriendRequests();
+      }
+    } else if (activeTab === "sent-requests") {
+      const filteredSent = sentRequests.filter((request) =>
+        request.name.toLowerCase().includes(term.toLowerCase())
+      );
+      dispatch(setMyRequestFriends(filteredSent));
+
+      if (!term) {
+        fetchSentRequests();
+      }
+    }
   };
 
-  // Xử lý thay đổi tab
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    setError(null); // Reset error state when changing tabs
+    setError(null);
 
-    // Tải dữ liệu tương ứng với tab được chọn
     if (tabId === "friend-list") {
       fetchFriends(searchTerm);
     } else if (tabId === "friend-requests") {
@@ -224,7 +242,6 @@ export default function ContactsPage() {
     } else if (tabId === "sent-requests") {
       fetchSentRequests();
     }
-    // Các tab khác có thể thêm sau
   };
 
   // Fetching Data on ContactsPage Load
