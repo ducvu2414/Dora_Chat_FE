@@ -1,32 +1,25 @@
 /* eslint-disable react/prop-types */
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
 
-export function FriendRequestItem({ request, onAccept, onReject }) {
-    function handleAccept() {
-        if (onAccept) {
-            onAccept(request._id);
+export function SentRequestItem({ request, onCancel }) {
+    function handleCancel() {
+        if (onCancel) {
+            onCancel(request._id);
         } else {
-            console.log('Accept friend request from', request.name);
+            console.log('Cancel friend request to', request.name);
         }
-    }
-
-    function handleReject() {
-        if (onReject) {
-            onReject(request._id);
-        } else {
-            console.log('Reject friend request from', request.name);
-        }
-    }
-
-    function handleViewMessage() {
-        console.log('View message from', request.name);
     }
 
     function handleViewProfile() {
         console.log('View profile of', request.name);
     }
+
+    // Get first letter of name for avatar placeholder
+    const getInitials = (name) => {
+        return name ? name.charAt(0).toUpperCase() : '?';
+    };
+
     const getColorFromName = (colorName) => {
         const colorMap = {
             'red': '#f87171',
@@ -45,9 +38,6 @@ export function FriendRequestItem({ request, onAccept, onReject }) {
         return colorMap[colorName?.toLowerCase()] || colorName;
     };
 
-    const getInitials = (name) => {
-        return name ? name.charAt(0).toUpperCase() : '?';
-    };
     return (
         <Card className="p-4" onClick={handleViewProfile}>
             <div className="flex items-center gap-4">
@@ -70,45 +60,24 @@ export function FriendRequestItem({ request, onAccept, onReject }) {
                 </div>
                 <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-gray-900 truncate">{request.name}</h3>
-                    <p className="text-xs text-gray-500 truncate">{request.message}</p>
+                    <p className="text-xs text-gray-500 truncate">Đã gửi lời mời kết bạn</p>
+                </div>
+                <div className="text-xs text-gray-400">
+                    {request.time || "Vừa gửi"}
                 </div>
             </div>
-            <div className="flex justify-between mt-4 gap-2">
-                <Button
-                    variant="primary"
-                    size="sm"
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleAccept();
-                    }}
-                >
-                    Accept
-                </Button>
+            <div className="flex justify-end mt-4">
                 <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-gray-300 hover:bg-gray-50"
+                    className="border-gray-300 hover:bg-gray-50 text-gray-700"
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleReject();
+                        handleCancel();
                     }}
                 >
-                    Reject
+                    Hủy lời mời
                 </Button>
-                <Button
-                    variant="primary"
-                    size="sm"
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewMessage();
-                    }}
-                >
-                    <MessageCircle className="h-4 w-4" />
-
-                </Button>
-
             </div>
         </Card>
     );

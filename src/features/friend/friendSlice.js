@@ -7,6 +7,8 @@ const initialState = {
   suggestFriends: [],
   amountNotify: 0,
   friendChats: [],
+  onlineStatus: {},
+  typingStatus: {}
 };
 
 export const friendSlice = createSlice({
@@ -60,7 +62,22 @@ export const friendSlice = createSlice({
         friend => friend._id !== action.payload
       );
     },
-  },
+    setFriendOnlineStatus: (state, action) => {
+      const { friendId, isOnline } = action.payload;
+      state.onlineStatus = {
+        ...state.onlineStatus,
+        [friendId]: isOnline
+      };
+    },
+    
+    setFriendTypingStatus: (state, action) => {
+      const { friendId, isTyping } = action.payload;
+      state.typingStatus = {
+        ...state.typingStatus,
+        [friendId]: isTyping
+      };
+    }
+  }
 });
 
 export const {
@@ -77,6 +94,8 @@ export const {
   setAmountNotify,
   setFriendChats,
   updateFriendChat,
+  setFriendOnlineStatus,
+  setFriendTypingStatus
 } = friendSlice.actions;
 
 export default friendSlice.reducer;

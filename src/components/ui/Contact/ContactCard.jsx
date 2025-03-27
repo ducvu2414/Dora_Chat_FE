@@ -64,19 +64,19 @@ export function ContactCard({ contact, onDeleteFriend }) {
                             />
                         ) : (
                             <div
-                                className="flex items-center justify-center w-24 h-24 mb-4 border-4 border-white rounded-full"
+                                className="flex items-center justify-center w-20 h-20 mb-4 border-4 border-white rounded-full"
                                 style={{
                                     backgroundColor: contact.avatarColor ?
                                         getColorFromName(contact.avatarColor) : '#e2e8f0'
                                 }}
                             >
-
+                                <span className="text-2xl font-semibold text-white">{getInitials(contact.name)}</span>
                             </div>
                         )}
                     </div>
                     <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium text-gray-900 truncate">{contact.name}</h3>
-                        <p className="text-xs text-gray-500 truncate">{contact.email}</p>
+                        <p className="text-xs text-gray-500 truncate">{contact.username}</p>
                     </div>
                 </div>
                 <ContactCardDropdown
