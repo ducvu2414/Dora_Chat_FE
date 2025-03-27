@@ -42,7 +42,8 @@
 //   )
 // }
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 
@@ -54,41 +55,75 @@ export function Conversation({
   name,
   message,
   time,
+  id, // Add id parameter to support proper routing
 }) {
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const navigate = useNavigate();
+
   const showDropdown = isConversationHovered || isDropdownHovered;
 
   const handleConversationEnter = () => {
-    setIsConversationHovered(true);
+    startTransition(() => {
+      setIsConversationHovered(true);
+    });
   };
 
   const handleConversationLeave = () => {
     setTimeout(() => {
       if (!isDropdownHovered) {
-        setIsConversationHovered(false);
+        startTransition(() => {
+          setIsConversationHovered(false);
+        });
       }
     }, 100);
   };
 
   const handleDropdownEnter = () => {
-    setIsDropdownHovered(true);
+    startTransition(() => {
+      setIsDropdownHovered(true);
+    });
   };
 
   const handleDropdownLeave = () => {
-    setIsDropdownHovered(false);
-    if (!isConversationHovered) {
-      setIsConversationHovered(false);
+    startTransition(() => {
+      setIsDropdownHovered(false);
+      if (!isConversationHovered) {
+        setIsConversationHovered(false);
+      }
+    });
+  };
+
+  const handleViewInfo = () => {
+    startTransition(() => {
+      navigate("/friend-information");
+    });
+  };
+
+  const handleClick = (e) => {
+    if (isDropdownHovered) {
+      return;
+    }
+
+    if (onClick) {
+      startTransition(() => {
+        onClick(e);
+      });
+    } else if (id) {
+      // If no onClick provided but we have an ID, navigate to chat
+      startTransition(() => {
+        navigate(`/chat/${id}`);
+      });
     }
   };
 
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
-          isActive ? "bg-blue-100" : "hover:bg-gray-100"
-        }`}
-        onClick={onClick}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
+          } ${isPending ? "opacity-70" : ""}`}
+        onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
       >
@@ -111,9 +146,7 @@ export function Conversation({
           >
             {activeTab === "messages" || activeTab === "requests" ? (
               <ContactCardDropdown
-                onViewInfo={() =>
-                  (window.location.href = "/friend-information")
-                }
+                onViewInfo={handleViewInfo}
                 onCategoryChange={(category) =>
                   console.log("Category changed:", category)
                 }

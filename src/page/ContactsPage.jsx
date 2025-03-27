@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ContactTabs } from "@/components/ui/Contact/ContactTabs";
 import { ContactList } from "@/components/ui/Contact/ContactList";
 import { ContactSearch } from "@/components/ui/Contact/ContactSearch";
 import GroupList from "@/components/ui/Contact/GroupList";
 import { FriendRequestList } from "@/components/ui/Contact/FriendRequestList";
 import { GroupRequestList } from "@/components/ui/Contact/GroupRequestList";
+import friendApi from "@/api/friend";
+import { debounce } from "lodash";
+import { AlertMessage } from '@/components/ui/alert-message';
 
 const groupList = [
   {
@@ -371,60 +374,275 @@ const groupListRequest = [
   },
 ];
 
-export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [contactsTab, setContactsTab] = useState("friend-list");
+export default function ContactsPage() {
+  const [activeTab, setActiveTab] = useState("friend-list");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
+  // State cho dữ liệu từ API
+  const [friendList, setFriendList] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      fetchFriends(term);
+    }, 500),
+    []
+  );
+
+  // Fetch danh sách bạn bè
+  // Fetch danh sách bạn bè
+  const fetchFriends = async (searchName = "") => {
+    try {
+      setIsLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const response = await friendApi.fetchFriends(user._id, searchName);
+      console.log("Friend API response:", response);
+
+      if (response) {
+        if (Array.isArray(response)) {
+          setFriendList(response);
+        } else if (response.data && Array.isArray(response.data)) {
+          setFriendList(response.data);
+        } else if (response.friendsTempt && Array.isArray(response.friendsTempt)) {
+          setFriendList(response.friendsTempt);
+        } else {
+          console.error("Unexpected response format:", response);
+          setFriendList([]);
+        }
+      } else {
+        setError("Không thể tải danh sách bạn bè");
+        AlertMessage({
+          type: "error",
+          message: "Không thể tải danh sách bạn bè"
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching friends:", err);
+      setError("Đã xảy ra lỗi khi tải danh sách bạn bè");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredContacts = contacts.filter((contact) => {
-    return contact.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Fetch danh sách lời mời kết bạn
+  const fetchFriendRequests = async () => {
+    try {
+      setIsLoading(true);
+      const response = await friendApi.fetchListRequestFriend();
+      if (response && !response.error) {
+        setFriendRequests(response.data || []);
+      } else {
+        setError("Không thể tải danh sách lời mời kết bạn");
+      }
+    } catch (err) {
+      console.error("Error fetching friend requests:", err);
+      setError("Đã xảy ra lỗi khi tải danh sách lời mời kết bạn");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const filteredGroups = groupList.filter((group) => {
-    return group.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Xử lý chấp nhận lời mời kết bạn
+  const handleAcceptFriendRequest = async (userId) => {
+    try {
+      const response = await friendApi.acceptRequestFriend(userId);
+      if (response && !response.error) {
+        fetchFriendRequests();
+        fetchFriends();
+        AlertMessage({
+          type: "success",
+          message: "Đã chấp nhận lời mời kết bạn"
+        });
+      } else {
+        AlertMessage({
+          type: "error",
+          message: "Không thể chấp nhận lời mời kết bạn"
+        });
+      }
+    } catch (err) {
+      console.error("Error accepting friend request:", err);
+      AlertMessage({
+        type: "error",
+        message: "Đã xảy ra lỗi khi chấp nhận lời mời kết bạn"
+      });
+    }
+  };
+
+  // Xử lý từ chối lời mời kết bạn
+  const handleRejectFriendRequest = async (userId) => {
+    try {
+      const response = await friendApi.deleteRequestFriend(userId);
+      if (response && !response.error) {
+        // Cập nhật lại danh sách lời mời kết bạn
+        fetchFriendRequests();
+        AlertMessage({
+          type: "success",
+          message: "Đã từ chối lời mời kết bạn"
+        });
+      } else {
+        AlertMessage({
+          type: "error",
+          message: "Không thể từ chối lời mời kết bạn"
+        });
+      }
+    } catch (err) {
+      console.error("Error rejecting friend request:", err);
+      AlertMessage({
+        type: "error",
+        message: "Đã xảy ra lỗi khi từ chối lời mời kết bạn"
+      });
+    }
+  };
+
+  // Xử lý xóa bạn bè
+  const handleDeleteFriend = async (userId) => {
+    try {
+      const response = await friendApi.deleteFriend(userId);
+      if (response && !response.error) {
+        // Cập nhật lại danh sách bạn bè
+        fetchFriends();
+        AlertMessage({
+          type: "success",
+          message: "Đã xóa bạn bè thành công"
+        });
+      } else {
+        AlertMessage({
+          type: "error",
+          message: "Không thể xóa bạn bè"
+        });
+      }
+    } catch (err) {
+      console.error("Error deleting friend:", err);
+      AlertMessage({
+        type: "error",
+        message: "Đã xảy ra lỗi khi xóa bạn bè"
+      });
+    }
+  };
+
+  // Xử lý tìm kiếm
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    debouncedSearch(term);
+  };
+
+  // Xử lý thay đổi tab
+  // Xử lý thay đổi tab
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setError(null); // Reset error state when changing tabs
+
+    // Tải dữ liệu tương ứng với tab được chọn
+    if (tabId === "friend-list") {
+      fetchFriends(searchTerm);
+    } else if (tabId === "friend-requests") {
+      fetchFriendRequests();
+    }
+    // Các tab khác có thể thêm sau
+  };
+
+  // Tải dữ liệu ban đầu khi component mount
+  useEffect(() => {
+    // Reset error state
+    setError(null);
+
+    if (activeTab === "friend-list") {
+      fetchFriends();
+    } else if (activeTab === "friend-requests") {
+      fetchFriendRequests();
+    }
+
+    // Cleanup debounced function khi component unmount
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [activeTab]);
+
+  // Tải dữ liệu ban đầu khi component mount
+  useEffect(() => {
+    if (activeTab === "friend-list") {
+      fetchFriends();
+    } else if (activeTab === "friend-requests") {
+      fetchFriendRequests();
+    }
+
+    // Cleanup debounced function khi component unmount
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [activeTab]);
+
+  // Render nội dung dựa trên tab đang active
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="flex justify-center items-center h-64">Đang tải...</div>;
+    }
+
+    if (error) {
+      return <div className="text-red-500 text-center">{error}</div>;
+    }
+
+    switch (activeTab) {
+      case "friend-list":
+        return <ContactList
+          contacts={friendList.length > 0 ? friendList.map(friend => ({
+            id: friend._id,
+            avatar: friend.avatar,
+            avatarColor: friend.avatarColor || "blue",
+            name: friend.name || "Unknown",
+            email: friend.username || friend.email || "",
+            isOnline: friend.isOnline || false
+          })) : contacts}
+          onDeleteFriend={handleDeleteFriend}
+        />;
+      case "friend-requests":
+        return <FriendRequestList
+          friendRequests={friendRequests.length > 0 ? friendRequests.map(request => ({
+            id: request._id,
+            avatar: friend.avatar,
+            avatarColor: friend.avatarColor || "blue",
+            name: request.name || "Unknown",
+            message: request.message || "Sent you a friend request"
+          })) : [
+            {
+              id: "1",
+              avatar: "https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__",
+              name: "Jone Nguyen",
+              message: "Hi, I want to be your friend"
+            }
+          ]}
+          onAccept={handleAcceptFriendRequest}
+          onReject={handleRejectFriendRequest}
+        />;
+      case "group-list":
+        return <GroupList groups={groupList} />;
+      case "group-requests":
+        return <GroupRequestList groupRequests={[
+          {
+            id: "1",
+            avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+            name: "Design Team",
+            message: "You have been invited to join Design Team"
+          }
+        ]} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
-      {/* Main Content - Contacts Page */}
-      <div className="flex flex-row flex-1 bg-white">
-        <div className="flex-1 p-6 bg-white border-t min-w-max">
-          <h1 className="mb-6 text-2xl font-semibold text-left text-blue-500">
-            Contacts
-          </h1>
-          <ContactTabs activeTab={contactsTab} onTabChange={setContactsTab} />
-        </div>
-        <div className="w-full h-full p-6">
-          {contactsTab === "friend-list" && (
-            <div className="mt-6 h-[90%]">
-              <ContactSearch onSearch={handleSearch} />
-              <div className="mt-6 overflow-y-auto h-[95%]">
-                <ContactList contacts={filteredContacts} />
-              </div>
-            </div>
-          )}
-          {contactsTab === "group-list" && (
-            <div className="mt-6 h-[90%]">
-              <ContactSearch onSearch={handleSearch} />
-              <div className="mt-6 overflow-y-auto h-[95%]">
-                <GroupList groups={filteredGroups} />
-              </div>
-            </div>
-          )}
-          {contactsTab === "friend-requests" && (
-            <div className="mt-6 overflow-y-auto h-[95%]">
-              <FriendRequestList friendRequests={friendListRequest} />
-            </div>
-          )}
-          {contactsTab === "group-requests" && (
-            <div className="mt-6 overflow-y-auto h-[95%]">
-              <GroupRequestList groupRequests={groupListRequest} />
-            </div>
-          )}
-        </div>
+    <div className="flex h-screen bg-gray-50">
+      <div className="w-1/4 p-6 border-r border-gray-200 bg-white">
+        <h1 className="text-2xl font-bold mb-6 text-blue-600">Contacts</h1>
+        <ContactTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      </div>
+      <div className="w-3/4 p-6">
+        <ContactSearch onSearch={handleSearch} />
+        {renderContent()}
       </div>
     </div>
   );
