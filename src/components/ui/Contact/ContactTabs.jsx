@@ -1,8 +1,16 @@
 /* eslint-disable react/prop-types */
+import { useDispatch, useSelector } from "react-redux";
+
 export function ContactTabs({ activeTab, onTabChange }) {
+    const friendList = useSelector(state => state.friend.friends);
+    const friendRequests = useSelector(state => state.friend.requestFriends);
+    const sentRequests = useSelector(state => state.friend.myRequestFriends);
+    const groupList = [];
+
     const tabs = [
-        { id: 'friend-list', label: 'Friend list', count: 22 },
-        { id: 'friend-requests', label: 'Friend requests', count: 1 },
+        { id: 'friend-list', label: 'Friend list', count: friendList.length },
+        { id: 'friend-requests', label: 'Friend requests', count: friendRequests.length },
+        { id: 'sent-requests', label: 'Sent requests', count: sentRequests.length },
         { id: 'group-list', label: 'Group list', count: 3 },
         { id: 'group-requests', label: 'Group requests', count: 1 }
     ];
@@ -23,7 +31,7 @@ export function ContactTabs({ activeTab, onTabChange }) {
                     onClick={() => onTabChange(tab.id)}
                 >
                     <span className="text-sm font-medium">
-                        {tab.label} {tab.count && `(${tab.count})`}
+                        {tab.label} {`(${tab.count})`}
                     </span>
                 </button>
             ))}

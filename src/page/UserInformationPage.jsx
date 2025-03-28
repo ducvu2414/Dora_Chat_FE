@@ -15,7 +15,6 @@ import { Icons } from "@/components/ui/icons";
 import { AlertMessage } from "@/components/ui/alert-message";
 import BannerImage from "@/assets/banner-user-info.png";
 import { Spinner } from "@/page/Spinner";
-
 const availableHobbies = [
   {
     value: "Singing",
@@ -105,6 +104,7 @@ export default function UserInformation() {
         setLoading(true);
         const user = JSON.parse(localStorage.getItem("user"));
         const response = await me.getProfile(user._id);
+        setUserInfo(response);
         const qrResponse = await me.getQR(user._id);
         setQr(qrResponse);
         setUserInfo(response);

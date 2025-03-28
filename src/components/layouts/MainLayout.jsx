@@ -13,7 +13,9 @@ import {
   updateFriend,
   updateFriendChat,
   setNewRequestFriend,
-  setAmountNotify
+  setAmountNotify,
+  setFriendOnlineStatus,
+  setFriendTypingStatus
 } from '../../features/friend/friendSlice';
 
 const messages = [
@@ -120,18 +122,16 @@ const MainLayout = () => {
   const { amountNotify } = useSelector(state => state.friend) || { amountNotify: 0 };
   const [isPending, startTransition] = useTransition();
   const [socketInitialized, setSocketInitialized] = useState(false);
+  const user = useRef(JSON.parse(localStorage.getItem('user') || '{}'));
 
-  // Initialize socket connection inside useEffect with startTransition
   useEffect(() => {
     if (!isConnected()) {
-      // Use startTransition to wrap the socket initialization
       startTransition(() => {
         init();
         setSocketInitialized(true);
       });
     }
 
-    // Clean up function
     return () => {
       if (socket) {
         socket.close();
@@ -139,12 +139,17 @@ const MainLayout = () => {
     };
   }, []);
 
-  // Set up socket event listeners
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !user.current?._id) return;
+
+    socket.on('connect', () => {
+      socket.emit(SOCKET_EVENTS.JOIN, user.current._id);
+      // socket.emit(SOCKET_EVENTS.USER_ONLINE, { userId: user.current._id, isOnline: true });
+    });
 
     const handleAcceptFriend = (value) => {
       startTransition(() => {
+        console.log('handleAcceptFriend', value);
         dispatch(setNewFriend(value));
         dispatch(setMyRequestFriend(value._id));
       });
@@ -184,7 +189,25 @@ const MainLayout = () => {
       }
     };
 
-    // Add event listeners
+    const handleFriendOnlineStatus = (data) => {
+      startTransition(() => {
+        dispatch(setFriendOnlineStatus({ friendId: data.userId, isOnline: data.isOnline }));
+      });
+    };
+
+    const handleFriendTyping = (data) => {
+      startTransition(() => {
+        dispatch(setFriendTypingStatus({ friendId: data.userId, isTyping: data.isTyping }));
+
+        if (data.isTyping) {
+          setTimeout(() => {
+            dispatch(setFriendTypingStatus({ friendId: data.userId, isTyping: false }));
+          }, 3000);
+        }
+      });
+    };
+
+    // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
     socket.on(SOCKET_EVENTS.DELETED_FRIEND_INVITE, handleDeleteFriendInvite);
@@ -192,7 +215,9 @@ const MainLayout = () => {
     socket.on(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
     socket.on(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
 
-    // Clean up event listeners
+    socket.on(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
+    socket.on(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
+
     return () => {
       socket.off(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
       socket.off(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -200,10 +225,12 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.DELETED_INVITE_WAS_SEND, handleDeleteInviteSend);
       socket.off(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
       socket.off(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
-    };
-  }, [dispatch, amountNotify, socket]);
 
-  // Handle conversation click with startTransition
+      socket.off(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
+      socket.off(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
+    };
+  }, [socket]);
+
   const handleConversationClick = (id) => {
     startTransition(() => {
       navigate(`/chat/${id}`);
