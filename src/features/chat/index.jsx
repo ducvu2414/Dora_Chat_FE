@@ -60,7 +60,7 @@ export default function ChatSingle() {
     setMessages((prevMessages) => [...prevMessages, message]);
   };
   const joinConversation = (conversationId) => {
-    socket.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
+    socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationId);
   };
   const onNewMessage = (callback) => {
     if (socket) {
