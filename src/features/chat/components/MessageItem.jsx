@@ -5,17 +5,18 @@ import { AiOutlineDownload, AiOutlinePaperClip } from "react-icons/ai";
 import { useState } from "react";
 
 export default function MessageItem({ msg, showAvatar, showTime }) {
+  const userId = JSON.parse(localStorage.getItem("user"))._id;
   const [expanded, setExpanded] = useState(false);
   const MAX_TEXT_LENGTH = 350;
-
+  console.log("tin nhắn", msg);
   const isImage = (type) => type === "IMAGE";
   const isFile = msg.type === "FILE";
-  const isMe = msg.sender === "me";
+  const isMe = msg.userId === userId;
   return (
     <div
-      key={msg.id}
+      key={msg._id}
       className={`flex items-end gap-2 ${
-        msg.sender === "me" ? " flex-row-reverse" : "justify-start"
+        msg.userId === userId ? " flex-row-reverse" : "justify-start"
       }`}
     >
       {/* Hiển thị avatar nếu là tin nhắn cuối trong nhóm */}
@@ -30,11 +31,11 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       )}
 
       {/* Nội dung tin nhắn */}
-      <div key={msg.id} className="flex flex-col max-w-[468px]   text-start">
+      <div key={msg._id} className="flex flex-col max-w-[468px]   text-start">
         {/* Nếu tin nhắn là hình ảnh */}
         {isImage(msg.type) ? (
           <img
-            src={msg.text}
+            src={msg.content}
             alt="sent image"
             className="max-w-[468px] max-h-[468px] object-contain rounded-lg"
             loading="lazy"
@@ -50,7 +51,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
 
             {/* Link tải file */}
             <a
-              href={msg.text}
+              href={msg.content}
               download
               className="flex items-center text-[#086DC0] text-sm hover:underline mt-2"
             >
@@ -67,8 +68,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                : "bg-[#F5F5F5] text-[#000000]"
            }`}
           >
-            {expanded ? msg.text : msg.text.slice(0, MAX_TEXT_LENGTH)}
-            {msg.text.length > MAX_TEXT_LENGTH && (
+            {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
+            {msg.content.length > MAX_TEXT_LENGTH && (
               <span
                 className="text-[#086DC0] hover:underline ml-1 cursor-pointer"
                 onClick={() => setExpanded(!expanded)}
@@ -84,7 +85,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               isMe ? "self-end" : ""
             }`}
           >
-            {msg.time}
+            {msg.createdAt}
           </span>
         )}
       </div>

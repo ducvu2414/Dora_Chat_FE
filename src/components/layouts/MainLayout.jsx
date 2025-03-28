@@ -3,8 +3,8 @@ import { memo, Suspense, useRef, useState, useTransition } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
-import { init, socket, isConnected } from '../../utils/socketClient';
-import { useDispatch, useSelector } from 'react-redux';
+import { init, socket, isConnected } from "../../utils/socketClient";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setNewFriend,
   setMyRequestFriend,
@@ -13,8 +13,8 @@ import {
   updateFriend,
   updateFriendChat,
   setNewRequestFriend,
-  setAmountNotify
-} from '../../features/friend/friendSlice';
+  setAmountNotify,
+} from "../../features/friend/friendSlice";
 
 const messages = [
   {
@@ -117,7 +117,9 @@ const requests = [
 const MainLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { amountNotify } = useSelector(state => state.friend) || { amountNotify: 0 };
+  const { amountNotify } = useSelector((state) => state.friend) || {
+    amountNotify: 0,
+  };
   const [isPending, startTransition] = useTransition();
   const [socketInitialized, setSocketInitialized] = useState(false);
 
@@ -142,7 +144,6 @@ const MainLayout = () => {
   // Set up socket event listeners
   useEffect(() => {
     if (!socket) return;
-
     const handleAcceptFriend = (value) => {
       startTransition(() => {
         dispatch(setNewFriend(value));
@@ -178,12 +179,16 @@ const MainLayout = () => {
 
     const handleRevokeToken = ({ key }) => {
       if (codeRevokeRef.current !== key) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
         window.location.reload();
       }
     };
-
+    // kha add id user join socket
+    if (socketInitialized) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      socket.emit(SOCKET_EVENTS.JOIN_USER, user._id);
+    }
     // Add event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -221,14 +226,16 @@ const MainLayout = () => {
       <div className="flex-1 overflow-auto">
         {isPending ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+              </div>
+            }
+          >
             <Outlet />
           </Suspense>
         )}

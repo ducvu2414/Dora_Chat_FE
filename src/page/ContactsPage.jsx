@@ -7,7 +7,7 @@ import { FriendRequestList } from "@/components/ui/Contact/FriendRequestList";
 import { GroupRequestList } from "@/components/ui/Contact/GroupRequestList";
 import friendApi from "@/api/friend";
 import { debounce } from "lodash";
-import { AlertMessage } from '@/components/ui/alert-message';
+import { AlertMessage } from "@/components/ui/alert-message";
 
 const groupList = [
   {
@@ -407,7 +407,10 @@ export default function ContactsPage() {
           setFriendList(response);
         } else if (response.data && Array.isArray(response.data)) {
           setFriendList(response.data);
-        } else if (response.friendsTempt && Array.isArray(response.friendsTempt)) {
+        } else if (
+          response.friendsTempt &&
+          Array.isArray(response.friendsTempt)
+        ) {
           setFriendList(response.friendsTempt);
         } else {
           console.error("Unexpected response format:", response);
@@ -417,7 +420,7 @@ export default function ContactsPage() {
         setError("Không thể tải danh sách bạn bè");
         AlertMessage({
           type: "error",
-          message: "Không thể tải danh sách bạn bè"
+          message: "Không thể tải danh sách bạn bè",
         });
       }
     } catch (err) {
@@ -455,19 +458,19 @@ export default function ContactsPage() {
         fetchFriends();
         AlertMessage({
           type: "success",
-          message: "Đã chấp nhận lời mời kết bạn"
+          message: "Đã chấp nhận lời mời kết bạn",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể chấp nhận lời mời kết bạn"
+          message: "Không thể chấp nhận lời mời kết bạn",
         });
       }
     } catch (err) {
       console.error("Error accepting friend request:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi chấp nhận lời mời kết bạn"
+        message: "Đã xảy ra lỗi khi chấp nhận lời mời kết bạn",
       });
     }
   };
@@ -481,19 +484,19 @@ export default function ContactsPage() {
         fetchFriendRequests();
         AlertMessage({
           type: "success",
-          message: "Đã từ chối lời mời kết bạn"
+          message: "Đã từ chối lời mời kết bạn",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể từ chối lời mời kết bạn"
+          message: "Không thể từ chối lời mời kết bạn",
         });
       }
     } catch (err) {
       console.error("Error rejecting friend request:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi từ chối lời mời kết bạn"
+        message: "Đã xảy ra lỗi khi từ chối lời mời kết bạn",
       });
     }
   };
@@ -507,19 +510,19 @@ export default function ContactsPage() {
         fetchFriends();
         AlertMessage({
           type: "success",
-          message: "Đã xóa bạn bè thành công"
+          message: "Đã xóa bạn bè thành công",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể xóa bạn bè"
+          message: "Không thể xóa bạn bè",
         });
       }
     } catch (err) {
       console.error("Error deleting friend:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi xóa bạn bè"
+        message: "Đã xảy ra lỗi khi xóa bạn bè",
       });
     }
   };
@@ -579,56 +582,76 @@ export default function ContactsPage() {
   // Render nội dung dựa trên tab đang active
   const renderContent = () => {
     if (isLoading) {
-      return <div className="flex justify-center items-center h-64">Đang tải...</div>;
+      return (
+        <div className="flex items-center justify-center h-64">Đang tải...</div>
+      );
     }
 
     if (error) {
-      return <div className="text-red-500 text-center">{error}</div>;
+      return <div className="text-center text-red-500">{error}</div>;
     }
 
     switch (activeTab) {
       case "friend-list":
-        return <ContactList
-          contacts={friendList.length > 0 ? friendList.map(friend => ({
-            id: friend._id,
-            avatar: friend.avatar,
-            avatarColor: friend.avatarColor || "blue",
-            name: friend.name || "Unknown",
-            email: friend.username || friend.email || "",
-            isOnline: friend.isOnline || false
-          })) : contacts}
-          onDeleteFriend={handleDeleteFriend}
-        />;
-      case "friend-requests":
-        return <FriendRequestList
-          friendRequests={friendRequests.length > 0 ? friendRequests.map(request => ({
-            id: request._id,
-            avatar: friend.avatar,
-            avatarColor: friend.avatarColor || "blue",
-            name: request.name || "Unknown",
-            message: request.message || "Sent you a friend request"
-          })) : [
-            {
-              id: "1",
-              avatar: "https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__",
-              name: "Jone Nguyen",
-              message: "Hi, I want to be your friend"
+        return (
+          <ContactList
+            contacts={
+              friendList.length > 0
+                ? friendList.map((friend) => ({
+                    id: friend._id,
+                    avatar: friend.avatar,
+                    avatarColor: friend.avatarColor || "blue",
+                    name: friend.name || "Unknown",
+                    email: friend.username || friend.email || "",
+                    isOnline: friend.isOnline || false,
+                  }))
+                : contacts
             }
-          ]}
-          onAccept={handleAcceptFriendRequest}
-          onReject={handleRejectFriendRequest}
-        />;
+            onDeleteFriend={handleDeleteFriend}
+          />
+        );
+      case "friend-requests":
+        return (
+          <FriendRequestList
+            friendRequests={
+              friendRequests.length > 0
+                ? friendRequests.map((request) => ({
+                    id: request._id,
+                    avatar: friend.avatar,
+                    avatarColor: friend.avatarColor || "blue",
+                    name: request.name || "Unknown",
+                    message: request.message || "Sent you a friend request",
+                  }))
+                : [
+                    {
+                      id: "1",
+                      avatar:
+                        "https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__",
+                      name: "Jone Nguyen",
+                      message: "Hi, I want to be your friend",
+                    },
+                  ]
+            }
+            onAccept={handleAcceptFriendRequest}
+            onReject={handleRejectFriendRequest}
+          />
+        );
       case "group-list":
         return <GroupList groups={groupList} />;
       case "group-requests":
-        return <GroupRequestList groupRequests={[
-          {
-            id: "1",
-            avatar: "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
-            name: "Design Team",
-            message: "You have been invited to join Design Team"
-          }
-        ]} />;
+        return (
+          <GroupRequestList
+            groupRequests={[
+              {
+                id: "1",
+                avatar:
+                  "https://cdn.sanity.io/images/599r6htc/regionalized/5094051dac77593d0f0978bdcbabaf79e5bb855c-1080x1080.png?w=540&h=540&q=75&fit=max&auto=format",
+                name: "Design Team",
+                message: "You have been invited to join Design Team",
+              },
+            ]}
+          />
+        );
       default:
         return null;
     }
@@ -636,8 +659,8 @@ export default function ContactsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <div className="w-1/4 p-6 border-r border-gray-200 bg-white">
-        <h1 className="text-2xl font-bold mb-6 text-blue-600">Contacts</h1>
+      <div className="w-1/4 p-6 bg-white border-r border-gray-200">
+        <h1 className="mb-6 text-2xl font-bold text-blue-600">Contacts</h1>
         <ContactTabs activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
       <div className="w-3/4 p-6">

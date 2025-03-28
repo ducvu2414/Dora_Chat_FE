@@ -11,6 +11,7 @@ export default function ChatBox({ messages }) {
         chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+  console.log(messages);
   return (
     <div className="flex-1 flex flex-col bg-[#fff] py-2">
       <div
@@ -19,13 +20,13 @@ export default function ChatBox({ messages }) {
       >
         {messages.map((msg, index) => {
           const isFirstInGroup =
-            index === 0 || messages[index - 1].sender !== msg.sender;
+            index === 0 || messages[index - 1].userId !== msg.userId;
           const isLastInGroup =
             index === messages.length - 1 ||
-            messages[index + 1].sender !== msg.sender;
+            messages[index + 1].userId !== msg.userId;
           return (
             <MessageItem
-              key={msg.id}
+              key={msg._id}
               msg={msg}
               showAvatar={isFirstInGroup}
               showTime={isLastInGroup}
