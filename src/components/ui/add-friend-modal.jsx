@@ -4,6 +4,8 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import userApi from "@/api/user";
+import VnFlag from "@assets/vn_flag.png";
 
 // eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
@@ -17,16 +19,12 @@ export function AddFriendModal({ isOpen, onClose }) {
     setSearchResult(null);
   };
 
-  const handleSearch = () => {
-    if (phoneNumber === "987654321" || phoneNumber === "0" + "987654321") {
-      setSearchResult({
-        name: "Trịnh Minh Kha",
-        avatar:
-          "https://s3-alpha-sig.figma.com/img/64dc/8ad0/c703131b418ed3db7ccb749b38302b92?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Fi~X1ie0Z0QdgkKeGP1Oy0LGU0CS7RYF0dtoZ8RTMM2qWgssK2ZEaDZ0ozsX7VeiwrJWJIFs7YrB8pSmWqtDTcvX7pPXNCUox~GGEBChFY6cgzz9eyUOwAq1WS3IOJxlbgSk55cTxnRKcoTwtrYO5l6ZGtLteMB1kuwVcbXZImjKZW5QwXbl1T7xuCMv7c3vepf4Vbou80TLFnrxDBOksA-b-tIcA~r0S9i2Q56KRNt39lTiNvLyptrHtptyWBk~UVsrUIG3oVXdTPvwK5~gNkKibs96lOdC63U-ptFwyAGafwmnvpu1EKaQDgAGD~ND-SaX9TynuPplGkA6MobOow__",
-        bio: "Likes playing badminton 🏸 and drinking 🍺",
-      });
-    } else {
-      setSearchResult(null);
+  const handleSearch = async () => {
+    try {
+      const user = await userApi.getUserByPhoneNumber(phoneNumber);
+      setSearchResult(user);
+    } catch (error) {
+      console.error("Error searching for user:", error);
     }
   };
 
@@ -45,7 +43,7 @@ export function AddFriendModal({ isOpen, onClose }) {
           <div className="relative flex-1">
             <div className="absolute flex items-center gap-1 -translate-y-1/2 left-3 top-1/2">
               <img
-                src="https://s3-alpha-sig.figma.com/img/8320/9ae2/006e5a6c0d3497a384172f8be7b98725?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=P99h6rtGE8HOSZn30dNs0DX6DUrY4ILOwbrlkwOGS8Dv-7zA1F3GyuT7as16ZTSUNfaEn1cEoYo64v4pgRemq4EANGBShva9CgaXAaBAI4MKGzSDiLJOhpPxHqg3ywDmQm9lnS2-vvyGntMBkcIvKD~y4QmjpUvIoVw6c-mirBP~sGkOY7kKB4Tj7-9N-JnxZop5OOhV6oL-yk1nSMi9ukMwTVeYx7caOmfFMT10zUvUmPfKy5lsj~UYTSC5Fo2nfY-UqRqNQzf5ydNG-mvi57WWbbbGdUXxOVM0g6oYZ4MRhCsieuoYvMBE0SKwkdMaaBVSRZ9QVaqVf1UDRaPUTw__"
+                src={VnFlag}
                 alt="Vietnam flag"
                 className="object-cover w-6 h-4 rounded"
               />
@@ -80,7 +78,7 @@ export function AddFriendModal({ isOpen, onClose }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src={searchResult.avatar || "/placeholder.svg"}
+                  src={searchResult.avatar}
                   alt={searchResult.name}
                   className="object-cover w-12 h-12 rounded-full cursor-pointer"
                   onClick={() => navigate("/other-people-information")}
@@ -92,7 +90,7 @@ export function AddFriendModal({ isOpen, onClose }) {
                   >
                     {searchResult.name}
                   </h4>
-                  <p className="text-sm text-gray-500">{searchResult.bio}</p>
+                  <p className="text-sm text-gray-500">{searchResult.username}</p>
                 </div>
               </div>
               <div className="flex gap-2">
