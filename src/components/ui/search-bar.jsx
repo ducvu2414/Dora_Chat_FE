@@ -24,7 +24,7 @@ export function SearchBar() {
       <div className="relative">
         <Button
           size="icon"
-          className="focus:outline-none shrink-0 rounded-full bg-gradient-to-r from-sky-700 from-5% via-blue-400 via-55% to-blue-300 to-90% text-white hover:scale-105"
+          className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           <Plus className="!h-6 !w-6" />

@@ -78,16 +78,7 @@ export default function UserInformation() {
   const [qr, setQr] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState();
 
-  const [userInfo, setUserInfo] = useState(
-    null
-    // {
-    // firstName: "User",
-    // lastName: "Admin",
-    // dateOfBirth: "2003-02-25",
-    // gender: "Male",
-    // hobbies: ["Singing", "Dancing"],
-    // }
-  );
+  const [userInfo, setUserInfo] = useState(null);
 
   const handleDateChange = (e) => {
     const newDate = e.target.value;

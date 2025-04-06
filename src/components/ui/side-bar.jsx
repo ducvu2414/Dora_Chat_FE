@@ -1,15 +1,36 @@
 /* eslint-disable react/prop-types */
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
 import { Conversation } from "@/components/ui/conversation";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
+import { set } from "lodash";
+import { Spinner } from "@/page/Spinner";
 
 // Sử dụng memo để tránh render lại khi props không thay đổi
 export function SideBar({ messages, groups, requests, onConversationClick }) {
   const [activeTab, setActiveTab] = useState("messages");
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function getUser() {
+      try {
+        setLoading(true);
+        const user = JSON.parse(localStorage.getItem("user"));
+        setUser(user);
+        console.log(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getUser();
+  }, []);
 
   const getConversations = () => {
     switch (activeTab) {
@@ -60,25 +81,34 @@ export function SideBar({ messages, groups, requests, onConversationClick }) {
       </div>
 
       <div className="p-4 border-t flex items-center justify-between bg-white relative">
-        <div className="flex items-center gap-3">
-          <img
-            src="https://s3-alpha-sig.figma.com/img/20a1/d517/ac424205661ad4fee696bc7f0dcf9d8e?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=gPeFCT0vSIeEq2Wi0-ccjoo5u3twEh9czXw3s8Nang76eUdafBXDlevX0ttJD2IIzInqzZBqP0RWYkP6aKFdWUKyq2R0o~7rW3~qcw2ux9RqWciREg1YtcWKdCFopWPSLcHfYpFT7fhsrW5MUlcD5ps5gSA949a-MgO~f69cmAFf9UqRnQbT91v8perO6yr2ouE2UKH20kdnQf3Jv-Iep7Y4c61Tl13D-UrSFsZKqDtHkKCMAt14Toszn80ys0~xA6Vl0dRzAm4LTzlK0I6DNPE3olaBQ7yNEbv~ZNIc9OaOGUhYxyjjkBSU72CleVm8VQtq8w7We8WAFnmrIQgpqA__"
-            alt="Admin"
-            className="w-12 h-12 rounded-full object-cover cursor-pointer"
-          />
-          <div>
-            <p className="text-sm text-regal-blue font-bold cursor-pointer">
-              User admin
-            </p>
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-              Active
-            </p>
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-3">
+              <img
+                src={user.avatar}
+                alt="Admin"
+                className="w-12 h-12 rounded-full object-cover cursor-pointer"
+              />
+              <div>
+                <p className="text-sm text-regal-blue font-bold cursor-pointer">
+                  {user.name}
+                </p>
+                <p className="text-xs text-green-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  Active
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="relative">
           <button
-            className="p-2 hover:bg-gray-200 rounded-md bg-white focus:outline-none"
+            className="p-2 hover:bg-gray-200 rounded-md bg-white focus:outline-none border-none"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <svg

@@ -1,4 +1,3 @@
-import { SideBar } from "@/components/ui/side-bar";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, UserRoundPlus } from "lucide-react";
 import BannerImage from "@/assets/banner-user-info.png";
@@ -100,7 +99,6 @@ const requests = [
 export default function OtherPeopleInformation() {
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
-      <SideBar messages={messages} groups={groups} requests={requests} />
 
       {/* Main Content */}
       <div className="relative flex-1 p-3 bg-blue-100">
