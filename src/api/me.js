@@ -1,4 +1,4 @@
-import axios from "./axiosClinet";
+import axios from "./axiosClient";
 
 const meApi = {
     getProfile: (id) => {
