@@ -16,7 +16,16 @@ const meApi = {
     updatePassword: (data) => {
         const url = `api/me/password`;
         return axios.put(url, data);
-    }
+    },
+    uploadAvatar: (data) => {
+        const url = `api/me/avatar`;
+        return axios.put(url, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    
 }
 
 export default meApi;

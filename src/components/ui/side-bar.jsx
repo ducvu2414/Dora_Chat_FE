@@ -1,36 +1,22 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
 import { Conversation } from "@/components/ui/conversation";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
-import { set } from "lodash";
-import { Spinner } from "@/page/Spinner";
 
 // Sử dụng memo để tránh render lại khi props không thay đổi
-export function SideBar({ messages, groups, requests, onConversationClick }) {
+export function SideBar({
+  messages,
+  groups,
+  requests,
+  onConversationClick,
+  user,
+}) {
+  console.log(user);
   const [activeTab, setActiveTab] = useState("messages");
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function getUser() {
-      try {
-        setLoading(true);
-        const user = JSON.parse(localStorage.getItem("user"));
-        setUser(user);
-        console.log(user);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    getUser();
-  }, []);
 
   const getConversations = () => {
     switch (activeTab) {
@@ -81,30 +67,22 @@ export function SideBar({ messages, groups, requests, onConversationClick }) {
       </div>
 
       <div className="p-4 border-t flex items-center justify-between bg-white relative">
-        {loading ? (
-          <div className="flex justify-center my-8">
-            <Spinner />
+        <div className="flex items-center gap-3">
+          <img
+            src={user.avatar}
+            alt="Admin"
+            className="w-12 h-12 rounded-full object-cover cursor-pointer"
+          />
+          <div>
+            <p className="text-sm text-regal-blue font-bold cursor-pointer">
+              {user.name}
+            </p>
+            <p className="text-xs text-green-500 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Active
+            </p>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-3">
-              <img
-                src={user.avatar}
-                alt="Admin"
-                className="w-12 h-12 rounded-full object-cover cursor-pointer"
-              />
-              <div>
-                <p className="text-sm text-regal-blue font-bold cursor-pointer">
-                  {user.name}
-                </p>
-                <p className="text-xs text-green-500 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  Active
-                </p>
-              </div>
-            </div>
-          </>
-        )}
+        </div>
 
         <div className="relative">
           <button

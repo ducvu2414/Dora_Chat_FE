@@ -124,7 +124,18 @@ const MainLayout = () => {
   };
   const [isPending, startTransition] = useTransition();
   const [socketInitialized, setSocketInitialized] = useState(false);
-  const user = useRef(JSON.parse(localStorage.getItem("user") || "{}"));
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}")
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+        setUser(JSON.parse(localStorage.getItem("user") || "{}"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     if (!isConnected()) {
@@ -263,6 +274,7 @@ const MainLayout = () => {
         messages={messages}
         groups={groups}
         requests={requests}
+        user={user}
         onConversationClick={handleConversationClick}
       />
       <div className="flex-1 overflow-auto">

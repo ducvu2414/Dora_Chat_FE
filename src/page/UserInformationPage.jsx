@@ -1,3 +1,4 @@
+import React from "react";
 import me from "@/api/me";
 import { useState, useEffect } from "react";
 import { TabUserInfo } from "@/components/ui/UserInformation/tab-user-info";
@@ -15,6 +16,8 @@ import { Icons } from "@/components/ui/icons";
 import { AlertMessage } from "@/components/ui/alert-message";
 import BannerImage from "@/assets/banner-user-info.png";
 import { Spinner } from "@/page/Spinner";
+import { Pencil } from "lucide-react";
+
 const availableHobbies = [
   {
     value: "Singing",
@@ -77,8 +80,33 @@ export default function UserInformation() {
   const [loading, setLoading] = useState(true);
   const [qr, setQr] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState();
-
   const [userInfo, setUserInfo] = useState(null);
+
+  const fileInputRef = React.useRef(null);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      
+      const formData = new FormData();
+      formData.append("avatar", file);
+      formData.append("id", userInfo._id); 
+      const response = await me.uploadAvatar(formData);
+
+      const userData = JSON.parse(localStorage.getItem('user'));
+      userData.avatar= response.avatar;
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      setUserInfo({
+        ...userInfo,
+        avatar: response.avatar,
+      });
+
+      window.dispatchEvent(new Event("storage"));
+    }
+  };
 
   const handleDateChange = (e) => {
     const newDate = e.target.value;
@@ -269,21 +297,44 @@ export default function UserInformation() {
               {/* Profile Header */}
               <div className="p-6 mb-6 text-center bg-white shadow-sm rounded-3xl">
                 <div className="flex flex-col items-center">
-                  {userInfo.avatar ? (
-                    <img
-                      src={userInfo.avatar}
-                      alt="User Admin"
-                      className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
+                  <div className="relative">
+                    {userInfo.avatar ? (
+                      <img
+                        src={userInfo.avatar || "/placeholder.svg"}
+                        alt="User Admin"
+                        className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
+                      />
+                    ) : (
+                      <div
+                        alt="User Admin"
+                        className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full bg-regal-blue"
+                      />
+                    )}
+
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
                     />
-                  ) : (
-                    <div
-                      alt="User Admin"
-                      className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full bg-regal-blue"
-                    />
-                  )}
+
+                    {isEditing ? (
+                      // Edit button
+                      <button
+                        onClick={() => fileInputRef.current.click()}
+                        className="absolute bottom-4 right-0 p-1.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
 
                   <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-                    User Admin
+                    {userInfo.name}
                   </h1>
                   <p className="mb-6 text-gray-600">⭐ Have a nice day! 🌊</p>
 
