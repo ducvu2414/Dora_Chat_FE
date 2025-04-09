@@ -11,12 +11,12 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   console.log("tin nhắn", msg);
   const isImage = (type) => type === "IMAGE";
   const isFile = msg.type === "FILE";
-  const isMe = msg.userId === userId;
+  const isMe = msg.memberId.userId === userId;
   return (
     <div
       key={msg._id}
       className={`flex items-end gap-2 ${
-        msg.userId === userId ? " flex-row-reverse" : "justify-start"
+        msg.memberId.userId === userId ? " flex-row-reverse" : "justify-start"
       }`}
     >
       {/* Hiển thị avatar nếu là tin nhắn cuối trong nhóm */}

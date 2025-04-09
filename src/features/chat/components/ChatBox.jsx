@@ -20,10 +20,11 @@ export default function ChatBox({ messages }) {
       >
         {messages.map((msg, index) => {
           const isFirstInGroup =
-            index === 0 || messages[index - 1].userId !== msg.userId;
+            index === 0 ||
+            messages[index - 1].memberId.userId !== msg.memberId.userId;
           const isLastInGroup =
             index === messages.length - 1 ||
-            messages[index + 1].userId !== msg.userId;
+            messages[index + 1].memberId.userId !== msg.memberId.userId;
           return (
             <MessageItem
               key={msg._id}

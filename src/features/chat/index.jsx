@@ -7,60 +7,17 @@ import { socket } from "../../utils/socketClient";
 import { SOCKET_EVENTS } from "../../utils/constant";
 import messageApi from "@/api/message";
 export default function ChatSingle() {
-  // const [messages, setMessages] = useState([
-  //   { id: 1, text: "Hello!", type: "TEXT", time: "10:25", sender: "other" },
-  //   {
-  //     id: 2,
-  //     text: "Hello!",
-  //     type: "TEXT",
-  //     time: "10:27",
-  //     sender: "other",
-  //   },
-  //   {
-  //     id: 3,
-  //     text: "Hi! How are you?",
-  //     type: "TEXT",
-  //     time: "10:30",
-  //     sender: "me",
-  //   },
-  //   {
-  //     id: 4,
-  //     text: "https://plus.unsplash.com/premium_photo-1661962309696-c429126b237e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  //     type: "IMAGE",
-  //     time: "10:32",
-  //     sender: "other",
-  //   },
-  //   {
-  //     id: 5,
-  //     text: "Hi! How are you? Kính gửi các chiến hữu trong cộng đồng P Hi! How are you? Kính gửi các chiến hữu trong cộng đồng PiHi! How are you? Kính gửi các chiến hữu trong cộng đồng PiHi! How are you? Kính gửi các chiến hữu trong cộng đồng PiHi! How are you? Kính gửi các chiến hữu trong cộng đồng Pii 🥲 Hôm nay, tôi ngồi xuống viết những Kính gửi các chiến hữu trong cộng đồng Pi 🥲 Hôm nay, tôi ngồi xuống viết những dòng này với một tấm lòng đầy ăn năn ",
-  //     type: "TEXT",
-  //     time: "10:35",
-  //     sender: "me",
-  //   },
-  //   {
-  //     id: 6,
-  //     text: "https://example.com/image.word",
-  //     type: "FILE",
-  //     sender: "other",
-  //     time: "10:02 ",
-  //   },
-  //   {
-  //     id: 7,
-  //     text: "https://example.com/document.pdf",
-  //     type: "FILE",
-  //     fileName: "document.pdf",
-  //     sender: "me",
-  //     time: "10:05 ",
-  //   },
-  // ]);
-  const conversationId = "67dcf8eac3a67270b6534c60";
+  const conversationId = "67ee2539dc14e5903dc8b4ce";
   const [messages, setMessages] = useState([]);
   const handleNewMessage = (message) => {
-    console.log("New message:", message);
-    setMessages((prevMessages) => [...prevMessages, message]);
+    setMessages((prevMessages) => {
+      const exists = prevMessages.some((m) => m._id === message._id);
+      if (exists) return prevMessages;
+      return [...prevMessages, message];
+    });
   };
   const joinConversation = (conversationId) => {
-    socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationId);
+    socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversationId);
   };
   const onNewMessage = (callback) => {
     if (socket) {
@@ -79,18 +36,16 @@ export default function ChatSingle() {
       .catch((error) => {
         console.error("Error fetching messages:", error);
       });
-
     // Lắng nghe tin nhắn mới
     onNewMessage(handleNewMessage);
   }, [conversationId]);
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
     try {
-      const response = await messageApi.sendMessage({
+      await messageApi.sendMessage({
         conversationId: conversationId,
         content: message,
       });
-      console.log("Message sent:", response);
     } catch (error) {
       console.error("Error sending message:", error);
     }
