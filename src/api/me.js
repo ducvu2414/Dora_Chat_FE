@@ -25,6 +25,14 @@ const meApi = {
             },
         });
     },
+    uploadCover: (data) => {
+        const url = `api/me/cover`;
+        return axios.put(url, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
     
 }
 

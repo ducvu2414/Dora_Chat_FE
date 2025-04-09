@@ -83,22 +83,25 @@ export default function UserInformation() {
   const [userInfo, setUserInfo] = useState(null);
 
   const fileInputRef = React.useRef(null);
+  const bannerFileInputRef = React.useRef(null);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
+      // const reader = new FileReader();
+      // reader.readAsDataURL(file);
+
       const formData = new FormData();
       formData.append("avatar", file);
-      formData.append("id", userInfo._id); 
+      formData.append("id", userInfo._id);
       const response = await me.uploadAvatar(formData);
 
-      const userData = JSON.parse(localStorage.getItem('user'));
-      userData.avatar= response.avatar;
-      localStorage.setItem('user', JSON.stringify(userData));
+      // set local storage
+      const userData = JSON.parse(localStorage.getItem("user"));
+      userData.avatar = response.avatar;
+      localStorage.setItem("user", JSON.stringify(userData));
 
+      // set userInfo useState
       setUserInfo({
         ...userInfo,
         avatar: response.avatar,
@@ -107,6 +110,28 @@ export default function UserInformation() {
       window.dispatchEvent(new Event("storage"));
     }
   };
+
+  const handleBannerUpload = async (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      const formData = new FormData();
+      formData.append("cover", file);
+      formData.append("id", userInfo._id);
+      const response = await me.uploadCover(formData);
+
+      // set local storage
+      const userData = JSON.parse(localStorage.getItem("user"));
+      userData.coverImage = response.cover;
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // set userInfo useState
+      setUserInfo({
+        ...userInfo,
+        coverImage: response.cover,
+      });
+      
+    }
+  }
 
   const handleDateChange = (e) => {
     const newDate = e.target.value;
@@ -292,6 +317,26 @@ export default function UserInformation() {
               </>
             )}
 
+            {/* Hidden file input for banner */}
+            <input
+                type="file"
+                ref={bannerFileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleBannerUpload}
+              />
+
+              {/* Edit button for banner */}
+              {isEditing && (
+                <button
+                  onClick={() => bannerFileInputRef.current.click()}
+                  className="absolute top-5 right-5 p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-md"
+                  title="Change banner image"
+                >
+                  <Pencil size={18} />
+                </button>
+              )}
+
             {/* Profile Content */}
             <div className="flex flex-row max-w-4xl px-8 mx-auto -mt-24 gap-x-5">
               {/* Profile Header */}
@@ -300,14 +345,17 @@ export default function UserInformation() {
                   <div className="relative">
                     {userInfo.avatar ? (
                       <img
-                        src={userInfo.avatar || "/placeholder.svg"}
+                        src={userInfo.avatar}
                         alt="User Admin"
                         className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
                       />
                     ) : (
+                      // pass color change to background
+
                       <div
                         alt="User Admin"
-                        className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full bg-regal-blue"
+                        className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
+                        style={{ backgroundColor: userInfo.avatarColor }}
                       />
                     )}
 
