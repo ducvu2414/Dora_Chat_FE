@@ -1,84 +1,77 @@
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import authApi from "@/api/auth";
 import { LoginBanner } from "@/components/ui/Login/LoginBanner";
 import { LoginForm } from "@/components/ui/Login/LoginForm";
 import { LoginHeader } from "@/components/ui/Login/LoginHeader";
 import { SignUpLink } from "@/components/ui/Login/SignUpLink";
 import { AlertMessage } from "@/components/ui/alert-message";
-import { setCredentials } from "@/features/auth/authSlice";
 import { Spinner } from "@/page/Spinner";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { QRLoginBox } from "@/components/ui/Login/QRLoginBox";
+import { setCredentials } from "@/features/auth/authSlice";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+
+  const [loading, setLoading] = useState(false);
+
   const handleLogin = async ({ username, password }) => {
     if (!username || !password) {
-      AlertMessage({ type: "error", message: "Please fill in all fields" });
+      AlertMessage({ type: "error", message: "Vui lòng điền đầy đủ thông tin" });
       return;
     }
 
     setLoading(true);
     try {
       const response = await authApi.login({ username, password });
+
       if (!response || response.error) {
         AlertMessage({
           type: "error",
           message:
             response?.data?.message ||
-            "Login failed. Please check your credentials and try again.",
+            "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
         });
         return;
-      } else {
-        const { token, refreshToken, user } = response.data;
-        console.log("Login response:", response.data);
-        // Dispatch user data to Redux store
-        dispatch(setCredentials({ user, token, refreshToken }));
-
-        // Store tokens and user data in localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        AlertMessage({ type: "success", message: "Login successful!" });
-        navigate("/home");
       }
+
+      const { token, refreshToken, user } = response.data;
+
+      // Dispatch to Redux
+      dispatch(setCredentials({ user, token, refreshToken }));
+
+      // Store in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      AlertMessage({ type: "success", message: "Đăng nhập thành công!" });
+      navigate("/home");
     } catch (error) {
       console.error("Login failed:", error);
       AlertMessage({
         type: "error",
-        message: "Login failed. Please check your credentials and try again.",
+        message: "Đăng nhập thất bại. Vui lòng thử lại.",
       });
     } finally {
       setLoading(false);
     }
   };
-  // const handleGoogleLogin = async () => {
-  //     setLoading(true);
-  //     try {
-  //         // Replace with actual Google OAuth logic
-  //         await new Promise((resolve) => setTimeout(resolve, 2000));
-  //         AlertMessage({ type: "success", message: "Google login successful!" });
-  //         navigate('/home');
-  //     } catch (error) {
-  //         console.error("Google login failed:", error);
-  //         AlertMessage({
-  //             type: "error",
-  //             message: "Google login failed. Please try again."
-  //         });
-  //     } finally {
-  //         setLoading(false);
-  //     }
-  // };
+
   return (
     <div className="w-full min-h-screen max-w-screen-2xl">
       <div className="flex flex-col items-center justify-center h-full md:flex-row">
+        {/* Bên trái: banner */}
         <LoginBanner />
+
+        {/* Bên phải: form đăng nhập */}
         <div className="w-full md:w-[400px] p-6 flex flex-col justify-center">
           <SignUpLink />
           <LoginHeader />
+
           {loading ? (
             <div className="flex justify-center my-8">
               <Spinner />
@@ -86,20 +79,14 @@ export default function LoginPage() {
           ) : (
             <>
               <LoginForm onSubmit={handleLogin} loading={loading} />
-              {/* <div className="relative flex items-center justify-center mt-4">
-                                <div className="w-full border-t border-gray-300"></div>
-                                <div className="absolute px-4 text-sm text-gray-500 bg-white">
-                                    Or
-                                </div>
-                            </div>
-                            <GoogleLoginButton
-                                onClick={handleGoogleLogin}
-                                loading={loading}
-                            /> */}
+
+              {/* QR Login */}
+              <QRLoginBox />
             </>
           )}
         </div>
       </div>
+
       <AlertMessage />
     </div>
   );

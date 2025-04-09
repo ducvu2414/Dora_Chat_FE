@@ -37,6 +37,17 @@ const authApi = {
     const url = "api/auth/forgot-password";
     return axios.post(url, params);
   },
+
+  createQRSession: () => {
+    return axios.get("/api/auth/qr", {
+      headers: {
+        'User-Agent': navigator.userAgent,
+      },
+    });
+  },
+  checkQRStatus: (sessionId) => {
+    return axios.get(`/api/auth/qr/status/${sessionId}`);
+  },
 };
 
 export default authApi;
