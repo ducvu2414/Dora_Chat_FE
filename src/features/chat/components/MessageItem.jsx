@@ -1,10 +1,12 @@
 /* eslint-disable react/prop-types */
 import Avatar from "@assets/chat/avatar.png";
 import { AiOutlineDownload, AiOutlinePaperClip } from "react-icons/ai";
-
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
 
 export default function MessageItem({ msg, showAvatar, showTime }) {
+  dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))._id;
   const [expanded, setExpanded] = useState(false);
   const MAX_TEXT_LENGTH = 350;
@@ -85,7 +87,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               isMe ? "self-end" : ""
             }`}
           >
-            {msg.createdAt}
+            {dayjs(msg.createdAt).fromNow()}
           </span>
         )}
       </div>

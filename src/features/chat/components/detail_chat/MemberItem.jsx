@@ -38,7 +38,7 @@ export default function MemberItem({
         <div
           key={member.id}
           onClick={() => handleShowInfo(member.id)}
-          className="relative flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
+          className="relative flex items-center  justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
         >
           <div className="flex items-center gap-2">
             <img src={Avatar} alt="icon" className="w-12 h-12 rounded-full" />
@@ -46,7 +46,10 @@ export default function MemberItem({
           </div>
 
           <button
-            onClick={() => toggleDropdown(member.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleDropdown(member.id);
+            }}
             className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
           >
             <MoreVertical className="w-5 h-5" />

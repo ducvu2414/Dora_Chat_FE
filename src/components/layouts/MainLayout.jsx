@@ -1,22 +1,21 @@
 import { SideBar } from "@/components/ui/side-bar";
-import { memo, Suspense, useRef, useState, useTransition } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
-import { init, socket, isConnected } from "../../utils/socketClient";
+import { memo, Suspense, useEffect, useState, useTransition } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
-  setNewFriend,
-  setMyRequestFriend,
-  updateMyRequestFriend,
-  updateRequestFriends,
-  updateFriend,
-  updateFriendChat,
-  setNewRequestFriend,
   setAmountNotify,
   setFriendOnlineStatus,
   setFriendTypingStatus,
+  setMyRequestFriend,
+  setNewFriend,
+  setNewRequestFriend,
+  updateFriend,
+  updateFriendChat,
+  updateMyRequestFriend,
+  updateRequestFriends,
 } from "../../features/friend/friendSlice";
+import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
+import { init, isConnected, socket } from "../../utils/socketClient";
 
 const messages = [
   {
@@ -130,7 +129,7 @@ const MainLayout = () => {
 
   useEffect(() => {
     const handleStorageChange = () => {
-        setUser(JSON.parse(localStorage.getItem("user") || "{}"));
+      setUser(JSON.parse(localStorage.getItem("user") || "{}"));
     };
 
     window.addEventListener("storage", handleStorageChange);

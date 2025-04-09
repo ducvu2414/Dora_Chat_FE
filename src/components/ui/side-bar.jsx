@@ -54,7 +54,7 @@ export function SideBar({
         requestCount={requests.length}
       />
 
-      <div className="flex-1 overflow-y-auto px-2 scrollbar-hide relative z-10">
+      <div className="relative z-10 flex-1 px-2 overflow-y-auto scrollbar-hide">
         {conversations.map((conv, i) => (
           <Conversation
             key={i}
@@ -66,18 +66,18 @@ export function SideBar({
         ))}
       </div>
 
-      <div className="p-4 border-t flex items-center justify-between bg-white relative">
+      <div className="relative flex items-center justify-between p-4 bg-white border-t">
         <div className="flex items-center gap-3">
           <img
             src={user.avatar}
             alt="Admin"
-            className="w-12 h-12 rounded-full object-cover cursor-pointer"
+            className="object-cover w-12 h-12 rounded-full cursor-pointer"
           />
           <div>
-            <p className="text-sm text-regal-blue font-bold cursor-pointer">
+            <p className="text-sm font-bold cursor-pointer text-regal-blue">
               {user.name}
             </p>
-            <p className="text-xs text-green-500 flex items-center gap-1">
+            <p className="flex items-center gap-1 text-xs text-green-500">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
               Active
             </p>
@@ -86,7 +86,7 @@ export function SideBar({
 
         <div className="relative">
           <button
-            className="p-2 hover:bg-gray-200 rounded-md bg-white focus:outline-none border-none"
+            className="p-2 bg-white border-none rounded-md hover:bg-gray-200 focus:outline-none"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <svg
