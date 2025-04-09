@@ -17,6 +17,7 @@ import { AlertMessage } from "@/components/ui/alert-message";
 import BannerImage from "@/assets/banner-user-info.png";
 import { Spinner } from "@/page/Spinner";
 import { Pencil } from "lucide-react";
+import { set } from "lodash";
 
 const availableHobbies = [
   {
@@ -94,25 +95,32 @@ export default function UserInformation() {
       const formData = new FormData();
       formData.append("avatar", file);
       formData.append("id", userInfo._id);
-      const response = await me.uploadAvatar(formData);
+      try {
+        setLoading(true);
+        const response = await me.uploadAvatar(formData);
 
-      // set local storage
-      const userData = JSON.parse(localStorage.getItem("user"));
-      userData.avatar = response.avatar;
-      localStorage.setItem("user", JSON.stringify(userData));
+        // set local storage
+        const userData = JSON.parse(localStorage.getItem("user"));
+        userData.avatar = response.avatar;
+        localStorage.setItem("user", JSON.stringify(userData));
 
-      // set userInfo useState
-      setUserInfo({
-        ...userInfo,
-        avatar: response.avatar,
-      });
+        // set userInfo useState
+        setUserInfo({
+          ...userInfo,
+          avatar: response.avatar,
+        });
+      } catch (error) {
+        console.error("Error uploading avatar:", error);
+      } finally {
+        setLoading(false);
+      }
 
       window.dispatchEvent(new Event("storage"));
     }
   };
 
   const handleBannerUpload = async (event) => {
-    const file = event.target.files[0]
+    const file = event.target.files[0];
     if (file) {
       const formData = new FormData();
       formData.append("cover", file);
@@ -129,9 +137,8 @@ export default function UserInformation() {
         ...userInfo,
         coverImage: response.cover,
       });
-      
     }
-  }
+  };
 
   const handleDateChange = (e) => {
     const newDate = e.target.value;
@@ -319,23 +326,23 @@ export default function UserInformation() {
 
             {/* Hidden file input for banner */}
             <input
-                type="file"
-                ref={bannerFileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleBannerUpload}
-              />
+              type="file"
+              ref={bannerFileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleBannerUpload}
+            />
 
-              {/* Edit button for banner */}
-              {isEditing && (
-                <button
-                  onClick={() => bannerFileInputRef.current.click()}
-                  className="absolute top-5 right-5 p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-md"
-                  title="Change banner image"
-                >
-                  <Pencil size={18} />
-                </button>
-              )}
+            {/* Edit button for banner */}
+            {isEditing && (
+              <button
+                onClick={() => bannerFileInputRef.current.click()}
+                className="absolute top-5 right-5 p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-md"
+                title="Change banner image"
+              >
+                <Pencil size={18} />
+              </button>
+            )}
 
             {/* Profile Content */}
             <div className="flex flex-row max-w-4xl px-8 mx-auto -mt-24 gap-x-5">
@@ -344,11 +351,17 @@ export default function UserInformation() {
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     {userInfo.avatar ? (
-                      <img
-                        src={userInfo.avatar}
-                        alt="User Admin"
-                        className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
-                      />
+                      loading ? (
+                        <div className="flex justify-center my-8">
+                          <Spinner />
+                        </div>
+                      ) : (
+                        <img
+                          src={userInfo.avatar}
+                          alt="User Admin"
+                          className="object-cover w-24 h-24 mb-4 border-4 border-white rounded-full"
+                        />
+                      )
                     ) : (
                       // pass color change to background
 
