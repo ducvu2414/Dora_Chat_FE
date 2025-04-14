@@ -4,13 +4,13 @@ import { AiOutlineDownload, AiOutlinePaperClip } from "react-icons/ai";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
+import MessageActionsMenu from "./MessageActionsMenu";
 
 export default function MessageItem({ msg, showAvatar, showTime }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))._id;
   const [expanded, setExpanded] = useState(false);
   const MAX_TEXT_LENGTH = 350;
-  console.log("tin nhắn", msg);
   const isImage = (type) => type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isMe = msg.memberId.userId === userId;
@@ -18,8 +18,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     <div
       key={msg._id}
       className={`flex items-end gap-2 ${
-        msg.memberId.userId === userId ? " flex-row-reverse" : "justify-start"
-      }`}
+        isMe ? "flex-row-reverse" : "justify-start"
+      } group`} // Thêm class "group" vào đây để làm trigger hover
     >
       {/* Hiển thị avatar nếu là tin nhắn cuối trong nhóm */}
       {showAvatar ? (
@@ -33,7 +33,17 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       )}
 
       {/* Nội dung tin nhắn */}
-      <div key={msg._id} className="flex flex-col max-w-[468px]   text-start">
+      <div
+        key={msg._id}
+        className="flex flex-col max-w-[468px] text-start relative"
+      >
+        <div
+          className={`absolute top-3 ${
+            isMe ? "left-[-30px]" : "right-[-30px]"
+          } opacity-0 group-hover:opacity-100 transition-opacity`}
+        >
+          <MessageActionsMenu isMe={isMe} />
+        </div>
         {/* Nếu tin nhắn là hình ảnh */}
         {isImage(msg.type) ? (
           <img

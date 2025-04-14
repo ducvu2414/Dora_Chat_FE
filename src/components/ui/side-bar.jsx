@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
 import { Conversation } from "@/components/ui/conversation";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
+import { useSelector } from "react-redux";
 
 // Sử dụng memo để tránh render lại khi props không thay đổi
 export function SideBar({
@@ -13,11 +14,10 @@ export function SideBar({
   onConversationClick,
   user,
 }) {
-  console.log(user);
   const [activeTab, setActiveTab] = useState("messages");
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
+  const { unread } = useSelector((state) => state.chat);
   const getConversations = () => {
     switch (activeTab) {
       case "messages":
@@ -34,9 +34,9 @@ export function SideBar({
   const conversations = getConversations();
 
   const handleConversationClick = (index, conversation) => {
-    setActiveConversation(index);
+    setActiveConversation(conversation._id || index);
     if (onConversationClick) {
-      const chatId = conversation.id || index;
+      const chatId = conversation._id || index;
       console.log("Conversation clicked:", chatId);
       onConversationClick(chatId);
     }
@@ -59,9 +59,11 @@ export function SideBar({
           <Conversation
             key={i}
             {...conv}
-            isActive={activeConversation === i}
+            isActive={activeConversation === conv._id}
             onClick={() => handleConversationClick(i, conv)}
             activeTab={activeTab}
+            idUser={user._id}
+            unread={unread[conv._id] || 0}
           />
         ))}
       </div>

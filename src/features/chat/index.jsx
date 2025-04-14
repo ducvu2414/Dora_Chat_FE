@@ -1,44 +1,41 @@
+import messageApi from "@/api/message";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import {
+  markRead,
+  setActiveConversation,
+  setMessages,
+} from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
 import HeaderSignleChat from "./components/HeaderSignleChat";
 import MessageInput from "./components/MessageInput";
-import { socket } from "../../utils/socketClient";
-import { SOCKET_EVENTS } from "../../utils/constant";
-import messageApi from "@/api/message";
 export default function ChatSingle() {
-  const conversationId = "67ee2539dc14e5903dc8b4ce";
-  const [messages, setMessages] = useState([]);
-  const handleNewMessage = (message) => {
-    setMessages((prevMessages) => {
-      const exists = prevMessages.some((m) => m._id === message._id);
-      if (exists) return prevMessages;
-      return [...prevMessages, message];
-    });
-  };
-  const joinConversation = (conversationId) => {
-    socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversationId);
-  };
-  const onNewMessage = (callback) => {
-    if (socket) {
-      socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, callback);
-    }
-  };
-  useEffect(() => {
-    joinConversation(conversationId);
+  const { id: conversationId } = useParams();
+  const dispatch = useDispatch();
+  const { messages, unread } = useSelector((state) => state.chat);
+  const conversationMessages = messages[conversationId] || [];
 
-    // Gọi API lấy danh sách tin nhắn ban đầu
+  useEffect(() => {
+    dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
+
+    // Lấy tin nhắn ban đầu
     messageApi
       .fetchMessages(conversationId)
       .then((res) => {
-        setMessages(res);
+        dispatch(setMessages({ conversationId, messages: res }));
       })
       .catch((error) => {
         console.error("Error fetching messages:", error);
       });
-    // Lắng nghe tin nhắn mới
-    onNewMessage(handleNewMessage);
-  }, [conversationId]);
+
+    // Đánh dấu đã đọc
+    if (unread[conversationId] > 0) {
+      dispatch(markRead({ conversationId }));
+    }
+  }, [conversationId, dispatch, unread]);
+
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
     try {
@@ -50,6 +47,7 @@ export default function ChatSingle() {
       console.error("Error sending message:", error);
     }
   };
+
   const [showDetail, setShowDetail] = useState(false);
   return (
     <div className="flex w-full h-screen">
@@ -58,7 +56,7 @@ export default function ChatSingle() {
         {/* ChatBox  */}
         <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
           <HeaderSignleChat handleDetail={setShowDetail} />
-          <ChatBox messages={messages} />
+          <ChatBox messages={conversationMessages} />
           <MessageInput onSend={handleSendMessage} />
         </div>
 

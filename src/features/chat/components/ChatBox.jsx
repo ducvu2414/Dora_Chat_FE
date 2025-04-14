@@ -11,7 +11,6 @@ export default function ChatBox({ messages }) {
         chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
-  console.log(messages);
   return (
     <div className="flex-1 flex flex-col bg-[#fff] py-2">
       <div

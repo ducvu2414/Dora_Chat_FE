@@ -16,10 +16,10 @@
 //       onMouseEnter={() => setIsHovered(true)}
 //       onMouseLeave={() => setIsHovered(false)}
 //     >
-//       <img src={avatar || "/placeholder.svg"} alt={name} className="w-14 h-14 rounded-full object-cover" />
+//       <img src={avatar || "/placeholder.svg"} alt={name} className="object-cover rounded-full w-14 h-14" />
 //       <div className="flex-1 min-w-0 pl-1">
-//         <h3 className="font-medium text-sm text-left">{name}</h3>
-//         <p className="text-sm text-gray-500 truncate text-left">{message}</p>
+//         <h3 className="text-sm font-medium text-left">{name}</h3>
+//         <p className="text-sm text-left text-gray-500 truncate">{message}</p>
 //       </div>
 //       {isHovered ? (
 //         activeTab === "messages" || activeTab === "requests" ? (
@@ -49,13 +49,16 @@ import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 
 export function Conversation({
   onClick,
+  idUser,
   isActive,
   activeTab,
   avatar,
+  members,
   name,
-  message,
+  lastMessageId,
   time,
   id, // Add id parameter to support proper routing
+  unread,
 }) {
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
@@ -117,24 +120,42 @@ export function Conversation({
       });
     }
   };
-
+  console.log("unread", unread);
+  const partner =
+    name ||
+    members?.filter((member) => {
+      return member.userId !== idUser;
+    });
+  const avatarMessage = avatar || partner?.[0].avatar;
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
-          } ${isPending ? "opacity-70" : ""}`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
+          isActive ? "bg-blue-100" : "hover:bg-gray-100"
+        } ${isPending ? "opacity-70" : ""}`}
         onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
       >
         <img
-          src={avatar || "/placeholder.svg"}
+          src={avatarMessage || "/placeholder.svg"}
           alt={name}
-          className="w-14 h-14 rounded-full object-cover"
+          className="object-cover rounded-full w-14 h-14"
         />
         <div className="flex-1 min-w-0 pl-3">
-          <h3 className="font-medium text-sm text-left">{name}</h3>
-          <p className="text-sm text-gray-500 truncate text-left">{message}</p>
+          <div className="relative flex items-center justify-between">
+            <h3 className="text-sm font-medium text-left truncate">
+              {name ? name : partner[0].name}
+            </h3>
+            {unread > 0 && (
+              <span className="absolute top-0 -left-10 ml-2 min-w-[20px] h-[20px] px-1 flex items-center justify-center text-xs font-semibold text-white bg-red-500 rounded-full shadow">
+                {unread > 99 ? "99+" : unread}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-left text-gray-500 truncate">
+            {lastMessageId?.content}
+          </p>
         </div>
 
         {!showDropdown && <span className="text-sm text-gray-400">{time}</span>}
