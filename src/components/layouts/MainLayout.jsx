@@ -7,6 +7,7 @@ import {
   setConversations,
   updateConversation,
   addMessage,
+  recallMessage,
 } from "../../features/chat/chatSlice";
 import {
   setAmountNotify,
@@ -107,6 +108,19 @@ const MainLayout = () => {
         );
       });
     };
+    socket.on(SOCKET_EVENTS.MESSAGE_RECALLED, (data) => {
+      startTransition(() => {
+        console.log("Received recall message:", data);
+        dispatch(
+          recallMessage({
+            messageId: data._id,
+            conversationId: data.conversationId,
+            isRecalled: data.isRecalled,
+            content: data.content,
+          })
+        );
+      });
+    });
 
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 

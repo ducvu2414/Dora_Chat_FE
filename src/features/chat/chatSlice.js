@@ -12,6 +12,14 @@ const chatSlice = createSlice({
     setConversations: (state, action) => {
       state.conversations = action.payload;
     },
+    addConversation: (state, action) => {
+      const conversation = action.payload;
+      // Kiểm tra xem conversation đã tồn tại chưa
+      if (!state.conversations.some((conv) => conv._id === conversation._id)) {
+        state.conversations.unshift(conversation); // Thêm vào đầu danh sách
+        state.unread[conversation._id] = conversation.unreadCount || 0;
+      }
+    },
     updateConversation: (state, action) => {
       const { conversationId, lastMessage } = action.payload;
       const index = state.conversations.findIndex(
@@ -58,15 +66,28 @@ const chatSlice = createSlice({
         state.unread[action.payload] = 0; // Reset badge khi mở cuộc trò chuyện
       }
     },
+    recallMessage: (state, action) => {
+      const { messageId, conversationId, isRecalled, content } = action.payload;
+      const messages = state.messages[conversationId];
+      if (messages) {
+        const index = messages.findIndex((m) => m._id === messageId);
+        if (index !== -1) {
+          messages[index].isDeleted = isRecalled;
+          messages[index].content = content;
+        }
+      }
+    },
   },
 });
 
 export const {
   setConversations,
+  addConversation,
   updateConversation,
   setMessages,
   addMessage,
   markRead,
   setActiveConversation,
+  recallMessage,
 } = chatSlice.actions;
 export default chatSlice.reducer;

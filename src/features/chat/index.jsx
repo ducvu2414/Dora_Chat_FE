@@ -19,7 +19,7 @@ export default function ChatSingle() {
 
   useEffect(() => {
     dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
-
+    console.log("Conversation ID:", conversationId);
     // Lấy tin nhắn ban đầu
     messageApi
       .fetchMessages(conversationId)
@@ -47,7 +47,6 @@ export default function ChatSingle() {
       console.error("Error sending message:", error);
     }
   };
-
   const [showDetail, setShowDetail] = useState(false);
   return (
     <div className="flex w-full h-screen">

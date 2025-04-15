@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   friends: [],
@@ -8,11 +8,11 @@ const initialState = {
   amountNotify: 0,
   friendChats: [],
   onlineStatus: {},
-  typingStatus: {}
+  typingStatus: {},
 };
 
 export const friendSlice = createSlice({
-  name: 'friend',
+  name: "friend",
   initialState,
   reducers: {
     setFriends: (state, action) => {
@@ -22,7 +22,9 @@ export const friendSlice = createSlice({
       state.friends = [...state.friends, action.payload];
     },
     updateFriend: (state, action) => {
-      state.friends = state.friends.filter(friend => friend._id !== action.payload);
+      state.friends = state.friends.filter(
+        (friend) => friend._id !== action.payload
+      );
     },
     setRequestFriends: (state, action) => {
       state.requestFriends = action.payload;
@@ -32,12 +34,12 @@ export const friendSlice = createSlice({
     },
     updateRequestFriends: (state, action) => {
       state.requestFriends = state.requestFriends.filter(
-        friend => friend._id !== action.payload
+        (friend) => friend._id !== action.payload
       );
     },
     setMyRequestFriend: (state, action) => {
       state.myRequestFriends = state.myRequestFriends.filter(
-        friend => friend._id !== action.payload
+        (friend) => friend._id !== action.payload
       );
     },
     setMyRequestFriends: (state, action) => {
@@ -45,7 +47,7 @@ export const friendSlice = createSlice({
     },
     updateMyRequestFriend: (state, action) => {
       state.myRequestFriends = state.myRequestFriends.filter(
-        friend => friend._id !== action.payload
+        (friend) => friend._id !== action.payload
       );
     },
     setSuggestFriends: (state, action) => {
@@ -59,25 +61,25 @@ export const friendSlice = createSlice({
     },
     updateFriendChat: (state, action) => {
       state.friendChats = state.friendChats.filter(
-        friend => friend._id !== action.payload
+        (friend) => friend._id !== action.payload
       );
     },
     setFriendOnlineStatus: (state, action) => {
       const { friendId, isOnline } = action.payload;
       state.onlineStatus = {
         ...state.onlineStatus,
-        [friendId]: isOnline
+        [friendId]: isOnline,
       };
     },
-    
+
     setFriendTypingStatus: (state, action) => {
       const { friendId, isTyping } = action.payload;
       state.typingStatus = {
         ...state.typingStatus,
-        [friendId]: isTyping
+        [friendId]: isTyping,
       };
-    }
-  }
+    },
+  },
 });
 
 export const {
@@ -95,7 +97,7 @@ export const {
   setFriendChats,
   updateFriendChat,
   setFriendOnlineStatus,
-  setFriendTypingStatus
+  setFriendTypingStatus,
 } = friendSlice.actions;
 
 export default friendSlice.reducer;

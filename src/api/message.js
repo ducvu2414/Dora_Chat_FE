@@ -11,6 +11,12 @@ const messageApi = {
   sendMessage: (body) => {
     return axios.post(`/api/messages/text`, body);
   },
+  recallMessage: async (messageId, conversationId) => {
+    const response = await axios.delete(
+      `/api/messages/${messageId}/conversation/${conversationId}`
+    );
+    return response.data;
+  },
 
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);

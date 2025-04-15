@@ -1,27 +1,27 @@
 /* eslint-disable react/prop-types */
+import { Modal } from "@/components/ui/modal";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Avatar from "@assets/chat/avatar.png";
 import Bell from "@assets/chat/bell.svg";
+import CheckDecentraliza from "@assets/chat/check_icon.svg";
+import Decentraliza from "@assets/chat/decentraliza.svg";
+import Dissolve from "@assets/chat/dissolve_icon.svg";
 import File from "@assets/chat/file_detail.svg";
+import Leave from "@assets/chat/leave_icon.svg";
 import Link from "@assets/chat/link_detail.svg";
 import MarkChat from "@assets/chat/mark_chat.svg";
 import Member from "@assets/chat/member.svg";
 import Picture from "@assets/chat/picture_detail.svg";
 import Setting from "@assets/chat/setting_group.svg";
-import CheckDecentraliza from "@assets/chat/check_icon.svg";
-import Decentraliza from "@assets/chat/decentraliza.svg";
-import Dissolve from "@assets/chat/dissolve_icon.svg";
 import Trash from "@assets/chat/trash_icon.svg";
-import Leave from "@assets/chat/leave_icon.svg";
+import { motion } from "framer-motion";
 import { Check, Pencil } from "lucide-react";
 import { useState } from "react";
-import PictureList from "./detail_chat/PictureList";
 import FileList from "./detail_chat/FileList";
 import LinkList from "./detail_chat/LinkList";
-import { motion } from "framer-motion";
-import { Modal } from "@/components/ui/modal";
-import ModalAddUser from "./ModalAddUser";
+import PictureList from "./detail_chat/PictureList";
+import UserSelectionModal from "./UserSelectionModal";
 export default function MainDetail({ handleSetActiveTab }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -41,7 +41,7 @@ export default function MainDetail({ handleSetActiveTab }) {
         onClose={() => setIsOpenAddUser(false)}
         title="Thêm thành viên"
       >
-        <ModalAddUser />
+        <UserSelectionModal />
       </Modal>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>

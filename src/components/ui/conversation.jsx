@@ -120,7 +120,6 @@ export function Conversation({
       });
     }
   };
-  console.log("unread", unread);
   const partner =
     name ||
     members?.filter((member) => {

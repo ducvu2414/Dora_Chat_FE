@@ -1,13 +1,20 @@
-import { useState, useRef, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
-
-export default function MessageActionsMenu(isMe) {
+import messageApi from "../../../api/message";
+import ForwardMessageModal from "./ForwardMessageModal";
+export default function MessageActionsMenu({
+  isMe,
+  messageId,
+  conversationId,
+  messageContent,
+}) {
   const [open, setOpen] = useState(false);
   const [showAbove, setShowAbove] = useState(false);
+  const [showForwardModal, setShowForwardModal] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const timeoutRef = useRef(null);
-
   // Xử lý sự kiện khi di chuột vào
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -41,7 +48,19 @@ export default function MessageActionsMenu(isMe) {
       }
     }
   }, [open]);
-
+  const handleRecallMessage = async () => {
+    try {
+      await messageApi.recallMessage(messageId, conversationId);
+      setOpen(false);
+    } catch (error) {
+      console.error("Error recalling message:", error);
+      alert("Không thể thu hồi tin nhắn");
+    }
+  };
+  const handleForwardMessage = () => {
+    setShowForwardModal((prev) => !prev);
+    setOpen(false);
+  };
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -51,45 +70,59 @@ export default function MessageActionsMenu(isMe) {
   }, []);
 
   return (
-    <div className="relative transition-opacity duration-200 opacity-0 group-hover:opacity-100">
-      <button
-        className="p-1 bg-transparent rounded-full hover:bg-gray-200"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        ref={buttonRef}
-      >
-        <HiOutlineDotsHorizontal size={18} />
-      </button>
-
-      {/* Menu chọn hành động */}
-      {open && (
-        <div
-          className={`absolute ${
-            showAbove ? "bottom-full mb-1" : "top-full mt-1"
-          } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px]`}
-          ref={menuRef}
+    <>
+      <div className="relative transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+        <button
+          className="p-1 bg-transparent rounded-full hover:bg-gray-200"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          ref={buttonRef}
         >
-          <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-            Trả lời
-          </button>
-          <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-            Chuyển tiếp
-          </button>
-          {isMe && (
+          <HiOutlineDotsHorizontal size={18} />
+        </button>
+
+        {/* Menu chọn hành động */}
+        {open && (
+          <div
+            className={`absolute ${
+              showAbove ? "bottom-full mb-1" : "top-full mt-1"
+            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px]`}
+            ref={menuRef}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-              Thu hồi
+              Trả lời
             </button>
-          )}
-          <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-            Xóa phía tôi
-          </button>
-          <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-            Ghim
-          </button>
-        </div>
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={handleForwardMessage}
+            >
+              Chuyển tiếp
+            </button>
+            {isMe && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+                onClick={handleRecallMessage}
+              >
+                Thu hồi
+              </button>
+            )}
+            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
+              Xóa phía tôi
+            </button>
+            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
+              Ghim
+            </button>
+          </div>
+        )}
+      </div>
+      {showForwardModal && (
+        <ForwardMessageModal
+          message={{ _id: messageId, content: messageContent, conversationId }}
+          onClose={() => setShowForwardModal(false)}
+        />
       )}
-    </div>
+    </>
   );
 }

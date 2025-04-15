@@ -14,6 +14,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const isImage = (type) => type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isMe = msg.memberId.userId === userId;
+
   return (
     <div
       key={msg._id}
@@ -42,7 +43,14 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             isMe ? "left-[-30px]" : "right-[-30px]"
           } opacity-0 group-hover:opacity-100 transition-opacity`}
         >
-          <MessageActionsMenu isMe={isMe} />
+          {!msg.isDeleted && (
+            <MessageActionsMenu
+              isMe={isMe}
+              messageId={msg._id.toString()}
+              conversationId={msg.conversationId.toString()}
+              messageContent={msg.content}
+            />
+          )}
         </div>
         {/* Nếu tin nhắn là hình ảnh */}
         {isImage(msg.type) ? (
@@ -74,14 +82,16 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         ) : (
           <p
             className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-           ${
-             isMe
-               ? "bg-[#EFF8FF] text-[#000000] ml-auto"
-               : "bg-[#F5F5F5] text-[#000000]"
-           }`}
+            ${
+              msg.isDeleted
+                ? "bg-gray-100 text-gray-400 italic"
+                : isMe
+                ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+                : "bg-[#F5F5F5] text-[#000000]"
+            }`}
           >
             {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
-            {msg.content.length > MAX_TEXT_LENGTH && (
+            {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
               <span
                 className="text-[#086DC0] hover:underline ml-1 cursor-pointer"
                 onClick={() => setExpanded(!expanded)}
