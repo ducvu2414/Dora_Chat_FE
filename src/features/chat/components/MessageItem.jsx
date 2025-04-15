@@ -1,12 +1,6 @@
 /* eslint-disable react/prop-types */
 import Avatar from "@assets/chat/avatar.png";
 import { AiOutlinePaperClip } from "react-icons/ai";
-import {
-  AiOutlineDownload,
-  AiOutlinePaperClip,
-  AiOutlineEye,
-} from "react-icons/ai";
-import { MdError } from "react-icons/md";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState, useEffect } from "react";
@@ -65,35 +59,6 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const handleVideoLoad = () => {
     setVideoLoaded(true);
     setVideoError(false);
-  const isDeleted = msg.isDeleted;
-
-  // Format file size if available
-  const formatFileSize = (bytes) => {
-    if (!bytes) return "";
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-    else return (bytes / 1048576).toFixed(1) + " MB";
-  };
-
-  // Extract file name from URL or use provided fileName
-  const getFileName = () => {
-    if (msg.fileName) return msg.fileName;
-    if (msg.content) {
-      try {
-        const url = new URL(msg.content);
-        const pathSegments = url.pathname.split("/");
-        return pathSegments[pathSegments.length - 1];
-      } catch (e) {
-        console.error("Invalid URL:", msg.content, e);
-        return "Tải xuống file";
-      }
-    }
-    return "Tải xuống file";
-  };
-
-  // Handle image load events
-  const handleImageLoad = () => {
-    setImageLoaded(true);
   };
 
   const handleVideoError = () => {
@@ -105,18 +70,37 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     setVideoError(false);
   }, [msg._id]);
 
+  const getFileTypeLabel = (url = "") => {
+    const ext = url.split(".").pop().toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext))
+      return "Hình ảnh";
+    if (["mp4", "mov", "avi", "webm"].includes(ext)) return "Video";
+    if (["pdf"].includes(ext)) return "PDF";
+    if (["doc", "docx"].includes(ext)) return "Word";
+    if (["xls", "xlsx", "csv"].includes(ext)) return "Excel";
+    if (["zip", "rar", "7z"].includes(ext)) return "Lưu trữ";
+    if (["mp3", "wav", "ogg"].includes(ext)) return "Âm thanh";
+    return "Tệp khác";
+  };
+
+  const handleOpenInNewTab = () => {
+    const url = encodeURIComponent(msg.content);
+    const name = encodeURIComponent(msg.content?.split("/").pop());
+    window.open(`/preview?url=${url}&name=${name}`, "_blank");
+  };
+
   return (
     <div
       key={msg._id}
-      className={`flex items-end gap-2 my-2 ${
+      className={`flex items-end gap-2 ${
         isMe ? "flex-row-reverse" : "justify-start"
-      } group relative`}
+      } group`}
     >
       {showAvatar ? (
         <img
-          src={msg.memberId?.avatar || Avatar}
+          src={Avatar}
           alt="avatar"
-          className="self-start object-cover w-10 h-10 rounded-full"
+          className="self-start w-10 h-10 rounded-full"
         />
       ) : (
         <div className="w-10 h-10 rounded-full" />
@@ -126,7 +110,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         <div
           className={`absolute top-3 ${
             isMe ? "left-[-30px]" : "right-[-30px]"
-          } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+          } opacity-0 group-hover:opacity-100 transition-opacity`}
         >
           {!msg.isDeleted && (
             <MessageActionsMenu
@@ -137,15 +121,13 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             />
           )}
         </div>
-
         {/* Message sender name (if not showing avatar and not from current user) */}
         {showAvatar && !isMe && (
-          <span className="mb-1 ml-1 text-xs font-medium text-gray-500 absolute top-[-20px] left-2 whitespace-nowrap">
+          <span className="mb-1 ml-1 text-xs font-medium text-gray-500 absolute top-[-20px] left-2 w-full text-nowrap">
             {msg.memberId?.name || "User"}
           </span>
         )}
 
-        {/* Image message */}
         {isImage ? (
           <img
             src={msg.content}
@@ -212,69 +194,40 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 />
               )}
             </div>
-            <img
-              src={msg.content}
-              alt="sent image"
-              className={`max-w-[468px] max-h-[468px] object-contain rounded-lg ${
-                imageLoaded ? "" : "hidden"
-              }`}
-              loading="lazy"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              onClick={() => window.open(msg.content, "_blank")}
-            />
-
-            {imageLoaded && (
-              <div className="absolute p-1 text-white transition-opacity bg-black bg-opacity-50 rounded-full opacity-0 bottom-2 right-2 group-hover:opacity-100">
-                <AiOutlineEye size={20} />
-              </div>
-            )}
           </div>
         ) : isFile ? (
           <div className="px-3 py-[14px] rounded-2xl flex flex-col items-center gap-2 bg-[#EFF8FF]">
             <div className="w-[120px] h-[120px] bg-[#F5F5F5] rounded-md flex items-center justify-center text-[#086DC0] text-sm">
               File
-          /* File message */
-          <div
-            className={`px-3 py-[14px] rounded-2xl flex items-center gap-3 ${
-              isMe ? "bg-[#EFF8FF]" : "bg-[#F5F5F5]"
-            }`}
-          >
-            <div className="w-[60px] h-[60px] flex items-center justify-center bg-white rounded-md border border-gray-200">
-              <AiOutlineDownload size={24} className="text-[#086DC0]" />
             </div>
-
-            <div className="flex flex-col flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {getFileName()}
-              </p>
-              {msg.fileSize && (
-                <p className="text-xs text-gray-500">
-                  {formatFileSize(msg.fileSize)}
-                </p>
-              )}
-
-              {/* Download link */}
-              <a
-                href={msg.content}
-                download={getFileName()}
-                className="flex items-center text-[#086DC0] text-sm hover:underline mt-2"
-              >
-                <AiOutlinePaperClip size={16} className="mr-1" />
-                Tải xuống
-              </a>
-            </div>
+            <a
+              href={msg.content}
+              download
+              className="flex items-center text-[#086DC0] text-sm hover:underline"
+            >
+              <AiOutlinePaperClip size={20} className="mr-1" />
+              {"file" + msg.content.split("file").pop() || "Tải xuống file"}
+            </a>
+            <span className="text-xs text-gray-500">
+              Loại: {getFileTypeLabel(msg.content)}
+            </span>
+            <span
+              onClick={handleOpenInNewTab}
+              className="text-xs text-[#086DC0] hover:underline cursor-pointer"
+            >
+              Xem trước
+            </span>
           </div>
         ) : (
           <p
             className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${
-              isDeleted
-                ? "bg-gray-100 text-gray-400 italic"
-                : isMe
-                ? "bg-[#EFF8FF] text-[#000000]"
-                : "bg-[#F5F5F5] text-[#000000]"
-            }`}
+              ${
+                msg.isDeleted
+                  ? "bg-gray-100 text-gray-400 italic"
+                  : isMe
+                  ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+                  : "bg-[#F5F5F5] text-[#000000]"
+              }`}
           >
             {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
             {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
@@ -286,27 +239,11 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               </span>
             )}
           </p>
-            {isDeleted ? (
-              msg.content
-            ) : (
-              <>
-                {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
-                {msg.content.length > MAX_TEXT_LENGTH && (
-                  <span
-                    className="text-[#086DC0] hover:underline ml-1 cursor-pointer"
-                    onClick={() => setExpanded(!expanded)}
-                  >
-                    {expanded ? "Thu gọn" : "Xem thêm"}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
         )}
 
         {showTime && (
           <span
-            className={`text-xs text-[#959595F3] mt-1 ${
+            className={`text-xs text-[#959595F3] mt-2 ${
               isMe ? "self-end" : ""
             }`}
           >
