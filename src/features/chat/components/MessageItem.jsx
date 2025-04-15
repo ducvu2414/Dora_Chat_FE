@@ -25,37 +25,43 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const isMe = msg.memberId?.userId === userId;
 
   useEffect(() => {
-    if (!msg?.content) return; // Kiểm tra nếu msg.content không tồn tại
-
+    if (!msg?.content) {
+      console.warn("Video content is empty");
+      setThumbnailUrl("");
+      setHoverVideoUrl("");
+      return;
+    }
+  
     try {
-      const videoParts = msg.content.split("videos/");
-      if (videoParts.length < 2) {
-        throw new Error("Invalid video URL format");
+      // Kiểm tra xem URL có phải là Cloudinary video không
+      const isCloudinaryVideo = msg.content.includes('res.cloudinary.com') && 
+                              msg.content.includes('/video/upload/');
+  
+      if (!isCloudinaryVideo) {
+        throw new Error("Not a Cloudinary video URL");
       }
-
-      const videoPath = videoParts[1];
-      const videoIdParts = videoPath.split(".");
-      if (videoIdParts.length === 0) {
-        throw new Error("Invalid video file name");
+  
+      // Tách public ID từ URL
+      const uploadIndex = msg.content.indexOf('/upload/') + '/upload/'.length;
+      const publicIdWithExt = msg.content.slice(uploadIndex);
+      const publicId = publicIdWithExt.split('.')[0];
+  
+      if (!publicId) {
+        throw new Error("Could not extract public ID from URL");
       }
-
-      const videoId = videoIdParts[0];
-      const generatedThumbnailUrl = `https://res.cloudinary.com/dicvz8vw5/video/upload/so_1.0,f_jpg,w_500/videos/${videoId}.jpg`;
-      const generatedHoverVideoUrl = msg.content.replace(
-        "/upload/",
-        "/upload/du_10,q_auto,w_500/"
-      );
-
+  
+      const baseUrl = msg.content.split('/upload/')[0] + '/upload/';
+      const generatedThumbnailUrl = `${baseUrl}so_1.0,f_jpg,w_500/${publicId}.jpg`;
+      const generatedHoverVideoUrl = `${baseUrl}du_10,q_auto,w_500/${publicIdWithExt}`;
+  
       setThumbnailUrl(generatedThumbnailUrl);
       setHoverVideoUrl(generatedHoverVideoUrl);
     } catch (error) {
-      console.error("Error generating video URLs:", error);
-
-      setThumbnailUrl("");
-      setHoverVideoUrl("");
+      console.warn("Video URL processing warning:", error.message);
+      setThumbnailUrl("/placeholder-video-thumbnail.jpg");
+      setHoverVideoUrl(msg.content);
     }
   }, [msg?.content]);
-
   const handleVideoLoad = () => {
     setVideoLoaded(true);
     setVideoError(false);

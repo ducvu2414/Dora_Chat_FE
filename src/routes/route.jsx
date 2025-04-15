@@ -25,6 +25,7 @@ const FriendInformationPage = React.lazy(() => import("@/page/FriendInformationP
 const UserInformationPage = React.lazy(() => import("@/page/UserInformationPage"));
 const ContactsPage = React.lazy(() => import("@/page/ContactsPage"));
 const OtherPeopleInformation = React.lazy(() => import("@/page/OtherPeopleInformationPage"));
+const PreviewPage = React.lazy(() => import("@/page/PreviewPage"));
 
 const withSuspense = (Component) => (
   <Suspense fallback={<LoadingFallback />}>
@@ -64,6 +65,10 @@ const routes = [
   {
     path: "/reset-password",
     element: <PublicRoute>{withSuspense(ResetPass)}</PublicRoute>
+  },
+  {
+    path: "/preview",
+    element: withSuspense(PreviewPage)
   },
 
   // Protected Routes with MainLayout
