@@ -36,13 +36,15 @@ export default function ChatSingle() {
     }
   }, [conversationId, dispatch, unread]);
 
-  const handleSendMessage = async ({ content, type }) => {
+  const handleSendMessage = async ({ content, type, files }) => {
     try {
-      await messageApi.sendMessage({
-        conversationId,
-        content,
-        type,
-      });
+      if (type === "TEXT") {
+        await messageApi.sendTextMessage({ conversationId, content });
+      } else if (type === "IMAGE") {
+        await messageApi.sendImageMessage(conversationId, files);
+      } else if (type === "FILE") {
+        await messageApi.sendFileMessage(conversationId, files[0]);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       throw error;
@@ -62,9 +64,8 @@ export default function ChatSingle() {
 
         {/* DetailChat*/}
         <div
-          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
-            showDetail ? "w-[385px]" : "w-0"
-          }`}
+          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"
+            }`}
         >
           {showDetail && <DetailChat />}
         </div>

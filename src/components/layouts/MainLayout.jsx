@@ -48,6 +48,8 @@ const MainLayout = () => {
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("user") || "{}")
   );
+  const userId = user?.current?._id || user?._id;
+
   // Lấy conversations khi tải trang
   useEffect(() => {
     const fetchData = async () => {
@@ -128,13 +130,33 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
     };
   }, [dispatch, conversations]);
-  useEffect(() => {
-    if (!socket || !user.current?._id) return;
+  // ✅ JOIN USER + JOIN_CONVERSATIONS khi socket connect/reconnect
 
-    socket.on("connect", () => {
-      socket.emit(SOCKET_EVENTS.JOIN, user.current._id);
-      // socket.emit(SOCKET_EVENTS.USER_ONLINE, { userId: user.current._id, isOnline: true });
-    });
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleConnect = () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit(SOCKET_EVENTS.JOIN, userId);
+      console.log("JOIN:", userId);
+
+      if (conversations.length > 0) {
+        const conversationIds = conversations.map((conv) => conv._id);
+        socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationIds);
+        console.log("JOIN_CONVERSATIONS:", conversationIds);
+      }
+    };
+
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, [socket, userId, conversations]);
+
+
+  useEffect(() => {
+    if (!socket || !user?._id) return;
 
     const handleAcceptFriend = (value) => {
       startTransition(() => {
@@ -177,10 +199,10 @@ const MainLayout = () => {
         window.location.reload();
       }
     };
-    // kha add id user join socket
-    if (socketInitialized && user?.current?._id) {
-      socket.emit(SOCKET_EVENTS.JOIN_USER, user.current._id);
-    }
+    // // kha add id user join socket
+    // if (socketInitialized && user?.current?._id) {
+    //   socket.emit(SOCKET_EVENTS.JOIN_USER, user.current._id);
+    // }
     // Add event listeners
 
     const handleFriendOnlineStatus = (data) => {
