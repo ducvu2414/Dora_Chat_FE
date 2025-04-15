@@ -170,7 +170,7 @@ export default function MessageInput({ onSend }) {
               </div>
               <button
                 onClick={removeFile}
-                className="text-red-500 hover:text-red-700"
+                className="text-red-500 hover:text-red-700 bg-white rounded-full flex items-center justify-center text-xs"
               >
                 ×
               </button>
