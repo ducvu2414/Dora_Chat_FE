@@ -40,6 +40,16 @@ const messageApi = {
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },
+  async sendVideoMessage(conversationId, video) {
+    const formData = new FormData();
+    formData.append("conversationId", conversationId);
+    formData.append("video", video);
+    const res = await axios.post(`/api/messages/video`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    console.log("res", res.data);
+    return res.data;
+  }
 };
 
 export default messageApi;

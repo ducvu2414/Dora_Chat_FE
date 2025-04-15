@@ -1,7 +1,12 @@
+/* eslint-disable react/no-unknown-property */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import Avatar from "@assets/chat/avatar.png";
-import { AiOutlineDownload, AiOutlinePaperClip, AiOutlineEye } from "react-icons/ai";
+import {
+  AiOutlineDownload,
+  AiOutlinePaperClip,
+  AiOutlineEye,
+} from "react-icons/ai";
 import { MdError } from "react-icons/md";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -12,20 +17,59 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [expanded, setExpanded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [hoverVideoUrl, setHoverVideoUrl] = useState("");
   const MAX_TEXT_LENGTH = 350;
 
   const isImage = msg.type === "IMAGE";
   const isFile = msg.type === "FILE";
+  const isVideo = msg.type === "VIDEO";
   const isMe = msg.memberId?.userId === userId;
   const isDeleted = msg.isDeleted;
+
+  useEffect(() => {
+    if (!msg?.content) return; // Kiểm tra nếu msg.content không tồn tại
+  
+    try {
+      const videoParts = msg.content.split("videos/");
+      if (videoParts.length < 2) {
+        throw new Error("Invalid video URL format");
+      }
+      
+      const videoPath = videoParts[1];
+      const videoIdParts = videoPath.split(".");
+      if (videoIdParts.length === 0) {
+        throw new Error("Invalid video file name");
+      }
+      
+      const videoId = videoIdParts[0];
+      const generatedThumbnailUrl = `https://res.cloudinary.com/dicvz8vw5/video/upload/so_1.0,f_jpg,w_500/videos/${videoId}.jpg`;
+      const generatedHoverVideoUrl = msg.content.replace(
+        "/upload/",
+        "/upload/du_10,q_auto,w_500/"
+      );
+  
+      setThumbnailUrl(generatedThumbnailUrl);
+      setHoverVideoUrl(generatedHoverVideoUrl);
+    } catch (error) {
+      console.error("Error generating video URLs:", error);
+
+      setThumbnailUrl(""); 
+      setHoverVideoUrl(""); 
+    }
+  }, [msg?.content]);
 
   // Format file size if available
   const formatFileSize = (bytes) => {
     if (!bytes) return "";
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    else return (bytes / 1048576).toFixed(1) + " MB";
   };
 
   // Extract file name from URL or use provided fileName
@@ -34,7 +78,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     if (msg.content) {
       try {
         const url = new URL(msg.content);
-        const pathSegments = url.pathname.split('/');
+        const pathSegments = url.pathname.split("/");
         return pathSegments[pathSegments.length - 1];
       } catch (e) {
         return "Tải xuống file";
@@ -48,7 +92,17 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     setImageLoaded(true);
   };
 
+  const handleVideoLoad = () => {
+    setVideoLoaded(true);
+    setVideoError(false);
+  };
+
   const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+  };
+
+  const handleVideoError = () => {
     setImageError(true);
   };
 
@@ -56,13 +110,16 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   useEffect(() => {
     setImageLoaded(true);
     setImageError(false);
+    setVideoLoaded(true);
+    setVideoError(false);
   }, [msg._id]);
 
   return (
     <div
       key={msg._id}
-      className={`flex items-end gap-2 my-2 ${isMe ? "flex-row-reverse" : "justify-start"
-        } group relative`}
+      className={`flex items-end gap-2 my-2 ${
+        isMe ? "flex-row-reverse" : "justify-start"
+      } group relative`}
     >
       {/* Avatar display logic */}
       {showAvatar ? (
@@ -79,8 +136,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       <div className="flex flex-col max-w-[468px] text-start relative">
         {/* Message actions menu button */}
         <div
-          className={`absolute top-3 ${isMe ? "left-[-30px]" : "right-[-30px]"
-            } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+          className={`absolute top-3 ${
+            isMe ? "left-[-30px]" : "right-[-30px]"
+          } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
         >
           {!isDeleted && (
             <MessageActionsMenu
@@ -121,11 +179,13 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             <img
               src={msg.content}
               alt="sent image"
-              className={`max-w-[468px] max-h-[468px] object-contain rounded-lg ${imageLoaded ? '' : 'hidden'}`}
+              className={`max-w-[468px] max-h-[468px] object-contain rounded-lg ${
+                imageLoaded ? "" : "hidden"
+              }`}
               loading="lazy"
               onLoad={handleImageLoad}
               onError={handleImageError}
-              onClick={() => window.open(msg.content, '_blank')}
+              onClick={() => window.open(msg.content, "_blank")}
             />
 
             {imageLoaded && (
@@ -134,10 +194,77 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               </div>
             )}
           </div>
+        ) : isVideo ? (
+          <div className="relative">
+            {!videoLoaded && !videoError && (
+              <div className="bg-gray-100 rounded-lg flex items-center justify-center w-[300px] h-[200px]">
+                <div className="animate-pulse">Đang tải video...</div>
+              </div>
+            )}
+
+            {videoError && (
+              <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
+                <MdError size={32} className="text-red-500 mb-2" />
+                <p className="text-sm text-gray-600 text-center">
+                  Không thể tải video
+                </p>
+              </div>
+            )}
+
+            {/* Container video */}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onClick={() => setIsClicked(true)}
+            >
+              {/* Hiển thị thumbnail khi không hover và chưa click */}
+              {!isClicked && !isHovered && thumbnailUrl && (
+                <img
+                  src={thumbnailUrl}
+                  className="max-w-[468px] max-h-[468px] object-contain rounded-lg cursor-pointer"
+                  alt="Image thumbnail"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "fallback-thumbnail.jpg"; // Fallback nếu thumbnail lỗi
+                  }}
+                />
+              )}
+
+              {/* Hiển thị video hover khi hover và chưa click */}
+              {!isClicked && isHovered && (
+                <video
+                  src={msg.content.replace(
+                    "/upload/",
+                    "/upload/du_10,q_auto,w_500/"
+                  )}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="max-w-[468px] max-h-[468px] object-contain rounded-lg cursor-pointer"
+                />
+              )}
+
+              {/* Hiển thị video đầy đủ khi click */}
+              {isClicked && (
+                <video
+                  src={msg.content}
+                  controls
+                  className="max-w-[468px] max-h-[468px] object-contain rounded-lg"
+                  onLoadedData={handleVideoLoad}
+                  onError={handleVideoError}
+                />
+              )}
+            </div>
+          </div>
         ) : isFile ? (
           /* File message */
-          <div className={`px-3 py-[14px] rounded-2xl flex items-center gap-3 ${isMe ? "bg-[#EFF8FF]" : "bg-[#F5F5F5]"
-            }`}>
+          <div
+            className={`px-3 py-[14px] rounded-2xl flex items-center gap-3 ${
+              isMe ? "bg-[#EFF8FF]" : "bg-[#F5F5F5]"
+            }`}
+          >
             <div className="w-[60px] h-[60px] flex items-center justify-center bg-white rounded-md border border-gray-200">
               <AiOutlineDownload size={24} className="text-[#086DC0]" />
             </div>
@@ -147,7 +274,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 {getFileName()}
               </p>
               {msg.fileSize && (
-                <p className="text-xs text-gray-500">{formatFileSize(msg.fileSize)}</p>
+                <p className="text-xs text-gray-500">
+                  {formatFileSize(msg.fileSize)}
+                </p>
               )}
 
               {/* Download link */}
@@ -165,12 +294,13 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
           /* Text message */
           <div
             className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${isDeleted
+            ${
+              isDeleted
                 ? "bg-gray-100 text-gray-400 italic"
                 : isMe
-                  ? "bg-[#EFF8FF] text-[#000000]"
-                  : "bg-[#F5F5F5] text-[#000000]"
-              }`}
+                ? "bg-[#EFF8FF] text-[#000000]"
+                : "bg-[#F5F5F5] text-[#000000]"
+            }`}
           >
             {isDeleted ? (
               "Tin nhắn đã bị xóa"
@@ -193,8 +323,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         {/* Message timestamp */}
         {showTime && (
           <span
-            className={`text-xs text-[#959595F3] mt-1 ${isMe ? "self-end" : ""
-              }`}
+            className={`text-xs text-[#959595F3] mt-1 ${
+              isMe ? "self-end" : ""
+            }`}
           >
             {dayjs(msg.createdAt).fromNow()}
           </span>

@@ -9,12 +9,15 @@ import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-
 export default function MessageInput({ onSend }) {
   const [input, setInput] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
+  const [videoFiles, setVideoFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [videoPreviews, setVideoPreviews] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null); // dùng để thao tác con trỏ input
 
@@ -22,20 +25,30 @@ export default function MessageInput({ onSend }) {
 
   useEffect(() => {
     if (imageFiles.length > 0) {
-      const previews = imageFiles.map(file => URL.createObjectURL(file));
+      const previews = imageFiles.map((file) => URL.createObjectURL(file));
       setImagePreviews(previews);
       return () => {
-        previews.forEach(url => URL.revokeObjectURL(url));
+        previews.forEach((url) => URL.revokeObjectURL(url));
       };
     }
   }, [imageFiles]);
+
+  useEffect(() => {
+    if (videoFiles.length > 0) {
+      const previews = videoFiles.map((file) => URL.createObjectURL(file));
+      setVideoPreviews(previews);
+      return () => {
+        previews.forEach((url) => URL.revokeObjectURL(url));
+      };
+    }
+  }, [videoFiles]);
 
   useEffect(() => {
     if (file) {
       const filePreview = {
         name: file.name,
         size: formatFileSize(file.size),
-        type: file.type
+        type: file.type,
       };
       setFilePreviews([filePreview]);
     } else {
@@ -44,14 +57,21 @@ export default function MessageInput({ onSend }) {
   }, [file]);
 
   const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    else return (bytes / 1048576).toFixed(1) + " MB";
   };
 
-  const handleImageSelect = (e) => {
+  const handleImageOrVideoSelect = (e) => {
     const files = Array.from(e.target.files);
-    setImageFiles(files);
+    // nếu file là ảnh
+    if (files.some((file) => file.type.startsWith("image/"))) {
+      setImageFiles(files);
+    }
+    // nếu file là video
+    else if (files.some((file) => file.type.startsWith("video/"))) {
+      setVideoFiles(files);
+    }
   };
 
   const handleFileSelect = (e) => {
@@ -60,8 +80,13 @@ export default function MessageInput({ onSend }) {
   };
 
   const removeImage = (index) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = (index) => {
+    setVideoFiles((prev) => prev.filter((_, i) => i !== index));
+    setVideoPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removeFile = () => {
@@ -71,7 +96,7 @@ export default function MessageInput({ onSend }) {
   };
 
   const handleSend = async () => {
-    if (!input.trim() && !imageFiles.length && !file) return;
+    if (!input.trim() && !imageFiles.length && !file && !videoFiles.length) return;
 
     setIsLoading(true);
     try {
@@ -89,6 +114,13 @@ export default function MessageInput({ onSend }) {
         });
       }
 
+      if (videoFiles.length > 0) {
+        await onSend({
+          type: "VIDEO",
+          files: videoFiles,
+        });
+      }
+
       if (file) {
         await onSend({
           type: "FILE",
@@ -98,10 +130,13 @@ export default function MessageInput({ onSend }) {
 
       setInput("");
       setImageFiles([]);
+      setVideoFiles([]);
       setImagePreviews([]);
+      setVideoPreviews([]);
       setFile(null);
       setFilePreviews([]);
       if (imageInputRef.current) imageInputRef.current.value = "";
+      if (videoInputRef.current) videoInputRef.current.value = "";
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Send message error:", error);
@@ -127,14 +162,21 @@ export default function MessageInput({ onSend }) {
     // Cập nhật vị trí con trỏ sau khi thêm emoji
     setTimeout(() => {
       inputRef.current.focus();
-      inputRef.current.setSelectionRange(cursorPos + emojiData.emoji.length, cursorPos + emojiData.emoji.length);
+      inputRef.current.setSelectionRange(
+        cursorPos + emojiData.emoji.length,
+        cursorPos + emojiData.emoji.length
+      );
     }, 0);
   };
 
   return (
     <div className="flex flex-col w-full relative">
-      {(imagePreviews.length > 0 || filePreviews.length > 0) && (
+      {/* Previews (chỉ hiển thị 1 trong 2: image hoặc video) */}
+      {(imagePreviews.length > 0 ||
+        videoPreviews.length > 0 ||
+        filePreviews.length > 0) && (
         <div className="p-2 mx-3 border-t border-gray-200">
+          {/* Hiển thị image previews nếu có */}
           {imagePreviews.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {imagePreviews.map((preview, index) => (
@@ -155,6 +197,28 @@ export default function MessageInput({ onSend }) {
             </div>
           )}
 
+          {/* Hiển thị video previews nếu có */}
+          {videoPreviews.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {videoPreviews.map((preview, index) => (
+                <div key={index} className="relative">
+                  <video
+                    src={preview}
+                    controls
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <button
+                    onClick={() => removeVideo(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Hiển thị file preview nếu có */}
           {filePreviews.length > 0 && (
             <div className="flex items-center justify-between bg-gray-100 p-2 rounded">
               <div className="flex items-center">
@@ -214,16 +278,17 @@ export default function MessageInput({ onSend }) {
             <img src={PictureIcon} className="p-2" alt="Picture" />
             <input
               type="file"
-              accept="image/*"
+              // accept="image/*,video/*"
+              accept="image/*,video/*"
               className="hidden"
               multiple
               ref={imageInputRef}
-              onChange={handleImageSelect}
+              onChange={handleImageOrVideoSelect}
               disabled={isLoading}
             />
           </label>
           <button
-            onClick={() => setShowEmojiPicker(prev => !prev)}
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
             className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
           >
             <img src={EmojiIcon} alt="Emoji" />
@@ -231,7 +296,9 @@ export default function MessageInput({ onSend }) {
         </div>
         <div
           onClick={handleSend}
-          className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${isLoading ? 'opacity-50' : ''}`}
+          className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
+            isLoading ? "opacity-50" : ""
+          }`}
         >
           <img src={SendIcon} alt="Send" />
         </div>

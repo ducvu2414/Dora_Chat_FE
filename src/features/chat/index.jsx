@@ -44,6 +44,8 @@ export default function ChatSingle() {
         await messageApi.sendImageMessage(conversationId, files);
       } else if (type === "FILE") {
         await messageApi.sendFileMessage(conversationId, files[0]);
+      } else if (type === "VIDEO") {
+        await messageApi.sendVideoMessage(conversationId, files[0]);
       }
     } catch (error) {
       console.error("Error sending message:", error);
