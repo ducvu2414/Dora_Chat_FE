@@ -61,6 +61,26 @@ export default function MessageActionsMenu({
     setShowForwardModal((prev) => !prev);
     setOpen(false);
   };
+  const handleDeleteForMe = async () => {
+    try {
+      const res = await messageApi.deleteMessageForMe(
+        messageId,
+        conversationId
+      );
+      console.log("Deleted message for me:", res);
+      // dispatch(
+      //   deleteMessageForMe({
+      //     messageId,
+      //     conversationId,
+      //     deletedMemberIds: response.deletedMemberIds,
+      //   })
+      // );
+      setOpen(false);
+    } catch (error) {
+      console.error("Error deleting message for me:", error);
+      alert("Không thể xóa tin nhắn");
+    }
+  };
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -108,7 +128,10 @@ export default function MessageActionsMenu({
                 Thu hồi
               </button>
             )}
-            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={handleDeleteForMe}
+            >
               Xóa phía tôi
             </button>
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">

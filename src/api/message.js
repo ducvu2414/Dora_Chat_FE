@@ -37,6 +37,12 @@ const messageApi = {
     });
     return res.data;
   },
+  deleteMessageForMe: async (messageId, conversationId) => {
+    const response = await axios.delete(`/api/messages/${messageId}/only`, {
+      data: { conversationId },
+    });
+    return response.data;
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

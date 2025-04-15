@@ -7,6 +7,9 @@ const conversationApi = {
   createConversation: (userIds) => {
     return axios.post(`/api/conversations/individuals/${userIds}`);
   },
+  getConversationById: (conversationId) => {
+    return axios.get(`/api/conversations/${conversationId}`);
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

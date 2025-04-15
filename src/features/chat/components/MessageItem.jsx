@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import Avatar from "@assets/chat/avatar.png";
-import { AiOutlineDownload, AiOutlinePaperClip, AiOutlineEye } from "react-icons/ai";
+import {
+  AiOutlineDownload,
+  AiOutlinePaperClip,
+  AiOutlineEye,
+} from "react-icons/ai";
 import { MdError } from "react-icons/md";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -23,9 +27,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   // Format file size if available
   const formatFileSize = (bytes) => {
     if (!bytes) return "";
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    else return (bytes / 1048576).toFixed(1) + " MB";
   };
 
   // Extract file name from URL or use provided fileName
@@ -34,9 +38,10 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     if (msg.content) {
       try {
         const url = new URL(msg.content);
-        const pathSegments = url.pathname.split('/');
+        const pathSegments = url.pathname.split("/");
         return pathSegments[pathSegments.length - 1];
       } catch (e) {
+        console.error("Invalid URL:", msg.content, e);
         return "Tải xuống file";
       }
     }
@@ -61,15 +66,16 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   return (
     <div
       key={msg._id}
-      className={`flex items-end gap-2 my-2 ${isMe ? "flex-row-reverse" : "justify-start"
-        } group relative`}
+      className={`flex items-end gap-2 my-2 ${
+        isMe ? "flex-row-reverse" : "justify-start"
+      } group relative`}
     >
       {/* Avatar display logic */}
       {showAvatar ? (
         <img
           src={msg.memberId?.avatar || Avatar}
           alt="avatar"
-          className="self-start w-10 h-10 rounded-full object-cover"
+          className="self-start object-cover w-10 h-10 rounded-full"
         />
       ) : (
         <div className="w-10 h-10 rounded-full"></div>
@@ -79,8 +85,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       <div className="flex flex-col max-w-[468px] text-start relative">
         {/* Message actions menu button */}
         <div
-          className={`absolute top-3 ${isMe ? "left-[-30px]" : "right-[-30px]"
-            } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+          className={`absolute top-3 ${
+            isMe ? "left-[-30px]" : "right-[-30px]"
+          } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
         >
           {!isDeleted && (
             <MessageActionsMenu
@@ -94,8 +101,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         </div>
 
         {/* Message sender name (if not showing avatar and not from current user) */}
-        {!showAvatar && !isMe && (
-          <span className="text-xs font-medium text-gray-500 mb-1 ml-1">
+        {showAvatar && !isMe && (
+          <span className="mb-1 ml-1 text-xs font-medium text-gray-500 absolute top-[-20px] left-2 whitespace-nowrap">
             {msg.memberId?.name || "User"}
           </span>
         )}
@@ -111,8 +118,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
 
             {imageError && (
               <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
-                <MdError size={32} className="text-red-500 mb-2" />
-                <p className="text-sm text-gray-600 text-center">
+                <MdError size={32} className="mb-2 text-red-500" />
+                <p className="text-sm text-center text-gray-600">
                   Không thể tải hình ảnh
                 </p>
               </div>
@@ -121,23 +128,28 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             <img
               src={msg.content}
               alt="sent image"
-              className={`max-w-[468px] max-h-[468px] object-contain rounded-lg ${imageLoaded ? '' : 'hidden'}`}
+              className={`max-w-[468px] max-h-[468px] object-contain rounded-lg ${
+                imageLoaded ? "" : "hidden"
+              }`}
               loading="lazy"
               onLoad={handleImageLoad}
               onError={handleImageError}
-              onClick={() => window.open(msg.content, '_blank')}
+              onClick={() => window.open(msg.content, "_blank")}
             />
 
             {imageLoaded && (
-              <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute p-1 text-white transition-opacity bg-black bg-opacity-50 rounded-full opacity-0 bottom-2 right-2 group-hover:opacity-100">
                 <AiOutlineEye size={20} />
               </div>
             )}
           </div>
         ) : isFile ? (
           /* File message */
-          <div className={`px-3 py-[14px] rounded-2xl flex items-center gap-3 ${isMe ? "bg-[#EFF8FF]" : "bg-[#F5F5F5]"
-            }`}>
+          <div
+            className={`px-3 py-[14px] rounded-2xl flex items-center gap-3 ${
+              isMe ? "bg-[#EFF8FF]" : "bg-[#F5F5F5]"
+            }`}
+          >
             <div className="w-[60px] h-[60px] flex items-center justify-center bg-white rounded-md border border-gray-200">
               <AiOutlineDownload size={24} className="text-[#086DC0]" />
             </div>
@@ -147,7 +159,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 {getFileName()}
               </p>
               {msg.fileSize && (
-                <p className="text-xs text-gray-500">{formatFileSize(msg.fileSize)}</p>
+                <p className="text-xs text-gray-500">
+                  {formatFileSize(msg.fileSize)}
+                </p>
               )}
 
               {/* Download link */}
@@ -165,15 +179,16 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
           /* Text message */
           <div
             className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${isDeleted
+            ${
+              isDeleted
                 ? "bg-gray-100 text-gray-400 italic"
                 : isMe
-                  ? "bg-[#EFF8FF] text-[#000000]"
-                  : "bg-[#F5F5F5] text-[#000000]"
-              }`}
+                ? "bg-[#EFF8FF] text-[#000000]"
+                : "bg-[#F5F5F5] text-[#000000]"
+            }`}
           >
             {isDeleted ? (
-              "Tin nhắn đã bị xóa"
+              msg.content
             ) : (
               <>
                 {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
@@ -193,8 +208,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
         {/* Message timestamp */}
         {showTime && (
           <span
-            className={`text-xs text-[#959595F3] mt-1 ${isMe ? "self-end" : ""
-              }`}
+            className={`text-xs text-[#959595F3] mt-1 ${
+              isMe ? "self-end" : ""
+            }`}
           >
             {dayjs(msg.createdAt).fromNow()}
           </span>

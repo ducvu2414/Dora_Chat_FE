@@ -18,14 +18,12 @@ export default function MessageInput({ onSend }) {
   const fileInputRef = useRef(null);
   const inputRef = useRef(null); // dùng để thao tác con trỏ input
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
   useEffect(() => {
     if (imageFiles.length > 0) {
-      const previews = imageFiles.map(file => URL.createObjectURL(file));
+      const previews = imageFiles.map((file) => URL.createObjectURL(file));
       setImagePreviews(previews);
       return () => {
-        previews.forEach(url => URL.revokeObjectURL(url));
+        previews.forEach((url) => URL.revokeObjectURL(url));
       };
     }
   }, [imageFiles]);
@@ -35,7 +33,7 @@ export default function MessageInput({ onSend }) {
       const filePreview = {
         name: file.name,
         size: formatFileSize(file.size),
-        type: file.type
+        type: file.type,
       };
       setFilePreviews([filePreview]);
     } else {
@@ -44,9 +42,9 @@ export default function MessageInput({ onSend }) {
   }, [file]);
 
   const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    else return (bytes / 1048576).toFixed(1) + " MB";
   };
 
   const handleImageSelect = (e) => {
@@ -60,8 +58,8 @@ export default function MessageInput({ onSend }) {
   };
 
   const removeImage = (index) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removeFile = () => {
@@ -127,12 +125,15 @@ export default function MessageInput({ onSend }) {
     // Cập nhật vị trí con trỏ sau khi thêm emoji
     setTimeout(() => {
       inputRef.current.focus();
-      inputRef.current.setSelectionRange(cursorPos + emojiData.emoji.length, cursorPos + emojiData.emoji.length);
+      inputRef.current.setSelectionRange(
+        cursorPos + emojiData.emoji.length,
+        cursorPos + emojiData.emoji.length
+      );
     }, 0);
   };
 
   return (
-    <div className="flex flex-col w-full relative">
+    <div className="relative flex flex-col w-full">
       {(imagePreviews.length > 0 || filePreviews.length > 0) && (
         <div className="p-2 mx-3 border-t border-gray-200">
           {imagePreviews.length > 0 && (
@@ -142,11 +143,11 @@ export default function MessageInput({ onSend }) {
                   <img
                     src={preview}
                     alt={`Preview ${index}`}
-                    className="w-16 h-16 object-cover rounded"
+                    className="object-cover w-16 h-16 rounded"
                   />
                   <button
                     onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-2 -right-2"
                   >
                     ×
                   </button>
@@ -156,11 +157,11 @@ export default function MessageInput({ onSend }) {
           )}
 
           {filePreviews.length > 0 && (
-            <div className="flex items-center justify-between bg-gray-100 p-2 rounded">
+            <div className="flex items-center justify-between p-2 bg-gray-100 rounded">
               <div className="flex items-center">
                 <div className="mr-2">📄</div>
                 <div>
-                  <div className="text-sm font-medium truncate max-w-xs">
+                  <div className="max-w-xs text-sm font-medium truncate">
                     {filePreviews[0].name}
                   </div>
                   <div className="text-xs text-gray-500">
@@ -223,7 +224,7 @@ export default function MessageInput({ onSend }) {
             />
           </label>
           <button
-            onClick={() => setShowEmojiPicker(prev => !prev)}
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
             className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
           >
             <img src={EmojiIcon} alt="Emoji" />
@@ -231,7 +232,9 @@ export default function MessageInput({ onSend }) {
         </div>
         <div
           onClick={handleSend}
-          className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${isLoading ? 'opacity-50' : ''}`}
+          className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
+            isLoading ? "opacity-50" : ""
+          }`}
         >
           <img src={SendIcon} alt="Send" />
         </div>

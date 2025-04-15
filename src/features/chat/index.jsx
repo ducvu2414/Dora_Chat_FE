@@ -2,6 +2,7 @@ import messageApi from "@/api/message";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { Spinner } from "@/page/Spinner";
 import {
   markRead,
   setActiveConversation,
@@ -11,15 +12,27 @@ import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
 import HeaderSignleChat from "./components/HeaderSignleChat";
 import MessageInput from "./components/MessageInput";
+import conversationApi from "@/api/conversation";
+
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
   const { messages, unread } = useSelector((state) => state.chat);
   const conversationMessages = messages[conversationId] || [];
+  const [conversation, setConversation] = useState(null);
 
   useEffect(() => {
     dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
-    console.log("Conversation ID:", conversationId);
+    const fetchConversation = async () => {
+      try {
+        const res = await conversationApi.getConversationById(conversationId);
+        console.log("Conversation data:", res);
+        setConversation(res);
+      } catch (error) {
+        console.error("Error fetching conversation:", error);
+      }
+    };
+    fetchConversation();
     // Lấy tin nhắn ban đầu
     messageApi
       .fetchMessages(conversationId)
@@ -51,21 +64,32 @@ export default function ChatSingle() {
     }
   };
   const [showDetail, setShowDetail] = useState(false);
+  if (!conversation) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen bg-white">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <div className="flex w-full h-screen">
       {/* Main Content */}
-      <div className="flex flex-1 overflow-auto ">
+      <div className="flex flex-1 overflow-sauto ">
         {/* ChatBox  */}
         <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
-          <HeaderSignleChat handleDetail={setShowDetail} />
+          <HeaderSignleChat
+            handleDetail={setShowDetail}
+            conversation={conversation}
+          />
           <ChatBox messages={conversationMessages} />
           <MessageInput onSend={handleSendMessage} />
         </div>
 
         {/* DetailChat*/}
         <div
-          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"
-            }`}
+          className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
+            showDetail ? "w-[385px]" : "w-0"
+          }`}
         >
           {showDetail && <DetailChat />}
         </div>

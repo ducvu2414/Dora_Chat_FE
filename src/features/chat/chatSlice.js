@@ -77,6 +77,25 @@ const chatSlice = createSlice({
         }
       }
     },
+    deleteMessageForMe: (state, action) => {
+      const { messageId, conversationId, deletedMemberIds, newLastMessage } =
+        action.payload;
+      const messages = state.messages[conversationId];
+      if (messages) {
+        const index = messages.findIndex((m) => m._id === messageId);
+        if (index !== -1) {
+          messages[index].deletedMemberIds = deletedMemberIds;
+          messages.splice(index, 1);
+        }
+      }
+      // Cập nhật lastMessage trong conversations
+      const convIndex = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (convIndex !== -1) {
+        state.conversations[convIndex].lastMessageId = newLastMessage || null;
+      }
+    },
   },
 });
 
@@ -89,5 +108,6 @@ export const {
   markRead,
   setActiveConversation,
   recallMessage,
+  deleteMessageForMe,
 } = chatSlice.actions;
 export default chatSlice.reducer;

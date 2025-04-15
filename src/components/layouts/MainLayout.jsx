@@ -8,6 +8,7 @@ import {
   updateConversation,
   addMessage,
   recallMessage,
+  deleteMessageForMe,
 } from "../../features/chat/chatSlice";
 import {
   setAmountNotify,
@@ -123,6 +124,26 @@ const MainLayout = () => {
         );
       });
     });
+    socket.on(
+      SOCKET_EVENTS.MESSAGE_DELETED_FOR_ME,
+      ({ deletedMessage, newLastMessage }) => {
+        startTransition(() => {
+          console.log(
+            "Received deleted for me:",
+            deletedMessage,
+            newLastMessage
+          );
+          dispatch(
+            deleteMessageForMe({
+              messageId: deletedMessage._id,
+              conversationId: deletedMessage.conversationId,
+              deletedMemberIds: deletedMessage.deletedMemberIds,
+              newLastMessage: newLastMessage,
+            })
+          );
+        });
+      }
+    );
 
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 
@@ -130,7 +151,6 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
     };
   }, [dispatch, conversations]);
-  // ✅ JOIN USER + JOIN_CONVERSATIONS khi socket connect/reconnect
 
   useEffect(() => {
     if (!socket || !userId) return;
@@ -153,7 +173,6 @@ const MainLayout = () => {
       socket.off("connect", handleConnect);
     };
   }, [socket, userId, conversations]);
-
 
   useEffect(() => {
     if (!socket || !user?._id) return;
