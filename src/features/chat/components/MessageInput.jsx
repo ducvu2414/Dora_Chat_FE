@@ -21,8 +21,6 @@ export default function MessageInput({ onSend }) {
   const fileInputRef = useRef(null);
   const inputRef = useRef(null); // dùng để thao tác con trỏ input
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
   useEffect(() => {
     if (imageFiles.length > 0) {
       const previews = imageFiles.map((file) => URL.createObjectURL(file));
