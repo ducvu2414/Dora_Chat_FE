@@ -92,7 +92,7 @@ const chatSlice = createSlice({
       const convIndex = state.conversations.findIndex(
         (conv) => conv._id === conversationId
       );
-      if (convIndex !== -1) {
+      if (convIndex !== -1 && newLastMessage) {
         state.conversations[convIndex].lastMessageId = newLastMessage || null;
       }
     },

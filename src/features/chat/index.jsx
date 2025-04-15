@@ -26,7 +26,6 @@ export default function ChatSingle() {
     const fetchConversation = async () => {
       try {
         const res = await conversationApi.getConversationById(conversationId);
-        console.log("Conversation data:", res);
         setConversation(res);
       } catch (error) {
         console.error("Error fetching conversation:", error);
