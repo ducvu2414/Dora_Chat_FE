@@ -36,15 +36,16 @@ export default function ChatSingle() {
     }
   }, [conversationId, dispatch, unread]);
 
-  const handleSendMessage = async (message) => {
-    if (!message.trim()) return;
+  const handleSendMessage = async ({ content, type }) => {
     try {
       await messageApi.sendMessage({
-        conversationId: conversationId,
-        content: message,
+        conversationId,
+        content,
+        type,
       });
     } catch (error) {
       console.error("Error sending message:", error);
+      throw error;
     }
   };
   const [showDetail, setShowDetail] = useState(false);
