@@ -31,12 +31,12 @@ export default function PictureList({ limit }) {
       {previewImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
           <div className="relative">
-            <button
+            <div
               onClick={() => setPreviewImage(null)}
-              className="absolute text-sm text-white top-2 right-2"
+              className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full cursor-pointer top-2 right-2 bg-black/50 hover:bg-black/70"
             >
-              <AiOutlineClose />
-            </button>
+              <AiOutlineClose className="text-lg text-white" />
+            </div>
             <img
               src={previewImage}
               alt="Preview"

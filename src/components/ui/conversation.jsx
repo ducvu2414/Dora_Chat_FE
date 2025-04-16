@@ -126,6 +126,9 @@ export function Conversation({
       return member.userId !== idUser;
     });
   const avatarMessage = avatar || partner?.[0].avatar;
+  console.log("members", members);
+  console.log("partner", partner);
+  console.log("avata", avatarMessage);
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
