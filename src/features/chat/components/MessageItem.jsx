@@ -31,29 +31,30 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       setHoverVideoUrl("");
       return;
     }
-  
+
     try {
       // Kiểm tra xem URL có phải là Cloudinary video không
-      const isCloudinaryVideo = msg.content.includes('res.cloudinary.com') && 
-                              msg.content.includes('/video/upload/');
-  
+      const isCloudinaryVideo =
+        msg.content.includes("res.cloudinary.com") &&
+        msg.content.includes("/video/upload/");
+
       if (!isCloudinaryVideo) {
         throw new Error("Not a Cloudinary video URL");
       }
-  
+
       // Tách public ID từ URL
-      const uploadIndex = msg.content.indexOf('/upload/') + '/upload/'.length;
+      const uploadIndex = msg.content.indexOf("/upload/") + "/upload/".length;
       const publicIdWithExt = msg.content.slice(uploadIndex);
-      const publicId = publicIdWithExt.split('.')[0];
-  
+      const publicId = publicIdWithExt.split(".")[0];
+
       if (!publicId) {
         throw new Error("Could not extract public ID from URL");
       }
-  
-      const baseUrl = msg.content.split('/upload/')[0] + '/upload/';
+
+      const baseUrl = msg.content.split("/upload/")[0] + "/upload/";
       const generatedThumbnailUrl = `${baseUrl}so_1.0,f_jpg,w_500/${publicId}.jpg`;
       const generatedHoverVideoUrl = `${baseUrl}du_10,q_auto,w_500/${publicIdWithExt}`;
-  
+
       setThumbnailUrl(generatedThumbnailUrl);
       setHoverVideoUrl(generatedHoverVideoUrl);
     } catch (error) {
@@ -124,6 +125,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               messageId={msg._id.toString()}
               conversationId={msg.conversationId.toString()}
               messageContent={msg.content}
+              type={msg.type}
             />
           )}
         </div>

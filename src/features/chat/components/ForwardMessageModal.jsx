@@ -39,13 +39,20 @@ export default function ForwardMessageModal({ message, onClose }) {
       console.log("Selected user IDs:", selectedUserIds);
       for (const userId of selectedUserIds) {
         let conversation = await conversationApi.createConversation(userId);
-        console.log("userId", userId);
-        console.log("Conversation:", conversation);
-        dispatch(addConversation(conversation));
+        const friend = friends.find((f) => f.id === userId);
+        dispatch(
+          addConversation({
+            ...conversation,
+            name: friend ? friend.name : "Unknown",
+            avatar: friend ? friend.avatar : null,
+          })
+        );
         // Gửi tin nhắn chuyển tiếp
-        await messageApi.sendMessage({
+        console.log("type", message);
+        await messageApi.sendTextMessage({
           conversationId: conversation._id,
           content: message.content,
+          type: message.type,
         });
       }
       setIsOpen(false);

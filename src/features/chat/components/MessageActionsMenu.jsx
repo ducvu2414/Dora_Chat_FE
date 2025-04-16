@@ -8,6 +8,7 @@ export default function MessageActionsMenu({
   messageId,
   conversationId,
   messageContent,
+  type,
 }) {
   const [open, setOpen] = useState(false);
   const [showAbove, setShowAbove] = useState(false);
@@ -142,7 +143,12 @@ export default function MessageActionsMenu({
       </div>
       {showForwardModal && (
         <ForwardMessageModal
-          message={{ _id: messageId, content: messageContent, conversationId }}
+          message={{
+            _id: messageId,
+            content: messageContent,
+            conversationId,
+            type,
+          }}
           onClose={() => setShowForwardModal(false)}
         />
       )}
