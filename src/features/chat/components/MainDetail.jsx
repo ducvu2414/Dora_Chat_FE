@@ -22,7 +22,7 @@ import FileList from "./detail_chat/FileList";
 import LinkList from "./detail_chat/LinkList";
 import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
-export default function MainDetail({ handleSetActiveTab }) {
+export default function MainDetail({ handleSetActiveTab, isConversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("John Doe");
@@ -46,12 +46,19 @@ export default function MainDetail({ handleSetActiveTab }) {
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
         <div className="flex items-center">
-          <div
-            onClick={() => setIsOpenAddUser(true)}
-            className="flex items-center justify-center bg-white rounded-full cursor-pointer w-9 h-9 hover:opacity-75"
-          >
-            <img src={AddUser} />
-          </div>
+          {isConversation ? (
+            <>
+              <div
+                onClick={() => setIsOpenAddUser(true)}
+                className="flex items-center justify-center bg-white rounded-full cursor-pointer w-9 h-9 hover:opacity-75"
+              >
+                <img src={AddUser} />
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
           <div className="flex items-center justify-center ml-2 bg-white rounded-full cursor-pointer w-9 h-9 hover:opacity-75">
             <img src={MarkChat} />
           </div>
@@ -82,19 +89,19 @@ export default function MainDetail({ handleSetActiveTab }) {
             />
           )}
         </div>
-        <div className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5">
+        <div className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5 cursor-pointer" onClick={() => setIsMuted(!isMuted)}>
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Bell} />
           </div>
           <p className="text-[#086DC0] ml-2">Mute messages</p>
           <div
-            className={`relative w-11 h-5 rounded-full cursor-pointer transition-all self-end ml-auto  ${
+            className={`relative right-2 w-11 h-6 rounded-full cursor-pointer transition-all self-end ml-auto  ${
               isMuted ? "bg-gray-400" : "bg-[#086DC0]"
             }`}
             onClick={() => setIsMuted(!isMuted)}
           >
             <div
-              className={`absolute top-0.5 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
                 isMuted ? "translate-x-5" : "translate-x-0"
               }`}
             ></div>
@@ -181,7 +188,7 @@ export default function MainDetail({ handleSetActiveTab }) {
             <div className="flex items-center justify-center w-[26px] h-[26px] bg-white rounded-full">
               <img src={Setting} />
             </div>
-            <p className="text-[#086DC0] ml-2">Quyền quản trị</p>
+            <p className="text-[#086DC0] ml-2">Administration</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <motion.img
                 src={ArrowRight}
@@ -202,9 +209,9 @@ export default function MainDetail({ handleSetActiveTab }) {
             className="px-4 mt-2 overflow-hidden"
           >
             {[
-              { img: CheckDecentraliza, text: "Phê duyệt thành viên (2)" },
-              { img: Decentraliza, text: "Phân quyền thành viên" },
-              { img: Dissolve, text: "Giải tán nhóm" },
+              { img: CheckDecentraliza, text: "Approve members (2)" },
+              { img: Decentraliza, text: "Decentralize" },
+              { img: Dissolve, text: "Disband" },
             ].map((item, index) => (
               <div
                 key={index}
@@ -223,14 +230,25 @@ export default function MainDetail({ handleSetActiveTab }) {
           </motion.div>
         </div>
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">
-          <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
-            <img src={Trash} alt="trash" />
-            <span className="text-[#086DC0]  text-xs ml-2">Xóa nhóm</span>
-          </button>
-          <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
-            <img src={Leave} alt="leave" />
-            <span className="text-[#086DC0]  text-xs ml-2">Rời nhóm</span>
-          </button>
+          {isConversation ? (
+            <>
+              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+                <img src={Trash} alt="trash" />
+                <span className="text-[#086DC0]  text-xs ml-2">Delete</span>
+              </button>
+              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+                <img src={Leave} alt="leave" />
+                <span className="text-[#086DC0]  text-xs ml-2">Leave</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+                <img src={Trash} alt="trash" />
+                <span className="text-[#086DC0]  text-xs ml-2">Delete</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>

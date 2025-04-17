@@ -92,7 +92,7 @@ export default function ChatSingle() {
             showDetail ? "w-[385px]" : "w-0"
           }`}
         >
-          {showDetail && <DetailChat />}
+          {showDetail && <DetailChat isConversation={conversation.type} />}
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import MainDetail from "./MainDetail";
 import MediaDetail from "./detail_chat/MediaDetail";
 import MemberList from "./detail_chat/MemberList";
-export default function DetailChat() {
+export default function DetailChat({ isConversation }) {
   const [activeTab, setActiveTab] = useState({
     tab: "detail",
   });
@@ -17,7 +17,7 @@ export default function DetailChat() {
   return (
     <div className="h-full w-[385px] p-4 bg-[#E8F4FF] rounded-[20px]">
       {activeTab.tab === "detail" && (
-        <MainDetail handleSetActiveTab={handleSetActiveTab} />
+        <MainDetail handleSetActiveTab={handleSetActiveTab} isConversation={isConversation} />
       )}
       {activeTab.tab === "media" && (
         <MediaDetail
