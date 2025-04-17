@@ -179,7 +179,6 @@ const MainLayout = () => {
 
     const handleAcceptFriend = (value) => {
       startTransition(() => {
-        console.log("handleAcceptFriend", value);
         dispatch(setNewFriend(value));
         dispatch(setMyRequestFriend(value._id));
       });
@@ -209,6 +208,10 @@ const MainLayout = () => {
         dispatch(updateFriend(_id));
         dispatch(updateFriendChat(_id));
       });
+    };
+
+    const handleJoinConversation = (conversationId) => {
+      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, [conversationId]);
     };
 
     const handleRevokeToken = ({ key }) => {
@@ -246,9 +249,7 @@ const MainLayout = () => {
 
         if (data.isTyping) {
           setTimeout(() => {
-            dispatch(
-              setFriendTypingStatus({ friendId: data.userId, isTyping: false })
-            );
+            dispatch(setFriendTypingStatus({ friendId: data.userId, isTyping: false }));
           }, 3000);
         }
       });
@@ -262,6 +263,7 @@ const MainLayout = () => {
     socket.on(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
     socket.on(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
 
+    socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
     socket.on(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
     socket.on(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
 
@@ -272,6 +274,8 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.DELETED_INVITE_WAS_SEND, handleDeleteInviteSend);
       socket.off(SOCKET_EVENTS.DELETED_FRIEND, handleDeleteFriend);
       socket.off(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
+
+      socket.off(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
 
       socket.off(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
       socket.off(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);

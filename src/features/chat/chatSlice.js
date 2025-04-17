@@ -44,15 +44,16 @@ const chatSlice = createSlice({
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = [];
       }
+
       const exists = state.messages[conversationId].some(
         (m) => m._id === message._id
       );
+
       if (!exists) {
         state.messages[conversationId].push(message);
-        // Chỉ tăng badge nếu không phải cuộc trò chuyện đang mở
+
         if (state.activeConversationId !== conversationId) {
-          state.unread[conversationId] =
-            (state.unread[conversationId] || 0) + 1;
+          state.unread[conversationId] = (state.unread[conversationId] || 0) + 1;
         }
       }
     },

@@ -2,7 +2,6 @@
 import ContactCardDropdown from '@/components/ui/Contact/ContactCardDropdown';
 
 export function ContactCard({ contact, onDeleteFriend }) {
-    console.log('ContactCard props:', contact);
     function onViewInfo() {
         console.log('View info');
         window.location.href = "/friend-information";
@@ -17,12 +16,13 @@ export function ContactCard({ contact, onDeleteFriend }) {
     }
 
     function onDelete() {
-        if (onDeleteFriend && contact.id) {
-            onDeleteFriend(contact.id);
+        if (onDeleteFriend && contact._id) {
+            onDeleteFriend(contact._id);
         } else {
-            console.log('Delete contact');
+            console.error("Contact ID is undefined:", contact);
         }
     }
+
 
     // Get first letter of name for avatar placeholder
     const getInitials = (name) => {
