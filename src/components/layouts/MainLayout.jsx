@@ -9,6 +9,7 @@ import {
   addMessage,
   recallMessage,
   deleteMessageForMe,
+  addConversation
 } from "../../features/chat/chatSlice";
 import {
   setAmountNotify,
@@ -99,6 +100,7 @@ const MainLayout = () => {
       console.log("Joined conversations:", conversationIds);
     }
     const handleNewMessage = (message) => {
+      console.log("📩 New message:", message);
       startTransition(() => {
         dispatch(
           addMessage({ conversationId: message.conversationId, message })
@@ -210,9 +212,30 @@ const MainLayout = () => {
       });
     };
 
-    const handleJoinConversation = (conversationId) => {
-      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, [conversationId]);
+    const handleJoinConversation = (conversation) => {
+      console.log("📥 Received JOIN_CONVERSATION:", conversation);
+      if (!conversation._id || !userId) {
+        console.error("❌ Invalid data - conversation._id:", conversation._id, "userId:", userId);
+        return;
+      }
+      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversation._id.toString(), () => {
+        console.log("✅ FE joined room:", conversation._id.toString());
+        socket.emit("JOINED_CONVERSATION", {
+          conversationId: conversation._id.toString(),
+          userId: userId,
+        });
+        console.log("📤 Sent JOINED_CONVERSATION:", {
+          conversationId: conversation._id.toString(),
+          userId: userId,
+        });
+      });
+      startTransition(() => {
+        dispatch(addConversation(conversation));
+        console.log("Added conversation to state:", conversation._id);
+      });
     };
+
+    socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
 
     const handleRevokeToken = ({ key }) => {
       if (codeRevokeRef.current !== key) {
