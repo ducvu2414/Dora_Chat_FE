@@ -2,8 +2,16 @@
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
+import { useState } from "react";
+import { ChannelTab } from "@/features/chat/components/ChannelTab";
 export default function HeaderSignleChat({ handleDetail, conversation }) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [activeChannel, setActiveChannel] = useState("general");
+  const channelTabs = [
+    { id: "general", label: "#general" },
+    { id: "channel1", label: "#channel1" },
+    { id: "channel2", label: "#channel2" },
+  ];
   console.log("conversation", conversation);
   const partner =
     conversation.name ||
@@ -12,7 +20,7 @@ export default function HeaderSignleChat({ handleDetail, conversation }) {
     });
   const avatarMessage = conversation.avatar || partner?.[0].avatar;
   return (
-    <div>
+    <div className="relative z-10 flex flex-col shadow-md w-full h-auto ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
           src={avatarMessage || "/placeholder.svg"}
@@ -42,6 +50,7 @@ export default function HeaderSignleChat({ handleDetail, conversation }) {
           </div>
         </div>
       </div>
+      <ChannelTab tabs={channelTabs} activeTab={activeChannel} onTabChange={setActiveChannel} className="fixed top-0 right-0 left-0" />
     </div>
   );
 }
