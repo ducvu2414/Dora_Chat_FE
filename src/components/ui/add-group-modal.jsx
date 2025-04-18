@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import { AlertMessage } from "@/components/ui/alert-message";
 import friendApi from "@/api/friend";
 import { Spinner } from "@/page/Spinner";
+import conversationApi from "@/api/conversation";
 
 // [
 //   { id: 1, name: 'Iris Paul', avatar: 'https://s3-alpha-sig.figma.com/img/b716/471e/a92dba5e34fe4ed85bd7c5f535acdaae?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=LjxeFExG2mfQsIC1PhfgwD5sI1KwkgcdwdyUS5AyHkUVuwcJf1wR0ZiKF7RZrM0i8GSlA7aHsoF51XhpRQLxR4qVXSw6UnYprvVtc7RNpJffWnq1ukN~P7L77ZIPtjU6181DFElG8PGlTyFsLtC0TD24WIb-y7s7EIcnJrVTSDRyotmNCUq-j0qSMuU1rOM301xCYXHB3Ul70GKtqsgBKK8x79HKBZgu-laGa4Oy7rfMzDnlbjS2pO6EwNUu~wFvwhBiGnMSUcfFZeD4txGpwBhJCUDT8epFoEW82g1cYS81ClzjFuMme3-BsB9QFjlEHrquHOeBoH-A9zON9uXx4g__' },
@@ -65,12 +66,26 @@ export function AddGroupModal({ onClose, isOpen }) {
   };
 
   const handleCreateGroup = () => {
-    console.log("Creating group:", {
-      name: groupName,
-      members: selectedFriends,
-    });
-    resetModalState();
-    onClose();
+    try {
+      setLoading(true);
+      const response = conversationApi.createGroupConversation(
+        groupName,
+        selectedFriends
+      );
+      if (response) {
+        window.location.href = "/home";
+      }
+    } catch (err) {
+      console.error("Error creating group:", err);
+      AlertMessage({
+        type: "error",
+        message: "Error creating group.",
+      });
+    } finally {
+      setLoading(false);
+      resetModalState();
+      onClose();
+    }
   };
 
   return (
@@ -148,7 +163,7 @@ export function AddGroupModal({ onClose, isOpen }) {
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white focus:outline-none"
           onClick={handleCreateGroup}
-          disabled={!groupName || selectedFriends.length === 0}
+          disabled={!groupName}
         >
           Create Group
         </Button>

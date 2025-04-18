@@ -10,6 +10,12 @@ const conversationApi = {
   getConversationById: (conversationId) => {
     return axios.get(`/api/conversations/${conversationId}`);
   },
+  createGroupConversation: (name, members) => {
+    return axios.post("/api/conversations/groups", {
+      name,
+      members,
+    });
+  }
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },
