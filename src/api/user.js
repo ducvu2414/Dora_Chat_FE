@@ -5,6 +5,11 @@ const userApi = {
         const url = `api/users/search/phoneNumber/${phoneNumber}`;
         return axios.get(url);
     },
+
+    getUserByEmail: (email) => {
+        const url = `api/users/search/username/${email}`;
+        return axios.get(url);
+    }
 }
 
 export default userApi;
