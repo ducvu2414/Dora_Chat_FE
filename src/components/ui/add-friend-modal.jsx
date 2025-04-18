@@ -5,24 +5,63 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import userApi from "@/api/user";
+import friendApi from "@/api/friend";
 import VnFlag from "@assets/vn_flag.png";
+import Email from "@assets/email.png";
+import { AlertMessage } from "@/components/ui/alert-message";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
   const navigate = useNavigate();
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const [searchResult, setSearchResult] = useState(null);
+  const [isFriend, setIsFriend] = useState(false);
+  const [searchType, setSearchType] = useState("phone");
+  const userLogin = JSON.parse(localStorage.getItem("user"));
 
   const resetModalState = () => {
-    setPhoneNumber("");
+    setSearchValue("");
     setSearchResult(null);
+    setSearchType("phone");
   };
 
   const handleSearch = async () => {
     try {
-      const user = await userApi.getUserByPhoneNumber(phoneNumber);
-      setSearchResult(user);
+      const phoneRegex = /^(0[0-9]{9})$/;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (searchType === "phone") {
+        if (phoneRegex.test(searchValue)) {
+          const user = await userApi.getUserByPhoneNumber(searchValue);
+          const isFriend = await friendApi.isFriend(userLogin._id, user._id);
+          setIsFriend(isFriend);
+          setSearchResult(user);
+        } else {
+          AlertMessage({
+            type: "error",
+            message: "Invalid phone number",
+          });
+        }
+      } else {
+        if (emailRegex.test(searchValue)) {
+          const user = await userApi.getUserByEmail(searchValue);
+          const isFriend = await friendApi.isFriend(userLogin._id, user._id);
+          setIsFriend(isFriend);
+          setSearchResult(user);
+        } else {
+          AlertMessage({
+            type: "error",
+            message: "Invalid email address",
+          });
+        }
+      }
     } catch (error) {
       console.error("Error searching for user:", error);
     }
@@ -42,19 +81,66 @@ export function AddFriendModal({ isOpen, onClose }) {
         <div className="flex gap-2">
           <div className="relative flex-1">
             <div className="absolute flex items-center gap-1 -translate-y-1/2 left-3 top-1/2">
-              <img
-                src={VnFlag}
-                alt="Vietnam flag"
-                className="object-cover w-6 h-4 rounded"
-              />
-              <span className="text-sm font-medium text-regal-blue">(+84)</span>
+              <Select value={searchType} onValueChange={setSearchType}>
+                <SelectTrigger className="w-23 border-0 p-0 h-auto bg-transparent">
+                  <SelectValue>
+                    {searchType === "phone" ? (
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={VnFlag}
+                          alt="Vietnam flag"
+                          className="object-cover w-6 h-4 rounded"
+                        />
+                        <span className="text-sm font-medium text-regal-blue">
+                          (+84)
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={Email}
+                          alt="Email icon"
+                          className="object-cover w-6 h-4 rounded"
+                        />
+                        <span className="text-sm font-medium text-regal-blue">
+                          Email
+                        </span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="phone">
+                    <div className="flex items-center gap-1">
+                      <img
+                        src={VnFlag}
+                        alt="Vietnam flag"
+                        className="object-cover w-6 h-4 rounded"
+                      />
+                      <span>(+84)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="email">
+                    <div className="flex items-center gap-1">
+                      <img
+                        src={Email}
+                        alt="Email icon"
+                        className="object-cover w-6 h-4 rounded"
+                      />
+                      <span>Email</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Input
               type="text"
-              placeholder="Phone number"
+              placeholder={
+                searchType === "phone" ? "Phone number" : "Email address"
+              }
               className="pl-24"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSearch();
               }}
@@ -73,8 +159,7 @@ export function AddFriendModal({ isOpen, onClose }) {
           <h3 className="text-sm font-bold text-center text-gray-500">
             {searchResult ? "Result" : "Recent"}
           </h3>
-
-          {searchResult ? (
+          {searchResult && userLogin._id !== searchResult._id ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
@@ -90,16 +175,23 @@ export function AddFriendModal({ isOpen, onClose }) {
                   >
                     {searchResult.name}
                   </h4>
-                  <p className="text-sm text-gray-500">{searchResult.username}</p>
+                  <p className="text-sm text-gray-500">
+                    {searchResult.username}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button
-                  size="icon"
-                  className="bg-blue-600 rounded-full hover:bg-blue-700"
-                >
-                  <UserPlus className="w-4 h-4" />
-                </Button>
+                {isFriend ? (
+                  <></>
+                ) : (
+                  <Button
+                    size="icon"
+                    className="bg-blue-600 rounded-full hover:bg-blue-700"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                  </Button>
+                )}
+
                 <Button
                   size="icon"
                   className="bg-blue-600 rounded-full hover:bg-blue-700"
