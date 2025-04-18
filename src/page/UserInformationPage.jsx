@@ -17,7 +17,6 @@ import { AlertMessage } from "@/components/ui/alert-message";
 import BannerImage from "@/assets/banner-user-info.png";
 import { Spinner } from "@/page/Spinner";
 import { Pencil } from "lucide-react";
-import { set } from "lodash";
 
 const availableHobbies = [
   {
@@ -143,9 +142,10 @@ export default function UserInformation() {
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setDateOfBirth(newDate); // Cập nhật state
+    const [year, month, day] = newDate.split("-").map(Number);
     setUserInfo({
       ...userInfo,
-      dateOfBirth: setDateOfBirth(newDate), // Cập nhật userInfo
+      dateOfBirth: { day, month, year }, // Cập nhật userInfo
     });
   };
 
@@ -160,7 +160,7 @@ export default function UserInformation() {
         setQr(qrResponse);
         setUserInfo(response);
         setDateOfBirth(
-          `${response.dateOfBirth.year}-${response.dateOfBirth.month}-${response.dateOfBirth.day}`
+          `${response.dateOfBirth.year}-${String(response.dateOfBirth.month).padStart(2, '0')}-${String(response.dateOfBirth.day).padStart(2, '0')}`
         );
       } catch (err) {
         console.error("Error fetching user profile:", err);
@@ -251,7 +251,6 @@ export default function UserInformation() {
 
   const handleSubmitInfo = async (e) => {
     e.preventDefault();
-
     if (!userInfo.name) {
       console.log("check name empty");
       AlertMessage({ type: "error", message: "Please enter your name" });
@@ -260,7 +259,6 @@ export default function UserInformation() {
 
     const regexName = /^[A-Za-zÀ-ỹ\s]+$/;
     if (!regexName.test(userInfo.name)) {
-      console.log("check name regex");
       AlertMessage({ type: "error", message: "Name must be characters" });
       return;
     }
@@ -277,7 +275,7 @@ export default function UserInformation() {
       const userInfoRequest = {
         id: userInfo._id,
         ...userInfo,
-        dateOfBirth: `${userInfo.dateOfBirth.year}-${userInfo.dateOfBirth.month}-${userInfo.dateOfBirth.day}T00:00:00.000Z`,
+        dateOfBirth: `${userInfo.dateOfBirth.year}-${String(userInfo.dateOfBirth.month).padStart(2, '0')}-${String(userInfo.dateOfBirth.day).padStart(2, '0')}T00:00:00.000Z`,
       };
       delete userInfoRequest._id;
       console.log(userInfoRequest);
@@ -514,7 +512,6 @@ export default function UserInformation() {
                             <Input
                               type="date"
                               value={dateOfBirth}
-                              // value={`${userInfo.dateOfBirth.year}-${userInfo.dateOfBirth.month}-${userInfo.dateOfBirth.day}`}
                               onChange={handleDateChange}
                               disabled={!isEditing}
                               className="bg-gray-50 text-regal-blue"
@@ -528,7 +525,10 @@ export default function UserInformation() {
                           <Select
                             value={userInfo.gender ? "true" : "false"}
                             onValueChange={(value) =>
-                              setUserInfo({ ...userInfo, gender: value })
+                              setUserInfo({
+                                ...userInfo,
+                                gender: value === "true",
+                              })
                             }
                             disabled={!isEditing}
                           >
