@@ -25,6 +25,7 @@ export function AddFriendModal({ isOpen, onClose }) {
   const [searchResult, setSearchResult] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [searchType, setSearchType] = useState("phone");
+  const [enableSentRequest, setEnableSentRequest] = useState(true);
   const userLogin = JSON.parse(localStorage.getItem("user"));
 
   const resetModalState = () => {
@@ -41,7 +42,7 @@ export function AddFriendModal({ isOpen, onClose }) {
         if (phoneRegex.test(searchValue)) {
           const user = await userApi.getUserByPhoneNumber(searchValue);
           const isFriend = await friendApi.isFriend(userLogin._id, user._id);
-          setIsFriend(isFriend);
+          setIsFriend(isFriend === true ? true : isFriend.data);
           setSearchResult(user);
         } else {
           AlertMessage({
@@ -53,7 +54,7 @@ export function AddFriendModal({ isOpen, onClose }) {
         if (emailRegex.test(searchValue)) {
           const user = await userApi.getUserByEmail(searchValue);
           const isFriend = await friendApi.isFriend(userLogin._id, user._id);
-          setIsFriend(isFriend);
+          setIsFriend(isFriend === true ? true : isFriend.data);
           setSearchResult(user);
         } else {
           AlertMessage({
@@ -62,7 +63,9 @@ export function AddFriendModal({ isOpen, onClose }) {
           });
         }
       }
+      setEnableSentRequest(true);
     } catch (error) {
+      setSearchResult(null);
       console.error("Error searching for user:", error);
     }
   };
@@ -187,6 +190,10 @@ export function AddFriendModal({ isOpen, onClose }) {
                   <Button
                     size="icon"
                     className="bg-blue-600 rounded-full hover:bg-blue-700"
+                    onClick={() => {
+                      setEnableSentRequest(false);
+                    }}
+                    disabled={!enableSentRequest}
                   >
                     <UserPlus className="w-4 h-4" />
                   </Button>

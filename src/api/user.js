@@ -2,7 +2,7 @@ import axios from "./axiosClient";
 
 const userApi = {
     getUserByPhoneNumber: (phoneNumber) => {
-        const url = `api/users/search/phoneNumber/${phoneNumber}`;
+        const url = `api/users/search/phone-number/${phoneNumber}`;
         return axios.get(url);
     },
 
