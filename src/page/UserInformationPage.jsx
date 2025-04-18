@@ -159,6 +159,7 @@ export default function UserInformation() {
         const qrResponse = await me.getQR(user._id);
         setQr(qrResponse);
         setUserInfo(response);
+        console.log("User info:", response);
         setDateOfBirth(
           `${response.dateOfBirth.year}-${String(response.dateOfBirth.month).padStart(2, '0')}-${String(response.dateOfBirth.day).padStart(2, '0')}`
         );
@@ -541,6 +542,22 @@ export default function UserInformation() {
                             </SelectContent>
                           </Select>
                         </div>
+                      </div>
+                      <div>
+                        <label className="block mb-1 text-sm font-medium text-left">
+                          Phone number
+                        </label>
+                        <Input
+                          value={userInfo.phoneNumber}
+                          onChange={(e) =>
+                            setUserInfo({
+                              ...userInfo,
+                              phoneNumber: e.target.value,
+                            })
+                          }
+                          disabled={!isEditing}
+                          className="bg-gray-50 text-regal-blue"
+                        />
                       </div>
                       <div>
                         <label className="block mb-1 text-sm font-medium text-left">
