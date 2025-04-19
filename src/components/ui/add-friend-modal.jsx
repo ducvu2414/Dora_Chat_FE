@@ -27,11 +27,12 @@ export function AddFriendModal({ isOpen, onClose }) {
   const [searchType, setSearchType] = useState("phone");
   const [enableSentRequest, setEnableSentRequest] = useState(true);
   const userLogin = JSON.parse(localStorage.getItem("user"));
-
+  const [hasSentRequest, setHasSentRequest] = useState(false);
   const resetModalState = () => {
     setSearchValue("");
     setSearchResult(null);
     setSearchType("phone");
+    setHasSentRequest(false);
   };
 
   const handleSearch = async () => {
@@ -66,7 +67,19 @@ export function AddFriendModal({ isOpen, onClose }) {
       setEnableSentRequest(true);
     } catch (error) {
       setSearchResult(null);
+      AlertMessage({ type: "error", message: "Không tìm thấy người dùng" });
       console.error("Error searching for user:", error);
+    }
+  };
+
+  const handleSendFriendRequest = async () => {
+    try {
+      await friendApi.sendRequestFriend(searchResult._id);
+      setHasSentRequest(true);
+      AlertMessage({ type: "success", message: "Send friend request successfully" });
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      AlertMessage({ type: "error", message: error.response.data.message });
     }
   };
 
@@ -189,13 +202,15 @@ export function AddFriendModal({ isOpen, onClose }) {
                 ) : (
                   <Button
                     size="icon"
-                    className="bg-blue-600 rounded-full hover:bg-blue-700"
-                    onClick={() => {
-                      setEnableSentRequest(false);
-                    }}
-                    disabled={!enableSentRequest}
+                    className="bg-blue-600 rounded-full hover:bg-blue-700 disabled:opacity-50"
+                    disabled={hasSentRequest}
+                    onClick={handleSendFriendRequest}
                   >
-                    <UserPlus className="w-4 h-4" />
+                    {hasSentRequest ? (
+                      <span className="text-xs font-semibold px-2">Sent</span>
+                    ) : (
+                      <UserPlus className="w-4 h-4" />
+                    )}
                   </Button>
                 )}
 
