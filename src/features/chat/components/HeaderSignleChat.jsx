@@ -2,17 +2,21 @@
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChannelTab } from "@/features/chat/components/ChannelTab";
-export default function HeaderSignleChat({ handleDetail, conversation }) {
+export default function HeaderSignleChat({
+  channelTabs,
+  activeTab,
+  handleDetail,
+  conversation,
+}) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const [activeChannel, setActiveChannel] = useState("general");
-  const channelTabs = [
-    { id: "general", label: "#general" },
-    { id: "channel1", label: "#channel1" },
-    { id: "channel2", label: "#channel2" },
-  ];
-  console.log("conversation", conversation);
+  const [activeChannel, setActiveChannel] = useState(activeTab);
+
+  useEffect(() => {
+    setActiveChannel(activeTab);
+  }, [activeTab]);
+
   const partner =
     conversation.name ||
     conversation.members?.filter((member) => {
@@ -50,7 +54,12 @@ export default function HeaderSignleChat({ handleDetail, conversation }) {
           </div>
         </div>
       </div>
-      <ChannelTab tabs={channelTabs} activeTab={activeChannel} onTabChange={setActiveChannel} className="fixed top-0 right-0 left-0" />
+      <ChannelTab
+        tabs={channelTabs}
+        activeTab={activeChannel}
+        onTabChange={setActiveChannel}
+        className="fixed top-0 right-0 left-0"
+      />
     </div>
   );
 }

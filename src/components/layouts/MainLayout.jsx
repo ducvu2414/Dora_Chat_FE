@@ -328,7 +328,6 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.REVOKE_TOKEN, handleRevokeToken);
 
       socket.off(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
-
       socket.off(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
       socket.off(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
     };
