@@ -17,10 +17,10 @@ export function ContactCard({ contact, onDeleteFriend }) {
     }
 
     function onDelete() {
-        if (onDeleteFriend && contact.id) {
-            onDeleteFriend(contact.id);
+        if (onDeleteFriend && contact._id) {
+            onDeleteFriend(contact._id);
         } else {
-            console.log('Delete contact');
+            console.error("Contact ID is undefined:", contact);
         }
     }
 
