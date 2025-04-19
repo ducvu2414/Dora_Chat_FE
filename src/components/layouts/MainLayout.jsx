@@ -1,5 +1,5 @@
 import { SideBar } from "@/components/ui/side-bar";
-import { memo, Suspense, useEffect, useState, useTransition } from "react";
+import { memo, Suspense, useEffect, useRef, useState, useTransition } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import conversationApi from "@/api/conversation";
@@ -11,6 +11,13 @@ import {
   deleteMessageForMe,
   addConversation
 } from "../../features/chat/chatSlice";
+
+import {
+  setIncomingCall,
+  clearIncomingCall,
+  setCallStarted,
+  endCall,
+} from "../../features/chat/callSlice";
 import {
   setAmountNotify,
   setFriendOnlineStatus,
@@ -25,6 +32,8 @@ import {
 } from "../../features/friend/friendSlice";
 import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
+import IncomingCallModal from "../ui/IncomingCallModal";
+import SimplePeerService from "../../utils/peerService";
 
 const requests = [
   {
@@ -51,7 +60,8 @@ const MainLayout = () => {
     JSON.parse(localStorage.getItem("user") || "{}")
   );
   const userId = user?.current?._id || user?._id;
-
+  const call = useSelector((state) => state.call);
+  const hasInit = useRef(false);
   // Lấy conversations khi tải trang
   useEffect(() => {
     const fetchData = async () => {
@@ -86,11 +96,75 @@ const MainLayout = () => {
     }
 
     return () => {
-      if (socket) {
-        socket.close();
-      }
+
     };
   }, []);
+
+
+  useEffect(() => {
+    const handleNewUserCall = ({ conversationId, userId: callerId, peerId, type, startedAt, initiator }) => {
+      const callPath = `/call/${conversationId}`;
+      if (initiator && !location.pathname.startsWith(callPath)) {
+        dispatch(clearIncomingCall());
+        dispatch(setCallStarted({ startedAt }));
+        navigate(`${callPath}?type=${type}`, {
+          state: { conversation: conversations.find(c => c._id === conversationId), initiator, peerId },
+        });
+      } else if (!initiator) {
+        dispatch(setIncomingCall({ type, conversationId, callerId, peerId }));
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.NEW_USER_CALL, handleNewUserCall);
+    return () => {
+      socket.off(SOCKET_EVENTS.NEW_USER_CALL, handleNewUserCall);
+    };
+  }, [conversations, location.pathname, navigate, dispatch]);
+
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    socket.on(SOCKET_EVENTS.RECEIVE_SIGNAL, async ({ from, signal, conversationId }) => {
+      console.log("📡 [Background] RECEIVE_SIGNAL:", { from, signal, conversationId });
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      console.log("📡 [Background] Local stream:", stream);
+
+      console.log("📡 [Background] Local stream:", stream);
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log("📡 [Background] User:", user);
+      // Gán local stream (nếu bạn muốn render ra video)
+      const localVideoElement = document.getElementById("local-video");
+      if (localVideoElement) {
+        localVideoElement.srcObject = stream;
+      }
+
+      await SimplePeerService.init({
+        userId: user._id,
+        conversationId,
+        stream,
+        initiator: false,
+        type: "audio", // hoặc "video" nếu là video call
+      });
+      console.log("📡 [Background] SimplePeerService initialized");
+
+      // Sau khi init xong thì gọi nhận tín hiệu
+      SimplePeerService.receiveSignal({ from, signal, conversationId });
+    });
+
+    return () => {
+      socket.off(SOCKET_EVENTS.RECEIVE_SIGNAL);
+      socket.off(SOCKET_EVENTS.CALL_ENDED);
+    };
+  }, [dispatch, user._id]);
+
+
+
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
     if (!socket) return;
@@ -181,6 +255,7 @@ const MainLayout = () => {
 
     const handleAcceptFriend = (value) => {
       startTransition(() => {
+        console.log("handleAcceptFriend", value);
         dispatch(setNewFriend(value));
         dispatch(setMyRequestFriend(value._id));
       });
@@ -272,7 +347,9 @@ const MainLayout = () => {
 
         if (data.isTyping) {
           setTimeout(() => {
-            dispatch(setFriendTypingStatus({ friendId: data.userId, isTyping: false }));
+            dispatch(
+              setFriendTypingStatus({ friendId: data.userId, isTyping: false })
+            );
           }, 3000);
         }
       });
@@ -334,6 +411,21 @@ const MainLayout = () => {
             }
           >
             <Outlet />
+            <IncomingCallModal />
+            <video
+              id="local-video"
+              autoPlay
+              muted
+              playsInline
+              className="hidden"
+            />
+            <video
+              id="remote-video"
+              autoPlay
+              playsInline
+              className="hidden"
+            />
+
           </Suspense>
         )}
       </div>

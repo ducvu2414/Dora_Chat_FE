@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
+import path from "path";
 
 // Loading component
 const LoadingFallback = () => (
@@ -26,6 +27,8 @@ const UserInformationPage = React.lazy(() => import("@/page/UserInformationPage"
 const ContactsPage = React.lazy(() => import("@/page/ContactsPage"));
 const OtherPeopleInformation = React.lazy(() => import("@/page/OtherPeopleInformationPage"));
 const PreviewPage = React.lazy(() => import("@/page/PreviewPage"));
+
+const CallPage = React.lazy(() => import("@/features/chat/CallPage"));
 
 const withSuspense = (Component) => (
   <Suspense fallback={<LoadingFallback />}>
@@ -90,6 +93,11 @@ const routes = [
         path: "chat/:id",
         element: withSuspense(ChatSingle)
       },
+      {
+        path: "call/:conversationId",
+        element: withSuspense(CallPage)
+      }
+      ,
       {
         path: "user-information",
         element: withSuspense(UserInformationPage)
