@@ -214,6 +214,34 @@ const MainLayout = () => {
 
     const handleJoinConversation = (conversation) => {
       console.log("📥 Received JOIN_CONVERSATION:", conversation);
+      console.log("conversation._id:", conversation._id);
+      console.log("userId:", userId);
+      if (!conversation._id || !userId) {
+        console.error("❌ Invalid data - conversation._id:", conversation._id, "userId:", userId);
+        return;
+      }
+      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversation._id.toString(), () => {
+        console.log("✅ FE joined room:", conversation._id.toString());
+        socket.emit("JOINED_CONVERSATION", {
+          conversationId: conversation._id.toString(),
+          userId: userId,
+        });
+        console.log("📤 Sent JOINED_CONVERSATION:", {
+          conversationId: conversation._id.toString(),
+          userId: userId,
+        });
+      });
+      startTransition(() => {
+        dispatch(addConversation(conversation));
+        console.log("Added conversation to state:", conversation._id);
+      });
+    };
+
+    const handleNewGroupConversation = ({conversation, defaultChannel}) => {
+      console.log("📥 Received JOIN_CONVERSATION:", conversation);
+      console.log("DefaultChannel:", defaultChannel);
+      console.log("conversation._id:", conversation._id);
+      console.log("userId:", userId);
       if (!conversation._id || !userId) {
         console.error("❌ Invalid data - conversation._id:", conversation._id, "userId:", userId);
         return;
@@ -236,6 +264,7 @@ const MainLayout = () => {
     };
 
     socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
+    socket.on(SOCKET_EVENTS.NEW_GROUP_CONVERSATION, handleNewGroupConversation);
 
     const handleRevokeToken = ({ key }) => {
       if (codeRevokeRef.current !== key) {

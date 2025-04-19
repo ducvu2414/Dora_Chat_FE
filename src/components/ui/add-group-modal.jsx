@@ -65,15 +65,15 @@ export function AddGroupModal({ onClose, isOpen }) {
     );
   };
 
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     try {
       setLoading(true);
-      const response = conversationApi.createGroupConversation(
+      const response = await conversationApi.createGroupConversation(
         groupName,
         selectedFriends
       );
       if (response) {
-        window.location.href = "/home";
+        // window.location.href = "/home";
       }
     } catch (err) {
       console.error("Error creating group:", err);
