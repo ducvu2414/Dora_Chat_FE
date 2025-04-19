@@ -60,7 +60,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       setThumbnailUrl(generatedThumbnailUrl);
       setHoverVideoUrl(generatedHoverVideoUrl);
     } catch (error) {
-      console.warn("Video URL processing warning1:", error.message);
+      console.warn("Video URL processing warning:", error.message);
       setThumbnailUrl("/placeholder-video-thumbnail.jpg");
       setHoverVideoUrl(msg.content);
     }
