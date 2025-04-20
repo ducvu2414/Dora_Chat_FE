@@ -17,17 +17,47 @@ import Setting from "@assets/chat/setting_group.svg";
 import Trash from "@assets/chat/trash_icon.svg";
 import { motion } from "framer-motion";
 import { Check, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileList from "./detail_chat/FileList";
 import LinkList from "./detail_chat/LinkList";
 import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
+import friendApi from "@/api/friend";
+import { Spinner } from "@/page/Spinner";
+
 export default function MainDetail({ handleSetActiveTab, isConversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("John Doe");
   const [isMuted, setIsMuted] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        setLoading(true);
+        const response = await friendApi.fetchFriends();
+        console.log(response);
+        setFriends(
+          response.map((friend) => ({
+            id: friend._id,
+            name: friend.name,
+            username: friend.username,
+            avatar: friend.avatar,
+            avatarColor: friend.avatarColor,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching friends:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFriends();
+  }, []);
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
@@ -39,9 +69,15 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
       <Modal
         isOpen={isOpenAddUser}
         onClose={() => setIsOpenAddUser(false)}
-        title="Thêm thành viên"
+        title="Add member"
       >
-        <UserSelectionModal />
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          <UserSelectionModal users={friends} />
+        )}
       </Modal>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
@@ -89,7 +125,10 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
             />
           )}
         </div>
-        <div className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5 cursor-pointer" onClick={() => setIsMuted(!isMuted)}>
+        <div
+          className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5 cursor-pointer"
+          onClick={() => setIsMuted(!isMuted)}
+        >
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Bell} />
           </div>
