@@ -52,7 +52,6 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           }
         });
         setFriends(friendsData);
-      
       } catch (error) {
         console.error("Error fetching friends:", error);
       } finally {
@@ -150,72 +149,75 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             ></div>
           </div>
         </div>
-        <div className="flex items-center w-full mt-3 cursor-pointer" onClick={() => handleSetActiveTab({ tab: "members" })}>
+        <div
+          className="flex items-center w-full mt-3 cursor-pointer"
+          onClick={() => handleSetActiveTab({ tab: "members" })}
+        >
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Member} />
           </div>
-          <p className="text-[#086DC0] ml-2">Member ({conversation.members.length})</p>
-          <div
-            className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-          >
+          <p className="text-[#086DC0] ml-2">
+            Member ({conversation.members.length})
+          </p>
+          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
             <img src={ArrowRight} />
           </div>
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center ">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "photos/videos",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Picture} />
             </div>
             <p className="text-[#086DC0] ml-2">Photo/videos (125)</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "photos/videos",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
           <PictureList limit={6} />
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "files",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={File} />
             </div>
             <p className="text-[#086DC0] ml-2">Files (3)</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "files",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
           <FileList limit={3} />
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "links",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Link} />
             </div>
             <p className="text-[#086DC0] ml-2">Link</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "links",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
