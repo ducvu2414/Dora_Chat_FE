@@ -1,5 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Modal } from "@/components/ui/modal";
+import { motion } from "framer-motion";
+import { Check, Pencil } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Avatar from "@assets/chat/avatar.png";
@@ -15,17 +19,14 @@ import Member from "@assets/chat/member.svg";
 import Picture from "@assets/chat/picture_detail.svg";
 import Setting from "@assets/chat/setting_group.svg";
 import Trash from "@assets/chat/trash_icon.svg";
-import { motion } from "framer-motion";
-import { Check, Pencil } from "lucide-react";
-import { useState, useEffect } from "react";
 import FileList from "./detail_chat/FileList";
 import LinkList from "./detail_chat/LinkList";
 import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
-import { Spinner } from "@/page/Spinner";
+import memberApi from "@/api/member";
 
-export default function MainDetail({ handleSetActiveTab, isConversation }) {
+export default function MainDetail({ handleSetActiveTab, isConversation, conversationId }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("John Doe");
@@ -39,16 +40,20 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
       try {
         setLoading(true);
         const response = await friendApi.fetchFriends();
-        console.log(response);
-        setFriends(
-          response.map((friend) => ({
-            id: friend._id,
-            name: friend.name,
-            username: friend.username,
-            avatar: friend.avatar,
-            avatarColor: friend.avatarColor,
-          }))
-        );
+
+        const friendsData = [];
+        response.forEach(async (friend) => {
+          console.log("Friend:", friend);
+          if (!(await memberApi.isMember(conversationId, friend._id)).data) {
+            friendsData.push({
+              id: friend._id,
+              name: friend.name,
+              avatar: friend.avatar,
+            });
+          }
+        });
+        setFriends(friendsData);
+      
       } catch (error) {
         console.error("Error fetching friends:", error);
       } finally {
@@ -56,7 +61,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
       }
     };
     fetchFriends();
-  }, []);
+  }, [conversationId]);
 
   const handleEditClick = () => {
     setIsEditing(true);
