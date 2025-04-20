@@ -126,42 +126,56 @@ const MainLayout = () => {
       socket.connect();
     }
 
+    // socket.on(SOCKET_EVENTS.RECEIVE_SIGNAL, ({ from, signal, conversationId }) => {
+    //   console.log("📡 RECEIVE_SIGNAL (wait for user accept):", { from, signal, conversationId });
+
+    //   dispatch(setIncomingCall({
+    //     from,
+    //     signal,
+    //     conversationId,
+    //     type: 'audio', // hoặc bạn truyền `type` từ socket
+    //   }));
+    // });
+
     socket.on(SOCKET_EVENTS.RECEIVE_SIGNAL, async ({ from, signal, conversationId }) => {
-      console.log("📡 [Background] RECEIVE_SIGNAL:", { from, signal, conversationId });
+      console.log("📡 [MainLayout] RECEIVE_SIGNAL:", { from, signal });
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-      console.log("📡 [Background] Local stream:", stream);
-
-      console.log("📡 [Background] Local stream:", stream);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const user = JSON.parse(localStorage.getItem("user"));
-      console.log("📡 [Background] User:", user);
-      // Gán local stream (nếu bạn muốn render ra video)
-      const localVideoElement = document.getElementById("local-video");
-      if (localVideoElement) {
-        localVideoElement.srcObject = stream;
+
+      if (!peerService.isInitialized()) {
+        await peerService.init({
+          userId: user._id,
+          conversationId,
+          stream,
+          initiator: false,
+          type: "audio",
+        });
+        console.log("📡 [MainLayout] peerService initialized");
       }
 
-      await SimplePeerService.init({
-        userId: user._id,
-        conversationId,
-        stream,
-        initiator: false,
-        type: "audio", // hoặc "video" nếu là video call
-      });
-      console.log("📡 [Background] SimplePeerService initialized");
-
-      // Sau khi init xong thì gọi nhận tín hiệu
-      SimplePeerService.receiveSignal({ from, signal, conversationId });
+      peerService.receiveSignal({ from, signal, conversationId });
     });
+
+    socket.on(SOCKET_EVENTS.CALL_USER, ({ from, conversationId, fromName }) => {
+      console.log("📞 FE nhận CALL_USER từ:", { from, conversationId, fromName });
+
+      dispatch(setIncomingCall({
+        type: "audio",
+        callerId: from,
+        conversationId,
+        peerId: from,
+        fromName,
+      }));
+    });
+
 
     return () => {
       socket.off(SOCKET_EVENTS.RECEIVE_SIGNAL);
-      socket.off(SOCKET_EVENTS.CALL_ENDED);
+      socket.off(SOCKET_EVENTS.CALL_USER);
     };
-  }, [dispatch, user._id]);
+  }, []);
+
 
 
 

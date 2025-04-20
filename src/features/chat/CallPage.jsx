@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCallStarted } from "./callSlice";
@@ -12,13 +12,15 @@ export default function CallPage() {
     const type = searchParams.get("type");
     const dispatch = useDispatch();
     const currentCall = useSelector((state) => state.call.currentCall);
+    const hasStartedRef = useRef(false); // 👈 Dùng để đảm bảo chỉ gọi 1 lần
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
-        if (!currentCall && user && type && conversationId) {
+        if (!currentCall && user && type && conversationId && !hasStartedRef.current) {
             const peerId = uuidv4();
             console.log("📞 Initializing call with peerId:", peerId);
 
+            hasStartedRef.current = true; // Đánh dấu đã gọi rồi
             dispatch(
                 setCallStarted({
                     type,
@@ -29,24 +31,23 @@ export default function CallPage() {
                 })
             );
         }
-    }, [currentCall, conversationId, type, dispatch]);
+    }, [currentCall, type, conversationId, dispatch]);
 
-    console.log("📞 [CallPage] Current Call State:", currentCall);
+    useEffect(() => {
+        console.log("📞 [CallPage] Current Call State:", currentCall);
+    }, [currentCall]);
 
     if (!currentCall) {
         return (
-            <div style={{ padding: "20px", fontSize: "18px", color: "#333" }}>
+            <div className="flex items-center justify-center h-screen bg-white text-gray-800 text-lg">
                 🔄 Đang khởi tạo cuộc gọi...
             </div>
         );
     }
 
     return (
-        <div>
+        <div className="h-screen w-screen bg-black">
             {type === "audio" ? <AudioCallComponent /> : <VideoCallComponent />}
-            <video id="remote-video" autoPlay playsInline />
-            <video id="local-video" autoPlay muted playsInline />
-
         </div>
     );
 }
