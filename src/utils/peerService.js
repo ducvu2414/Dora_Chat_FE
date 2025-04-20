@@ -2,185 +2,122 @@ import SimplePeer from "simple-peer";
 import { socket } from "./socketClient";
 import { SOCKET_EVENTS } from "./constant";
 
-class SimplePeerService {
+class PeerService {
     constructor() {
-        this.peers = new Map(); // Map<userId, SimplePeer>
+        this.peer = null;
         this.localStream = null;
-        this.userId = null;
+        this.localPeerId = null;
         this.conversationId = null;
-        this.type = null;
-        this.initialized = false;
-        this.remoteStreamCallbacks = new Map(); // Map<userId|*, callback>
+        this.remoteStreamCallback = null;
+        this.onSignal = this._onSignal.bind(this);
+        this.config = {
+            iceServers: [
+                { urls: "stun:ss-turn2.xirsys.com" },
+                {
+                    username: "BqQedRrqX2gbyE-VQucoLtiCToWi3Txj95qC-_j77Tf6JIMtO0qW3-YLh6aGpxmwAAAAAGgDH_1nZ2R1Y2s=",
+                    credential: "e83406e2-1cd2-11f0-a3ab-0242ac140004",
+                    urls: [
+                        "turn:ss-turn2.xirsys.com:80?transport=udp",
+                        "turn:ss-turn2.xirsys.com:3478?transport=udp",
+                        "turn:ss-turn2.xirsys.com:80?transport=tcp",
+                        "turn:ss-turn2.xirsys.com:3478?transport=tcp",
+                        "turns:ss-turn2.xirsys.com:443?transport=tcp",
+                        "turns:ss-turn2.xirsys.com:5349?transport=tcp"
+                    ]
+                }
+            ]
+        };
     }
 
-    async init({ userId, conversationId, stream, initiator = false, type }) {
-        if (this.initialized) {
-            console.warn("🔁 peerService already initialized. Ending previous call.");
-            this.endCall(); // cleanup trước
-        }
-
-        this.userId = userId;
+    async init({ userId, peerId, conversationId, stream, initiator }) {
+        this.localPeerId = peerId;
         this.conversationId = conversationId;
         this.localStream = stream;
-        this.type = type;
-        this.initialized = true;
 
-        console.log("📡 [peerService] Initialized");
-
-        if (initiator) {
-            console.log("📞Socket emit SUBSCRIBE_CALL_AUDIO");
-            socket.emit(
-                type === "audio" ? SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO : SOCKET_EVENTS.SUBSCRIBE_CALL_VIDEO,
-                { conversationId, userId, peerId: this.userId }
-            );
-        }
-    }
-
-
-    onRemoteStream(userIdOrWildcard, callback) {
-        this.remoteStreamCallbacks.set(userIdOrWildcard, callback);
-    }
-
-    emitRemoteStream(userId, stream) {
-        if (this.remoteStreamCallbacks.has(userId)) {
-            this.remoteStreamCallbacks.get(userId)(stream, userId);
-        }
-        if (this.remoteStreamCallbacks.has('*')) {
-            this.remoteStreamCallbacks.get('*')(stream, userId);
-        }
-    }
-
-    isInitialized() {
-        return this.initialized;
-    }
-
-
-    _createPeer(partnerId, initiator) {
-        const peer = new SimplePeer({
+        this.peer = new SimplePeer({
             initiator,
             trickle: false,
-            stream: this.localStream,
+            stream,
+            config: this.config
         });
 
-        peer.on("signal", (signal) => {
+        // Gửi signal (offer / answer)
+        this.peer.on("signal", (signal) => {
             socket.emit(SOCKET_EVENTS.CALL_USER, {
-                from: this.userId,
+                from: this.localPeerId,
                 conversationId: this.conversationId,
                 signal,
             });
         });
 
-        peer.on("stream", (remoteStream) => {
-            console.log(`📡 Received stream from ${partnerId}`);
-            this.emitRemoteStream(partnerId, remoteStream);
-        });
-
-        peer.on("connect", () => {
-            console.log(`✅ Peer connected with ${partnerId}`);
-        });
-
-        peer.on("error", (err) => {
-            console.error(`❌ Peer error with ${partnerId}:`, err);
-        });
-
-        peer.on("close", () => {
-            console.log(`🔒 Peer closed with ${partnerId}`);
-            this.peers.delete(partnerId);
-        });
-
-        this.peers.set(partnerId, peer);
-    }
-
-    setOnRemoteStream(callback) {
-        this.onRemoteStream("*", callback);
-    }
-
-    /**
-     * Handle signal from another user
-     */
-    receiveSignal({ from, signal, conversationId }) {
-        if (conversationId !== this.conversationId) return;
-
-        if (!this.peers.has(from)) {
-            this._createPeer(from, false);
-        }
-
-        const peer = this.peers.get(from);
-        try {
-            peer.signal(signal);
-        } catch (e) {
-            console.warn("⚠️ Skipped duplicate or invalid signal from", from);
-        }
-    }
-
-    /**
-     * Register a callback for remote streams
-     */
-    onRemoteStream(userId = "*", callback) {
-        this.remoteStreamCallbacks.set(userId, callback);
-    }
-
-    /**
-     * End all peers and cleanup
-     */
-    endCall() {
-        this.peers.forEach((peer, id) => {
-            try {
-                console.log(`🔒 Ending call with ${id}`);
-                peer.destroy();
-            } catch (err) {
-                console.warn(`Error destroying peer ${id}`, err);
+        // Khi nhận được stream từ peer
+        this.peer.on("stream", (remoteStream) => {
+            if (this.remoteStreamCallback) {
+                this.remoteStreamCallback(remoteStream);
             }
         });
 
-        this.peers.clear();
-        this.remoteStreamCallbacks.clear();
+        this.peer.on("connect", () => console.log("✅ Peer connected"));
+        this.peer.on("error", (err) => console.error("❌ Peer error", err));
+        this.peer.on("close", () => console.log("🔒 Peer closed"));
 
-        this.localStream?.getTracks().forEach((track) => track.stop());
-        this.localStream = null;
-        this.userId = null;
-        this.conversationId = null;
-        this.type = null;
-        this.initialized = false;
+        // Lắng nghe signal từ server
+        socket.on(SOCKET_EVENTS.RECEIVE_SIGNAL, this.onSignal);
+
+        // Đăng ký vào room call
+        socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, {
+            conversationId,
+            userId,
+            peerId
+        });
     }
 
-    /**
-     * Toggle audio
-     */
-    toggleAudio() {
-        const audioTracks = this.localStream?.getAudioTracks();
-        if (audioTracks && audioTracks.length > 0) {
-            audioTracks[0].enabled = !audioTracks[0].enabled;
-            return !audioTracks[0].enabled;
+    _onSignal({ from, signal, conversationId }) {
+        if (conversationId !== this.conversationId) return;
+        if (!this.peer) return;
+        if (from === this.localPeerId) return;
+        this.peer.signal(signal);
+    }
+
+    onRemoteStream(cb) {
+        this.remoteStreamCallback = cb;
+    }
+
+    endCall() {
+        if (this.peer) {
+            this.peer.destroy();
+            this.peer = null;
         }
-        return false;
-    }
+        if (this.localStream) {
+            this.localStream.getTracks().forEach((track) => track.stop());
+            this.localStream = null;
+        }
 
-    /**
-     * Get all connected peers
-     */
-    getConnectedPeerIds() {
-        return Array.from(this.peers.keys());
+        socket.off(SOCKET_EVENTS.RECEIVE_SIGNAL, this.onSignal);
+        this.remoteStreamCallback = null;
+        this.localPeerId = null;
+        this.conversationId = null;
     }
 
     toggleAudio() {
-        const audioTracks = this.localStream?.getAudioTracks();
-        if (audioTracks && audioTracks.length > 0) {
-            audioTracks[0].enabled = !audioTracks[0].enabled;
-            return !audioTracks[0].enabled;
+        if (!this.localStream) return false;
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            return !audioTrack.enabled;
         }
         return false;
     }
 
     toggleVideo() {
-        const videoTracks = this.localStream?.getVideoTracks();
-        if (videoTracks && videoTracks.length > 0) {
-            videoTracks[0].enabled = !videoTracks[0].enabled;
-            return !videoTracks[0].enabled;
+        if (!this.localStream) return false;
+        const videoTrack = this.localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            return !videoTrack.enabled;
         }
         return false;
     }
 }
 
-const peerService = new SimplePeerService();
-export default peerService;
+export default new PeerService();

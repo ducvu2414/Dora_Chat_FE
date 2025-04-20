@@ -19,13 +19,16 @@ export default function HeaderSignleChat({ conversation }) {
   const peerId = uuidv4(); // Unique peerId for each call
 
   const handleCall = (type) => {
-    if (!conversation._id || !userId) return;
 
+    if (!conversation._id || !userId) return;
     const payload = {
       conversationId: conversation._id,
       userId,
       peerId,
+      type,
     };
+    console.log("🚀 ~ file: HeaderSignleChat.jsx:22 ~ handleCall ~ payload", payload);
+
 
     if (type === "audio") {
       socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);

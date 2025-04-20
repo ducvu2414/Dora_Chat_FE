@@ -14,6 +14,8 @@ export default function AudioCallComponent() {
     const [isConnecting, setIsConnecting] = useState(true);
     const localAudioRef = useRef(null);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const [startTime, setStartTime] = useState(null);
+    const [duration, setDuration] = useState(0);
 
     const partner =
         currentCall.conversation?.members?.find((m) => m.userId !== user._id) || {};
@@ -22,39 +24,58 @@ export default function AudioCallComponent() {
 
     const didInitRef = useRef(false);
 
+    // AudioCallComponent.jsx
     useEffect(() => {
         const startCall = async () => {
             if (didInitRef.current) return;
             didInitRef.current = true;
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log("🎧 Local stream ready");
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    sampleRate: { ideal: 44100 },
+                    channelCount: { ideal: 1 },
+                    echoCancellation: { ideal: true },
+                    noiseSuppression: { ideal: true },
+                    autoGainControl: { ideal: false },
+                }
+            });
 
+
+
+            localAudioRef.current.srcObject = stream;
+
+            // init peerService 1 lần với initiator đúng vai trò
             await peerService.init({
                 userId: user._id,
+                peerId: currentCall.peerId,            // uuid của bạn
                 conversationId: currentCall.conversationId,
                 stream,
                 initiator: currentCall.initiator,
-                type: "audio",
             });
 
-            console.log("📡 peerService initialized");
-            peerService.setOnRemoteStream((stream, partnerId) => {
-                setRemoteStreams((prev) => ({
-                    ...prev,
-                    [partnerId]: stream,
-                }));
+            // lắng nghe remote stream
+            peerService.onRemoteStream((stream) => {
+                setRemoteStreams((prev) => ({ ...prev, remote: stream }));
                 setIsConnecting(false);
             });
-
-            localAudioRef.current.srcObject = stream;
         };
 
         startCall();
-
         return () => {
             peerService.endCall();
         };
+    }, []);
+
+
+    useEffect(() => {
+        const handleEnded = ({ userId }) => {
+            console.log(`📴 Cuộc gọi đã kết thúc từ phía ${userId}`);
+            peerService.endCall();
+            dispatch(endCall());
+        };
+
+        socket.on(SOCKET_EVENTS.CALL_ENDED, handleEnded);
+        return () => socket.off(SOCKET_EVENTS.CALL_ENDED, handleEnded);
     }, []);
 
 
@@ -64,15 +85,20 @@ export default function AudioCallComponent() {
     };
 
     const handleEndCall = () => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000); // giây
+        console.log(`⏱️ Cuộc gọi kéo dài ${elapsed} giây`);
+        setDuration(elapsed);
         socket.emit(SOCKET_EVENTS.END_CALL, {
             conversationId: currentCall.conversationId,
             userId: currentCall.userId,
         });
+        peerService.endCall();
         dispatch(endCall());
     };
 
+
     return (
-        <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white relative">
+        <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white ">
             {isConnecting && (
                 <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
                     <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center mb-4">
@@ -84,6 +110,13 @@ export default function AudioCallComponent() {
                     <p className="text-gray-300">Đang kết nối...</p>
                 </div>
             )}
+
+            {duration > 0 && (
+                <div className="mt-4 text-sm text-gray-400">
+                    ⏱️ Thời gian cuộc gọi: {Math.floor(duration / 60)} phút {duration % 60} giây
+                </div>
+            )}
+
 
             {/* Local Audio (muted) */}
             <audio ref={localAudioRef} autoPlay muted />
@@ -99,9 +132,9 @@ export default function AudioCallComponent() {
                 />
             ))}
 
-            {/* UI Info + Controls */}
-            <div className="flex flex-col items-center justify-center mt-12">
-                <div className="w-24 h-24 rounded-full overflow-hidden mb-6">
+            {/* UI Info  Controls */}
+            <div className="flex flex-col items-center justify-center w-full h-full p-4 bg-gray-800 rounded-lg shadow-lg">
+                <div className="w-24 h-24 rounded-full overflow-hidden ">
                     {partnerAvatar ? (
                         <img
                             src={partnerAvatar}

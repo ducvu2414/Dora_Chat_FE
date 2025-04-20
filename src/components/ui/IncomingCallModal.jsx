@@ -24,6 +24,7 @@ export default function IncomingCallModal() {
                 fromName: incomingCall.fromName,
             })
         );
+        console.log("🚀 ~ file: IncomingCallModal.jsx:20 ~ handleAccept ~ incomingCall:", incomingCall);
         dispatch(clearIncomingCall());
         navigate(`/call/${incomingCall.conversationId}?type=${incomingCall.type}`);
     };

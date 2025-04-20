@@ -1,14 +1,17 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAction } from "@reduxjs/toolkit";
+
+export const endCall = createAction("call/end");
+
+const initialState = {
+    currentCall: null,
+    incomingCall: null,
+};
 
 const callSlice = createSlice({
     name: "call",
-    initialState: {
-        currentCall: null,
-        incomingCall: null,
-    },
+    initialState,
     reducers: {
         setCallStarted: (state, action) => {
-            console.log("✅ Reducer setCallStarted:", action.payload);
             state.currentCall = action.payload;
         },
         setIncomingCall: (state, action) => {
@@ -17,18 +20,19 @@ const callSlice = createSlice({
         clearIncomingCall: (state) => {
             state.incomingCall = null;
         },
-        endCall: (state) => {
+    },
+    extraReducers: (builder) => {
+        builder.addCase(endCall, (state) => {
             state.currentCall = null;
             state.incomingCall = null;
-        },
+        });
     },
 });
 
 export const {
     setCallStarted,
     setIncomingCall,
-    clearIncomingCall,
-    endCall,
+    clearIncomingCall
 } = callSlice.actions;
 
 export default callSlice.reducer;
