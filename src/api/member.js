@@ -9,6 +9,10 @@ const memberApi = {
             },
         });
     },
+
+    getMembers: (conversationId) => {
+        return axios.get(`api/members/${conversationId}`);
+    },
 }
 
 export default memberApi;

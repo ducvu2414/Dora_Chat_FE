@@ -26,7 +26,7 @@ import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 
-export default function MainDetail({ handleSetActiveTab, isConversation, conversationId }) {
+export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("John Doe");
@@ -43,8 +43,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation, convers
 
         const friendsData = [];
         response.forEach(async (friend) => {
-          console.log("Friend:", friend);
-          if (!(await memberApi.isMember(conversationId, friend._id)).data) {
+          if (!(await memberApi.isMember(conversation._id, friend._id)).data) {
             friendsData.push({
               id: friend._id,
               name: friend.name,
@@ -61,7 +60,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation, convers
       }
     };
     fetchFriends();
-  }, [conversationId]);
+  }, [conversation._id]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -87,7 +86,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation, convers
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
         <div className="flex items-center">
-          {isConversation ? (
+          {conversation.type ? (
             <>
               <div
                 onClick={() => setIsOpenAddUser(true)}
@@ -151,13 +150,12 @@ export default function MainDetail({ handleSetActiveTab, isConversation, convers
             ></div>
           </div>
         </div>
-        <div className="flex items-center w-full mt-3">
+        <div className="flex items-center w-full mt-3 cursor-pointer" onClick={() => handleSetActiveTab({ tab: "members" })}>
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Member} />
           </div>
-          <p className="text-[#086DC0] ml-2">Members (3)</p>
+          <p className="text-[#086DC0] ml-2">Member ({conversation.members.length})</p>
           <div
-            onClick={() => handleSetActiveTab({ tab: "members" })}
             className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
           >
             <img src={ArrowRight} />
@@ -274,7 +272,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation, convers
           </motion.div>
         </div>
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">
-          {isConversation ? (
+          {conversation.type ? (
             <>
               <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
                 <img src={Trash} alt="trash" />

@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/prop-types */
-import Avatar from "@assets/chat/avatar.png";
 import { useState, useRef } from "react";
 import { MoreVertical, UserPlus, MessageSquare, Trash2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
@@ -60,13 +59,13 @@ export default function MemberItem({
 
         return (
           <div
-            key={member.id}
+            key={member._id}
             ref={dropdownRef}
-            onClick={() => handleShowInfo(member.id)}
+            onClick={() => handleShowInfo(member._id)}
             className="relative flex items-center  justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
           >
             <div className="flex items-center gap-2">
-              <img src={Avatar} alt="icon" className="w-12 h-12 rounded-full" />
+              <img src={member.avatar} alt="icon" className="w-12 h-12 rounded-full" />
               <p className="text-sm font-medium">{member.name}</p>
             </div>
 
@@ -74,7 +73,7 @@ export default function MemberItem({
               onClick={(e) => {
                 e.stopPropagation();
                 checkPosition();
-                toggleDropdown(member.id);
+                toggleDropdown(member._id);
               }}
               className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
             >
@@ -83,7 +82,7 @@ export default function MemberItem({
 
             {/* Dropdown menu */}
             <Dropdown
-              isOpen={openDropdownId === member.id}
+              isOpen={openDropdownId === member._id}
               onClose={() => setOpenDropdownId(null)}
               align="left"
               verticalAlign={dropdownPosition}
