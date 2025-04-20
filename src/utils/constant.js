@@ -49,6 +49,7 @@ export const SOCKET_EVENTS = {
   CALL_USER: "call-user",
   ANSWER_CALL: "answer-call",
   RECEIVE_SIGNAL: "receive-signal",
+  LEAVE_CALL: "leave-call",
 
 
   // Last view tracking

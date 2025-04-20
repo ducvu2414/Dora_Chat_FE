@@ -46,7 +46,7 @@ export default function CallPage() {
     }
 
     return (
-        <div className="h-screen bg-black">
+        <div className="h-screen  bg-black">
             {type === "audio" ? <AudioCallComponent /> : <VideoCallComponent />}
         </div>
     );

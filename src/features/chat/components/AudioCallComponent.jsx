@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import peerService from "../../../utils/peerService";
 import { SOCKET_EVENTS } from "../../../utils/constant";
 import { socket } from "../../../utils/socketClient";
-import { endCall } from "../callSlice";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
+import { endCall, endCall as endCallAction } from "../callSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function AudioCallComponent() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { currentCall } = useSelector((state) => state.call);
     const [remoteStreams, setRemoteStreams] = useState({});
     const [isMuted, setIsMuted] = useState(false);
@@ -72,6 +74,9 @@ export default function AudioCallComponent() {
             console.log(`📴 Cuộc gọi đã kết thúc từ phía ${userId}`);
             peerService.endCall();
             dispatch(endCall());
+            setTimeout(() => {
+                navigate("/home");
+            }, 300);
         };
 
         socket.on(SOCKET_EVENTS.CALL_ENDED, handleEnded);
@@ -84,16 +89,37 @@ export default function AudioCallComponent() {
         setIsMuted(muted);
     };
 
-    const handleEndCall = () => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000); // giây
-        console.log(`⏱️ Cuộc gọi kéo dài ${elapsed} giây`);
-        setDuration(elapsed);
-        socket.emit(SOCKET_EVENTS.END_CALL, {
-            conversationId: currentCall.conversationId,
-            userId: currentCall.userId,
-        });
-        peerService.endCall();
-        dispatch(endCall());
+    // 2) Khi bất kỳ bên nào emit CALL_ENDED, cả hai đều endCall
+    useEffect(() => {
+        const onCallEnded = ({ conversationId }) => {
+            if (conversationId !== currentCall?.conversationId) return;
+            console.log("📞 Call ended by remote");
+            handleEndCall();
+        };
+        socket.on(SOCKET_EVENTS.CALL_ENDED, onCallEnded);
+        return () => {
+            socket.off(SOCKET_EVENTS.CALL_ENDED, onCallEnded);
+        };
+    }, [currentCall]);
+
+    // 3) Khi user nhấn nút kết thúc, endCall sạch sẽ và notify server qua peerService
+    const handleEndCall = async () => {
+        console.log("📞 Ending call...");
+        // 3.1 dọn peer & media & socket listeners
+        await peerService.endCall();
+
+        // 3.2 reset các ref/state để lần sau startCall() có thể chạy lại
+        didInitRef.current = false;
+        if (localAudioRef.current) localAudioRef.current.srcObject = null;
+        setRemoteStreams(null);
+        setIsConnecting(true);
+
+        // 3.3 reset redux
+        dispatch(endCallAction());
+
+        setTimeout(() => {
+            navigate("/home");
+        }, 300);
     };
 
 
@@ -163,7 +189,7 @@ export default function AudioCallComponent() {
                         onClick={handleEndCall}
                         className="p-4 rounded-full bg-red-600"
                     >
-                        <PhoneOff className="h-6 w-6" />
+                        <PhoneOff className="h-6 w-6 text-white" />
                     </button>
                 </div>
             </div>
