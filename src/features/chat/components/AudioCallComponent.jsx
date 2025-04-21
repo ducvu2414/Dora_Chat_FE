@@ -6,11 +6,13 @@ import { socket } from "../../../utils/socketClient";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { endCall, endCall as endCallAction } from "../callSlice";
 import { useNavigate } from "react-router-dom";
+// import ringtoneCallerFile from "../../../assets/ringcaller.mp3";
 
 export default function AudioCallComponent() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { currentCall } = useSelector((state) => state.call);
+    const { conversations } = useSelector((state) => state.chat);
     const [remoteStreams, setRemoteStreams] = useState({});
     const [isMuted, setIsMuted] = useState(false);
     const [isConnecting, setIsConnecting] = useState(true);
@@ -18,10 +20,15 @@ export default function AudioCallComponent() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const [startTime, setStartTime] = useState(null);
     const [duration, setDuration] = useState(0);
+    // const ringbackRef = useRef(null);
+    console.log("🚀 ~ file: AudioCallComponent.jsx:10 ~ AudioCallComponent ~ currentCall:", currentCall);
 
+    const conversationId = currentCall?.conversationId;
+    const conversation = conversations.find((c) => c._id === conversationId);
+    const members = conversation?.members || [];
     const partner =
-        currentCall.conversation?.members?.find((m) => m.userId !== user._id) || {};
-    const partnerName = partner?.name || "Đang kết nối...";
+        currentCall.conversation?.members?.find((m) => m.userId !== user._id) || members.find((m) => m.userId !== user._id);
+    const partnerName = currentCall?.fromName || partner?.name || "Người gọi";
     const partnerAvatar = partner?.avatar || "";
 
     const didInitRef = useRef(false);
@@ -31,6 +38,14 @@ export default function AudioCallComponent() {
         const startCall = async () => {
             if (didInitRef.current) return;
             didInitRef.current = true;
+
+            // ringbackRef.current = new Audio(ringtoneCallerFile);
+            // ringbackRef.current.loop = true;
+            // ringbackRef.current.volume = 0.8;
+            // await ringbackRef.current.play().catch(() => {
+            //     console.warn("⚠️ Cannot autoplay ringback tone (maybe blocked by browser)");
+            // });
+
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
@@ -46,10 +61,9 @@ export default function AudioCallComponent() {
 
             localAudioRef.current.srcObject = stream;
 
-            // init peerService 1 lần với initiator đúng vai trò
             await peerService.init({
                 userId: user._id,
-                peerId: currentCall.peerId,            // uuid của bạn
+                peerId: currentCall.peerId,
                 conversationId: currentCall.conversationId,
                 stream,
                 initiator: currentCall.initiator,
@@ -59,6 +73,11 @@ export default function AudioCallComponent() {
             peerService.onRemoteStream((stream) => {
                 setRemoteStreams((prev) => ({ ...prev, remote: stream }));
                 setIsConnecting(false);
+                // if (ringbackRef.current) {
+                //     ringbackRef.current.pause();
+                //     ringbackRef.current.currentTime = 0;
+                // }
+                setStartTime(Date.now());
             });
         };
 
@@ -67,6 +86,17 @@ export default function AudioCallComponent() {
             peerService.endCall();
         };
     }, []);
+
+
+    useEffect(() => {
+        if (!startTime) return;
+
+        const interval = setInterval(() => {
+            setDuration(Math.floor((Date.now() - startTime) / 1000));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startTime]);
 
 
     useEffect(() => {
@@ -123,6 +153,17 @@ export default function AudioCallComponent() {
     };
 
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (isConnecting) {
+                handleEndCall();
+            }
+        }, 30000);
+        return () => clearTimeout(timeout);
+    }, [isConnecting]);
+
+
+
     return (
         <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white ">
             {isConnecting && (
@@ -137,11 +178,6 @@ export default function AudioCallComponent() {
                 </div>
             )}
 
-            {duration > 0 && (
-                <div className="mt-4 text-sm text-gray-400">
-                    ⏱️ Thời gian cuộc gọi: {Math.floor(duration / 60)} phút {duration % 60} giây
-                </div>
-            )}
 
 
             {/* Local Audio (muted) */}
@@ -174,10 +210,16 @@ export default function AudioCallComponent() {
                             </span>
                         </div>
                     )}
+
+
                 </div>
                 <h2 className="text-xl font-semibold mb-2">{partnerName}</h2>
                 <p className="text-gray-400 mb-6">Cuộc gọi âm thanh</p>
-
+                {startTime && (
+                    <div className="mt-2 text-sm text-gray-400">
+                        ⏱️ {Math.floor(duration / 60)} phút {duration % 60} giây
+                    </div>
+                )}
                 <div className="flex space-x-6 mt-4">
                     <button
                         onClick={toggleMute}

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearIncomingCall, setCallStarted } from "../../features/chat/callSlice";
 import { SOCKET_EVENTS } from "../../utils/constant";
 import { socket } from "../../utils/socketClient";
+import ringtoneFile from "../../assets/ringtone.mp3";
 
 export default function IncomingCallModal() {
     const dispatch = useDispatch();
@@ -11,31 +12,55 @@ export default function IncomingCallModal() {
     const incomingCall = useSelector((state) => state.call.incomingCall);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-    if (!incomingCall) return null;
+    const ringtoneRef = useRef(new Audio(ringtoneFile));
+    const timeoutRef = useRef(null);
+
+    useEffect(() => {
+        if (incomingCall) {
+            ringtoneRef.current.loop = true;
+            ringtoneRef.current.play();
+
+            timeoutRef.current = setTimeout(() => {
+                handleReject(true);
+            }, 30000);
+        }
+
+        return () => {
+            ringtoneRef.current.pause();
+            ringtoneRef.current.currentTime = 0;
+            clearTimeout(timeoutRef.current);
+        };
+    }, [incomingCall]);
 
     const handleAccept = () => {
-        dispatch(
-            setCallStarted({
-                type: incomingCall.type,
-                conversationId: incomingCall.conversationId,
-                peerId: incomingCall.peerId,
-                userId: user._id,
-                initiator: false,
-                fromName: incomingCall.fromName,
-            })
-        );
-        console.log("🚀 ~ file: IncomingCallModal.jsx:20 ~ handleAccept ~ incomingCall:", incomingCall);
+        ringtoneRef.current.pause();
+        clearTimeout(timeoutRef.current);
+
+        dispatch(setCallStarted({
+            type: incomingCall.type,
+            conversationId: incomingCall.conversationId,
+            peerId: incomingCall.peerId,
+            userId: user._id,
+            initiator: false,
+            fromName: incomingCall.fromName,
+        }));
         dispatch(clearIncomingCall());
         navigate(`/call/${incomingCall.conversationId}?type=${incomingCall.type}`);
     };
 
-    const handleReject = () => {
+    const handleReject = (auto = false) => {
+        ringtoneRef.current.pause();
+        clearTimeout(timeoutRef.current);
+
         socket.emit(SOCKET_EVENTS.REJECT_CALL, {
             conversationId: incomingCall.conversationId,
             userId: user._id,
+            reason: auto ? "timeout" : "manual",
         });
         dispatch(clearIncomingCall());
     };
+
+    if (!incomingCall) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -50,7 +75,7 @@ export default function IncomingCallModal() {
                         Chấp nhận
                     </button>
                     <button
-                        onClick={handleReject}
+                        onClick={() => handleReject(false)}
                         className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                     >
                         Từ chối

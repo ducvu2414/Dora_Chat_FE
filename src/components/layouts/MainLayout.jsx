@@ -15,7 +15,9 @@ import {
   setIncomingCall,
   clearIncomingCall,
   setCallStarted,
+  endCall
 } from "../../features/chat/callSlice";
+
 import {
   setAmountNotify,
   setFriendOnlineStatus,
@@ -102,7 +104,7 @@ const MainLayout = () => {
         type,
         conversationId,
         callerId, fromName,
-        peerId,         // đây chính là peerId của caller
+        peerId,
         remotePeerId: null,
         conversation: conv,
       }));
@@ -117,6 +119,16 @@ const MainLayout = () => {
     };
   }, [conversations, dispatch, location.pathname, navigate]);
 
+  useEffect(() => {
+    const onRejected = ({ userId, reason }) => {
+      console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
+      dispatch(endCall())
+      navigate("/home");
+    };
+
+    socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+    return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+  }, []);
 
   // 5. Chat & friend events
   useEffect(() => {
