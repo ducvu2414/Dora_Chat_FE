@@ -1,16 +1,23 @@
 import { SideBar } from "@/components/ui/side-bar";
 import { memo, Suspense, useEffect, useState, useTransition } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
 import {
   setConversations,
-  updateConversation,
   addMessage,
   recallMessage,
   deleteMessageForMe,
-  addConversation
+  addConversation,
+  updateConversation,
 } from "../../features/chat/chatSlice";
+import {
+  setIncomingCall,
+  clearIncomingCall,
+  setCallStarted,
+  endCall
+} from "../../features/chat/callSlice";
+
 import {
   setAmountNotify,
   setFriendOnlineStatus,
@@ -25,28 +32,20 @@ import {
 } from "../../features/friend/friendSlice";
 import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
-
-const requests = [
-  {
-    id: 201,
-    avatar:
-      "https://s3-alpha-sig.figma.com/img/0dca/d322/bd3b28a9327f195eb0ce730500f0d0da?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=A85Yi8I9~KWqyXmqyfuBGHshdKrK8tThkb0O2PFT9r3RfGbUHEKPrNooEK6K1kWm3XxH7wkD8ow8hQJhCOW6~-NlzRvt~mwwd69qJg9jePW~hkCxxmmqJhQEX4AmeuMsXxQra5FhE15ZX0dtlvCN8y687T9BjrijhDOIr-RHOrSNsIbJ017SzZabBsEV0tmCsUfJtNheeabH9IO6LPD1aiMV-TnG0Y0S9Sf-Uw5VuS8la3pQx--qHVu9kiJpkNvJVOJs2Zfhkdtw69uR2EH80RhL7KMohgNOuaaoxeRDGDuJaH4~oTzvt9pfY~HnQf8gO37oWR2kQZ2ZdxsWMr28YA__",
-    name: "John Doe",
-    message: "Hi, I'd like to connect!",
-    time: "2 hours ago",
-  },
-  // Add more requests as needed
-];
+import IncomingCallModal from "../ui/IncomingCallModal";
 
 const MainLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { amountNotify } = useSelector((state) => state.friend) || {
     amountNotify: 0,
   };
-  const { conversations } = useSelector((state) => state.chat);
-  const [isPending, startTransition] = useTransition();
   const [socketInitialized, setSocketInitialized] = useState(false);
+  const { conversations } = useSelector((state) => state.chat);
+  const currentCall = useSelector((state) => state.call.currentCall);
+
+  const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("user") || "{}")
   );
@@ -176,6 +175,68 @@ const MainLayout = () => {
     };
   }, [socket, userId, conversations]);
 
+
+
+  useEffect(() => {
+    const handleNewUserCall = ({ conversationId, userId: callerId, peerId, type, initiator }) => {
+      console.log("⚡️ NEW_USER_CALL", { conversationId, callerId, peerId, type, initiator });
+      if (currentCall) {
+        console.log("📵 Bỏ qua NEW_USER_CALL vì đang trong cuộc gọi");
+        return;
+      }
+      const base = `/call/${conversationId}`;
+      if (location.pathname.startsWith(base)) return;
+      const conv = conversations.find(c => c._id === conversationId);
+      if (initiator) {
+        // caller
+        dispatch(clearIncomingCall());
+        dispatch(setCallStarted({ type, conversationId, initiator: true, peerId, remotePeerId: null, conversation: conv }));
+        console.log("caller", { type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv });
+        navigate(`${base}?type=${type}`, { state: { conversation: conv } });
+      } else {
+        // callee (room‑broadcast)
+        console.log("callee", { type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv });
+        dispatch(setIncomingCall({ type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv }));
+      }
+    };
+
+    const handleCallUser = ({ from: callerId, fromName, conversationId, type, peerId }) => {
+      console.log("⚡️ CALL_USER", { callerId, fromName, conversationId, type, peerId });
+      const base = `/call/${conversationId}`;
+      if (location.pathname.startsWith(base)) return;
+      const conv = conversations.find(c => c._id === conversationId);
+      console.log("handleCallUser", { type, conversationId, callerId, fromName, peerId, remotePeerId: null, conversation: conv });
+      dispatch(setIncomingCall({
+        type,
+        conversationId,
+        callerId, fromName,
+        peerId,
+        remotePeerId: null,
+        conversation: conv,
+      }));
+    };
+
+    socket.on(SOCKET_EVENTS.NEW_USER_CALL, handleNewUserCall);
+    socket.on(SOCKET_EVENTS.CALL_USER, handleCallUser);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NEW_USER_CALL, handleNewUserCall);
+      socket.off(SOCKET_EVENTS.CALL_USER, handleCallUser);
+    };
+  }, [conversations, dispatch, location.pathname, navigate]);
+
+  useEffect(() => {
+    const onRejected = ({ userId, reason }) => {
+      console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
+      dispatch(endCall())
+      navigate("/home");
+    };
+
+    socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+    return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+  }, []);
+
+
   useEffect(() => {
     if (!socket || !user?._id) return;
 
@@ -237,7 +298,8 @@ const MainLayout = () => {
       });
     };
 
-    const handleNewGroupConversation = ({conversation, defaultChannel}) => {
+    const handleNewGroupConversation = ({ conversation, defaultChannel }) => {
+
       console.log("📥 Received JOIN_CONVERSATION:", conversation);
       console.log("DefaultChannel:", defaultChannel);
       console.log("conversation._id:", conversation._id);
@@ -362,6 +424,7 @@ const MainLayout = () => {
             }
           >
             <Outlet />
+            <IncomingCallModal />
           </Suspense>
         )}
       </div>

@@ -126,15 +126,14 @@ export function Conversation({
       return member.userId !== idUser;
     });
   const avatarMessage = avatar || partner?.[0].avatar;
-  console.log("members", members);
-  console.log("partner", partner);
-  console.log("avata", avatarMessage);
+  // console.log("members", members);
+  // console.log("partner", partner);
+  // console.log("avata", avatarMessage);
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
-          isActive ? "bg-blue-100" : "hover:bg-gray-100"
-        } ${isPending ? "opacity-70" : ""}`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
+          } ${isPending ? "opacity-70" : ""}`}
         onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
