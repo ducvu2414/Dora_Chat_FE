@@ -12,6 +12,11 @@ const conversationApi = {
       userIds: members,
     });
   },
+  removeMemberFromConversation: (conversationId, memberId) => {
+    return axios.delete(
+      `/api/conversations/${conversationId}/members/${memberId}`
+    );
+  },
   getConversationById: (conversationId) => {
     return axios.get(`/api/conversations/${conversationId}`);
   },

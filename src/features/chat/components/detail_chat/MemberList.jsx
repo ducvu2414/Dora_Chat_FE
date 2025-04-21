@@ -5,6 +5,7 @@ import MemberItem from "./MemberItem";
 import { useState, useEffect } from "react";
 import { Spinner } from "@/page/Spinner";
 import memberApi from "@/api/member";
+import conversationApi from "@/api/conversation";
 
 export default function MemberList({ onBack, conversationId }) {
   const [membersState, setMembers] = useState(null);
@@ -34,8 +35,16 @@ export default function MemberList({ onBack, conversationId }) {
     alert(`Chuyển đến tin nhắn của ${member.name}`);
   };
 
-  const handleRemove = (member) => {
-    alert(`Đã xóa ${member.name} khỏi nhóm`);
+  const handleRemove = async (member) => {
+    try {
+      const responseRemoveMember = await conversationApi.removeMemberFromConversation(conversationId, member._id);
+      console.log(responseRemoveMember);
+    }
+    catch (error) {
+      console.error("Error removing member:", error);
+      alert("You cannot remove this member from the group chat");
+    }
+
   };
 
   return loading || !membersState ? (
