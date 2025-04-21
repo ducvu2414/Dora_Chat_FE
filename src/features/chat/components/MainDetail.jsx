@@ -36,6 +36,16 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const handleSubmit = async (selectedUserIds) => {
+    try {
+      const responseAddMembers = await conversationApi.addMembersToConversation(conversation._id, selectedUserIds);
+      console.log("Selected user IDs:", responseAddMembers);
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+      alert("You do not have permission to add members to this group");
+    }
+  };
+
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -80,7 +90,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <Spinner />
           </div>
         ) : (
-          <UserSelectionModal users={friends} />
+          <UserSelectionModal onSubmit={handleSubmit} users={friends} />
         )}
       </Modal>
       <div className="flex items-center justify-between">
@@ -112,7 +122,10 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
               type="text"
               value={name}
               onChange={async (e) => {
-                const responseName = await conversationApi.updateGroupName(conversation._id, e.target.value);
+                const responseName = await conversationApi.updateGroupName(
+                  conversation._id,
+                  e.target.value
+                );
                 setName(responseName.name);
               }}
               className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-32"

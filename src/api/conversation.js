@@ -7,6 +7,11 @@ const conversationApi = {
   createConversation: (userIds) => {
     return axios.post(`/api/conversations/individuals/${userIds}`);
   },
+  addMembersToConversation: (conversationId, members) => {
+    return axios.post(`/api/conversations/${conversationId}/members`, {
+      userIds: members,
+    });
+  },
   getConversationById: (conversationId) => {
     return axios.get(`/api/conversations/${conversationId}`);
   },

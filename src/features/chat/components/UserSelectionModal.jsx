@@ -25,6 +25,7 @@ export default function UserSelectionModal({
   const handleSubmit = () => {
     if (onSubmit) {
       onSubmit(selectedUsers);
+      console.log("Selected users:", selectedUsers);
     } else {
       console.log("Selected users:", selectedUsers);
     }
