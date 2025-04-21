@@ -26,7 +26,6 @@ import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
-import { set } from "lodash";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
@@ -36,6 +35,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [quantityMember, setQuantityMember] = useState(0);
 
   const handleSubmit = async (selectedUserIds) => {
     try {
@@ -66,6 +66,16 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             });
           }
         });
+        const membersInGroup = await memberApi.getMembers(conversation._id);
+        // quantity member
+        setQuantityMember(
+          membersInGroup.data.reduce((acc, member) => {
+            if (member.active) {
+              acc += 1;
+            }
+            return acc;
+          }, 0)
+        );
         setFriends(friendsData);
       } catch (error) {
         console.error("Error fetching friends:", error);
@@ -183,9 +193,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Member} />
           </div>
-          <p className="text-[#086DC0] ml-2">
-            Member ({conversation.members.length})
-          </p>
+          <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
           <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
             <img src={ArrowRight} />
           </div>
