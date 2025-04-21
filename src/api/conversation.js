@@ -15,7 +15,10 @@ const conversationApi = {
       name,
       members,
     });
-  }
+  },
+  updateGroupName: (conversationId, name) => {
+    return axios.patch(`/api/conversations/${conversationId}/name`, { name });
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

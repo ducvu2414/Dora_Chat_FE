@@ -25,11 +25,12 @@ import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
+import conversationApi from "@/api/conversation";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("John Doe");
+  const [name, setName] = useState(conversation.name);
   const [isMuted, setIsMuted] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
@@ -110,7 +111,10 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={async (e) => {
+                const responseName = await conversationApi.updateGroupName(conversation._id, e.target.value);
+                setName(responseName.name);
+              }}
               className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-32"
             />
           ) : (
