@@ -7,6 +7,16 @@ const conversationApi = {
   createConversation: (userIds) => {
     return axios.post(`/api/conversations/individuals/${userIds}`);
   },
+  addMembersToConversation: (conversationId, members) => {
+    return axios.post(`/api/conversations/${conversationId}/members`, {
+      userIds: members,
+    });
+  },
+  removeMemberFromConversation: (conversationId, memberId) => {
+    return axios.delete(
+      `/api/conversations/${conversationId}/members/${memberId}`
+    );
+  },
   getConversationById: (conversationId) => {
     return axios.get(`/api/conversations/${conversationId}`);
   },
@@ -15,7 +25,10 @@ const conversationApi = {
       name,
       members,
     });
-  }
+  },
+  updateGroupName: (conversationId, name) => {
+    return axios.patch(`/api/conversations/${conversationId}/name`, { name });
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

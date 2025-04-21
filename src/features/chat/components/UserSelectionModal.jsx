@@ -6,17 +6,15 @@ import { Search } from "lucide-react";
 import Avatar from "@assets/chat/avatar.png";
 
 export default function UserSelectionModal({
-  buttonText = "Thêm thành viên",
+  buttonText = "Add",
   onSubmit,
   initialSelectedUsers = [],
-  users = [...Array(10)].map((_, index) => ({
-    id: index + 1,
-    name: `User ${index + 1}`,
-  })),
+  users = [],
   message = null,
 }) {
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState(initialSelectedUsers);
+
 
   const toggleSelectUser = (id) => {
     setSelectedUsers((prev) =>
@@ -27,6 +25,7 @@ export default function UserSelectionModal({
   const handleSubmit = () => {
     if (onSubmit) {
       onSubmit(selectedUsers);
+      console.log("Selected users:", selectedUsers);
     } else {
       console.log("Selected users:", selectedUsers);
     }
@@ -47,7 +46,7 @@ export default function UserSelectionModal({
         <Search className="absolute w-5 h-5 text-[#086DC0] -translate-y-1/2 left-4 top-1/2" />
         <Input
           type="search"
-          placeholder="Tìm kiếm thành viên..."
+          placeholder="Search..."
           className="w-full border rounded-full pl-12 py-2 bg-gray-50 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#086DC0] focus:border-[#086DC0]"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

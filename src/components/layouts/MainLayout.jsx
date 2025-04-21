@@ -299,6 +299,7 @@ const MainLayout = () => {
     };
 
     const handleNewGroupConversation = ({ conversation, defaultChannel }) => {
+
       console.log("📥 Received JOIN_CONVERSATION:", conversation);
       console.log("DefaultChannel:", defaultChannel);
       console.log("conversation._id:", conversation._id);

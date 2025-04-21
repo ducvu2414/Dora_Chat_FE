@@ -1,43 +1,57 @@
 /* eslint-disable react/prop-types */
+
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import MemberItem from "./MemberItem";
+import { useState, useEffect } from "react";
+import { Spinner } from "@/page/Spinner";
+import memberApi from "@/api/member";
+import conversationApi from "@/api/conversation";
 
-const members = [
-  { id: "1", name: "THành lồng" },
-  { id: "2", name: "Huyền lồng" },
-  { id: "3", name: "Tâm Lon" },
-  { id: "4", name: "Quang Lồng" },
-  { id: "5", name: "Tâm Lon" },
-  { id: "6", name: "Quang Lồng" },
-  { id: "7", name: "Tâm Lon" },
-  { id: "8", name: "Quang Lồng" },
-  { id: "9", name: "Tâm Lon" },
-  { id: "10", name: "Quang Lồng" },
-  { id: "11", name: "Tâm Lon" },
-  { id: "12", name: "Quang Lồng" },
-  { id: "231", name: "Tâm Lon" },
-  { id: "421", name: "Quang Lồng" },
-  { id: "33132", name: "Tâm Lon" },
-  { id: "4214", name: "Quang Lồng" },
-  { id: "3214", name: "Tâm Lon" },
-  { id: "4341", name: "Quang Lồng" },
-  { id: "31341", name: "Tâm Lon" },
-  { id: "413411", name: "Quang Lồng" },
-];
-const handleAddFriend = (member) => {
-  alert(`Gửi lời mời kết bạn đến ${member.name}`);
-};
+export default function MemberList({ onBack, conversationId }) {
+  const [membersState, setMembers] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const handleMessage = (member) => {
-  alert(`Chuyển đến tin nhắn của ${member.name}`);
-};
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        setLoading(true);
+        const response = await memberApi.getMembers(conversationId);
+        setMembers(response.data);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const handleRemove = (member) => {
-  alert(`Đã xóa ${member.name} khỏi nhóm`);
-};
+    fetchMembers();
+  }, [conversationId]);
 
-export default function MemberList({ onBack }) {
-  return (
+  const handleAddFriend = (member) => {
+    alert(`Gửi lời mời kết bạn đến ${member.name}`);
+  };
+
+  const handleMessage = (member) => {
+    alert(`Chuyển đến tin nhắn của ${member.name}`);
+  };
+
+  const handleRemove = async (member) => {
+    try {
+      const responseRemoveMember = await conversationApi.removeMemberFromConversation(conversationId, member._id);
+      console.log(responseRemoveMember);
+    }
+    catch (error) {
+      console.error("Error removing member:", error);
+      alert("You cannot remove this member from the group chat");
+    }
+
+  };
+
+  return loading || !membersState ? (
+    <div className="flex justify-center my-8">
+      <Spinner />
+    </div>
+  ) : (
     <div>
       <div className="flex items-center mb-4">
         <div
@@ -46,11 +60,11 @@ export default function MemberList({ onBack }) {
         >
           <img src={ArrowRight} className="rotate-180" />
         </div>
-        <p className="text-lg font-bold text-[#086DC0] ml-2">Members (6)</p>
+        <p className="text-lg font-bold text-[#086DC0] ml-2">Members ({membersState.length})</p>
       </div>
       <div className="mt-4 overflow-auto h-[calc(100vh-7rem)]">
         <MemberItem
-          members={members}
+          members={membersState}
           onAddFriend={handleAddFriend}
           onMessage={handleMessage}
           onRemove={handleRemove}

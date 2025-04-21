@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
@@ -7,8 +6,15 @@ import { PhoneCall, Video } from "lucide-react";
 import { SOCKET_EVENTS } from "@/utils/constant";
 import { socket } from "@/utils/socketClient";
 import { v4 as uuidv4 } from "uuid";
+import { useState, useEffect } from "react";
+import { ChannelTab } from "@/features/chat/components/ChannelTab";
 
-export default function HeaderSignleChat({ conversation }) {
+export default function HeaderSignleChat({
+  channelTabs,
+  activeTab,
+  handleDetail,
+  conversation,
+}) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [activeChannel, setActiveChannel] = useState(activeTab);

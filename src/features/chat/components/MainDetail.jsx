@@ -1,5 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Modal } from "@/components/ui/modal";
+import { motion } from "framer-motion";
+import { Check, Pencil } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Avatar from "@assets/chat/avatar.png";
@@ -15,38 +19,110 @@ import Member from "@assets/chat/member.svg";
 import Picture from "@assets/chat/picture_detail.svg";
 import Setting from "@assets/chat/setting_group.svg";
 import Trash from "@assets/chat/trash_icon.svg";
-import { motion } from "framer-motion";
-import { Check, Pencil } from "lucide-react";
-import { useState } from "react";
 import FileList from "./detail_chat/FileList";
 import LinkList from "./detail_chat/LinkList";
 import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
-export default function MainDetail({ handleSetActiveTab, isConversation }) {
+import friendApi from "@/api/friend";
+import memberApi from "@/api/member";
+import conversationApi from "@/api/conversation";
+
+export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("John Doe");
+  const [name, setName] = useState(conversation.name);
   const [isMuted, setIsMuted] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [quantityMember, setQuantityMember] = useState(0);
+
+  const handleSubmit = async (selectedUserIds) => {
+    try {
+      const responseAddMembers = await conversationApi.addMembersToConversation(
+        conversation._id,
+        selectedUserIds
+      );
+      console.log("Selected user IDs:", responseAddMembers);
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+      alert("You do not have permission to add members to this group");
+    }
+  };
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        setLoading(true);
+        const response = await friendApi.fetchFriends();
+
+        const friendsData = [];
+        response.forEach(async (friend) => {
+          if (!(await memberApi.isMember(conversation._id, friend._id)).data) {
+            friendsData.push({
+              id: friend._id,
+              name: friend.name,
+              avatar: friend.avatar,
+            });
+          }
+        });
+        const membersInGroup = await memberApi.getMembers(conversation._id);
+        // quantity member
+        setQuantityMember(
+          membersInGroup.data.reduce((acc, member) => {
+            if (member.active) {
+              acc += 1;
+            }
+            return acc;
+          }, 0)
+        );
+        setFriends(friendsData);
+      } catch (error) {
+        console.error("Error fetching friends:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFriends();
+  }, [conversation._id]);
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
-  const handleSaveClick = () => {
-    setIsEditing(false);
+
+  const handleSaveClick = async () => {
+    try {
+      setIsEditing(false);
+      const responseName = await conversationApi.updateGroupName(
+        conversation._id,
+        name
+      );
+      setName(responseName.name);
+    } catch {
+      alert("You do not have permission to change the group name");
+      setName(conversation.name);
+    }
   };
+
   return (
     <>
       <Modal
         isOpen={isOpenAddUser}
         onClose={() => setIsOpenAddUser(false)}
-        title="Thêm thành viên"
+        title="Add member"
       >
-        <UserSelectionModal />
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          <UserSelectionModal onSubmit={handleSubmit} users={friends} />
+        )}
       </Modal>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
         <div className="flex items-center">
-          {isConversation ? (
+          {conversation.type ? (
             <>
               <div
                 onClick={() => setIsOpenAddUser(true)}
@@ -89,7 +165,10 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
             />
           )}
         </div>
-        <div className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5 cursor-pointer" onClick={() => setIsMuted(!isMuted)}>
+        <div
+          className="flex items-center w-full mt-5 border-b border-[#E7E7E7] pb-5 cursor-pointer"
+          onClick={() => setIsMuted(!isMuted)}
+        >
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Bell} />
           </div>
@@ -107,73 +186,73 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
             ></div>
           </div>
         </div>
-        <div className="flex items-center w-full mt-3">
+        <div
+          className="flex items-center w-full mt-3 cursor-pointer"
+          onClick={() => handleSetActiveTab({ tab: "members" })}
+        >
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Member} />
           </div>
-          <p className="text-[#086DC0] ml-2">Members (3)</p>
-          <div
-            onClick={() => handleSetActiveTab({ tab: "members" })}
-            className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-          >
+          <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
+          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
             <img src={ArrowRight} />
           </div>
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center ">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "photos/videos",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Picture} />
             </div>
             <p className="text-[#086DC0] ml-2">Photo/videos (125)</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "photos/videos",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
           <PictureList limit={6} />
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "files",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={File} />
             </div>
             <p className="text-[#086DC0] ml-2">Files (3)</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "files",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
           <FileList limit={3} />
         </div>
         <div className="w-full mt-3">
-          <div className="flex items-center">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() =>
+              handleSetActiveTab({
+                tab: "media",
+                media: "links",
+              })
+            }
+          >
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Link} />
             </div>
             <p className="text-[#086DC0] ml-2">Link</p>
-            <div
-              onClick={() =>
-                handleSetActiveTab({
-                  tab: "media",
-                  media: "links",
-                })
-              }
-              className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75"
-            >
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
@@ -230,7 +309,7 @@ export default function MainDetail({ handleSetActiveTab, isConversation }) {
           </motion.div>
         </div>
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">
-          {isConversation ? (
+          {conversation.type ? (
             <>
               <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
                 <img src={Trash} alt="trash" />
