@@ -3,10 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import peerService from "../../../utils/peerService";
 import { SOCKET_EVENTS } from "../../../utils/constant";
 import { socket } from "../../../utils/socketClient";
-import { Mic, MicOff, PhoneOff } from "lucide-react";
-import { endCall, endCall as endCallAction } from "../callSlice";
+import { Mic, MicOff, PhoneOff, Settings } from "lucide-react";
+import { endCall as endCallAction } from "../callSlice";
 import { useNavigate } from "react-router-dom";
-// import ringtoneCallerFile from "../../../assets/ringcaller.mp3";
 
 export default function AudioCallComponent() {
     const dispatch = useDispatch();
@@ -16,225 +15,280 @@ export default function AudioCallComponent() {
     const [remoteStreams, setRemoteStreams] = useState({});
     const [isMuted, setIsMuted] = useState(false);
     const [isConnecting, setIsConnecting] = useState(true);
+    const [audioDevices, setAudioDevices] = useState([]);
+    const [selectedDevice, setSelectedDevice] = useState("default");
+    const [showSettings, setShowSettings] = useState(false);
     const localAudioRef = useRef(null);
+    const localStreamRef = useRef(null);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const [startTime, setStartTime] = useState(null);
     const [duration, setDuration] = useState(0);
-    // const ringbackRef = useRef(null);
-    console.log("🚀 ~ file: AudioCallComponent.jsx:10 ~ AudioCallComponent ~ currentCall:", currentCall);
 
-    const conversationId = currentCall?.conversationId;
-    const conversation = conversations.find((c) => c._id === conversationId);
-    const members = conversation?.members || [];
-    const partner =
-        currentCall.conversation?.members?.find((m) => m.userId !== user._id) || members.find((m) => m.userId !== user._id);
-    const partnerName = currentCall?.fromName || partner?.name || "Người gọi";
-    const partnerAvatar = partner?.avatar || "";
+    const conversation = conversations.find(c => c._id === currentCall?.conversationId) || {};
+    const participants = conversation.members || [];
 
     const didInitRef = useRef(false);
 
-    // AudioCallComponent.jsx
+    // Load available audio devices
+    useEffect(() => {
+        const loadDevices = async () => {
+            try {
+                // Request permission first by getting a stream
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioInputs = devices.filter(device => device.kind === 'audioinput');
+                setAudioDevices(audioInputs);
+                console.log("📱 Available audio devices:", audioInputs);
+            } catch (err) {
+                console.error("❌ Error loading audio devices", err);
+            }
+        };
+
+        loadDevices();
+    }, []);
+
+    const getOptimalAudioConstraints = () => {
+        // Higher-quality audio constraints
+        return {
+            deviceId: selectedDevice ? { exact: selectedDevice } : undefined,
+            sampleRate: 48000,
+            sampleSize: 16,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true, // Enable autoGainControl for better background noise handling
+            latency: 0.01,
+            // Voice isolation for modern browsers that support it
+            ...(window.AudioContext && { voiceIsolation: true })
+        };
+    };
+
+    // Start or join call
     useEffect(() => {
         const startCall = async () => {
             if (didInitRef.current) return;
             didInitRef.current = true;
 
-            // ringbackRef.current = new Audio(ringtoneCallerFile);
-            // ringbackRef.current.loop = true;
-            // ringbackRef.current.volume = 0.8;
-            // await ringbackRef.current.play().catch(() => {
-            //     console.warn("⚠️ Cannot autoplay ringback tone (maybe blocked by browser)");
-            // });
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: getOptimalAudioConstraints()
+                });
 
+                const track = stream.getAudioTracks()[0];
+                console.log("🎧 Audio Track Settings:", track.getSettings());
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    sampleRate: { ideal: 44100 },
-                    channelCount: { ideal: 1 },
-                    echoCancellation: { ideal: true },
-                    noiseSuppression: { ideal: true },
-                    autoGainControl: { ideal: false },
+                // Apply audio processing constraints again directly to the track if needed
+                await track.applyConstraints(getOptimalAudioConstraints())
+                    .catch(e => console.warn("Could not apply additional constraints:", e));
+
+                // Apply gain if needed via AudioContext (advanced)
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    const gainNode = audioContext.createGain();
+
+                    // Adjust gain - values < 1 decrease volume, > 1 increase
+                    gainNode.gain.value = 1.2; // Slight boost to volume
+
+                    // Optional: Add a compressor for more consistent audio
+                    const compressor = audioContext.createDynamicsCompressor();
+                    compressor.threshold.value = -24;
+                    compressor.knee.value = 30;
+                    compressor.ratio.value = 12;
+                    compressor.attack.value = 0.003;
+                    compressor.release.value = 0.25;
+
+                    source.connect(compressor);
+                    compressor.connect(gainNode);
+
+                    const destination = audioContext.createMediaStreamDestination();
+                    gainNode.connect(destination);
+
+                    // Create new stream with processed audio
+                    const processedStream = new MediaStream();
+                    processedStream.addTrack(destination.stream.getAudioTracks()[0]);
+
+                    // Keep a reference to the original stream to properly clean up
+                    localStreamRef.current = stream;
+
+                    // Use the processed stream
+                    localAudioRef.current.srcObject = processedStream;
+
+                    // Initialize peer with processed audio
+                    await peerService.init({
+                        userId: user._id,
+                        peerId: currentCall.peerId,
+                        conversationId: currentCall.conversationId,
+                        stream: processedStream,
+                        initiator: currentCall.initiator,
+                    });
+                } catch (audioProcessingError) {
+                    console.warn("Advanced audio processing not available, using standard stream", audioProcessingError);
+                    // Fallback to standard audio
+                    localStreamRef.current = stream;
+                    localAudioRef.current.srcObject = stream;
+
+                    await peerService.init({
+                        userId: user._id,
+                        peerId: currentCall.peerId,
+                        conversationId: currentCall.conversationId,
+                        stream: stream,
+                        initiator: currentCall.initiator,
+                    });
                 }
-            });
 
-
-
-            localAudioRef.current.srcObject = stream;
-
-            await peerService.init({
-                userId: user._id,
-                peerId: currentCall.peerId,
-                conversationId: currentCall.conversationId,
-                stream,
-                initiator: currentCall.initiator,
-            });
-
-            // lắng nghe remote stream
-            peerService.onRemoteStream((stream) => {
-                setRemoteStreams((prev) => ({ ...prev, remote: stream }));
-                setIsConnecting(false);
-                // if (ringbackRef.current) {
-                //     ringbackRef.current.pause();
-                //     ringbackRef.current.currentTime = 0;
-                // }
-                setStartTime(Date.now());
-            });
+                // on remote stream
+                peerService.onRemoteStream((remoteStream, remoteId) => {
+                    setRemoteStreams(prev => ({ ...prev, [remoteId]: remoteStream }));
+                    setIsConnecting(false);
+                    if (!startTime) setStartTime(Date.now());
+                });
+            } catch (err) {
+                console.error("❌ Error accessing audio stream", err);
+                alert("Không thể truy cập vào microphone. Vui lòng kiểm tra quyền truy cập microphone của trình duyệt.");
+                handleEndCall();
+            }
         };
 
         startCall();
         return () => {
+            if (localStreamRef.current) {
+                localStreamRef.current.getTracks().forEach(track => track.stop());
+            }
             peerService.endCall();
         };
-    }, []);
+    }, [selectedDevice]);
 
+    // Change audio device
+    const changeAudioDevice = async (deviceId) => {
+        // Clean up existing stream
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => track.stop());
+        }
 
+        setSelectedDevice(deviceId);
+        // The useEffect will handle reconnection with the new device
+        didInitRef.current = false;
+    };
+
+    // track duration
     useEffect(() => {
         if (!startTime) return;
-
         const interval = setInterval(() => {
             setDuration(Math.floor((Date.now() - startTime) / 1000));
         }, 1000);
-
         return () => clearInterval(interval);
     }, [startTime]);
 
-
+    // handle end events
     useEffect(() => {
-        const handleEnded = ({ userId }) => {
-            console.log(`📴 Cuộc gọi đã kết thúc từ phía ${userId}`);
-            peerService.endCall();
-            dispatch(endCall());
-            setTimeout(() => {
-                navigate("/home");
-            }, 300);
-        };
+        const onEnded = () => handleEndCall();
+        socket.on(SOCKET_EVENTS.CALL_ENDED, onEnded);
+        return () => socket.off(SOCKET_EVENTS.CALL_ENDED, onEnded);
+    }, [currentCall]);
 
-        socket.on(SOCKET_EVENTS.CALL_ENDED, handleEnded);
-        return () => socket.off(SOCKET_EVENTS.CALL_ENDED, handleEnded);
-    }, []);
-
+    const handleEndCall = async () => {
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => track.stop());
+        }
+        await peerService.endCall();
+        didInitRef.current = false;
+        if (localAudioRef.current) localAudioRef.current.srcObject = null;
+        setRemoteStreams({});
+        setIsConnecting(true);
+        dispatch(endCallAction());
+        navigate('/home');
+    };
 
     const toggleMute = () => {
         const muted = peerService.toggleAudio();
         setIsMuted(muted);
     };
 
-    // 2) Khi bất kỳ bên nào emit CALL_ENDED, cả hai đều endCall
-    useEffect(() => {
-        const onCallEnded = ({ conversationId }) => {
-            if (conversationId !== currentCall?.conversationId) return;
-            console.log("📞 Call ended by remote");
-            handleEndCall();
-        };
-        socket.on(SOCKET_EVENTS.CALL_ENDED, onCallEnded);
-        return () => {
-            socket.off(SOCKET_EVENTS.CALL_ENDED, onCallEnded);
-        };
-    }, [currentCall]);
-
-    // 3) Khi user nhấn nút kết thúc, endCall sạch sẽ và notify server qua peerService
-    const handleEndCall = async () => {
-        console.log("📞 Ending call...");
-        // 3.1 dọn peer & media & socket listeners
-        await peerService.endCall();
-
-        // 3.2 reset các ref/state để lần sau startCall() có thể chạy lại
-        didInitRef.current = false;
-        if (localAudioRef.current) localAudioRef.current.srcObject = null;
-        setRemoteStreams(null);
-        setIsConnecting(true);
-
-        // 3.3 reset redux
-        dispatch(endCallAction());
-
-        setTimeout(() => {
-            navigate("/home");
-        }, 300);
-    };
-
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (isConnecting) {
-                handleEndCall();
-            }
-        }, 30000);
-        return () => clearTimeout(timeout);
-    }, [isConnecting]);
-
-
-
     return (
-        <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white ">
+        <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
             {isConnecting && (
                 <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
                     <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center mb-4">
                         <Mic className="h-12 w-12 text-white" />
                     </div>
-                    <h2 className="text-white text-2xl font-semibold mb-2">
-                        {partnerName}
-                    </h2>
-                    <p className="text-gray-300">Đang kết nối...</p>
+                    <h2 className="text-white text-2xl font-semibold mb-2">Đang kết nối...</h2>
                 </div>
             )}
 
-
-
-            {/* Local Audio (muted) */}
+            {/* Local audio muting */}
             <audio ref={localAudioRef} autoPlay muted />
 
-            {/* Remote Audio */}
-            {Object.entries(remoteStreams).map(([id, stream]) => (
-                <audio
-                    key={id}
-                    autoPlay
-                    ref={(el) => {
-                        if (el) el.srcObject = stream;
-                    }}
-                />
-            ))}
-
-            {/* UI Info  Controls */}
-            <div className="flex flex-col items-center justify-center w-full h-full p-4 bg-gray-800 rounded-lg shadow-lg">
-                <div className="w-24 h-24 rounded-full overflow-hidden ">
-                    {partnerAvatar ? (
-                        <img
-                            src={partnerAvatar}
-                            alt={partnerName}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-blue-600 flex items-center justify-center">
-                            <span className="text-white text-2xl font-bold">
-                                {partnerName.charAt(0).toUpperCase()}
-                            </span>
+            {/* Remote streams grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 w-full">
+                {Object.entries(remoteStreams).map(([peerId, stream]) => {
+                    const member = participants.find(m => m.peerId === peerId) || {};
+                    return (
+                        <div key={peerId} className="flex flex-col items-center bg-gray-800 p-2 rounded">
+                            <div className="w-16 h-16 rounded-full overflow-hidden mb-2">
+                                {member.avatar
+                                    ? <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                                    : <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+                                        <span className="text-white text-xl">{member.name?.charAt(0)}</span>
+                                    </div>}
+                            </div>
+                            <p className="text-sm mb-2 truncate">{member.name || 'Người dùng'}</p>
+                            <audio
+                                autoPlay
+                                ref={el => el && (el.srcObject = stream)}
+                            />
                         </div>
-                    )}
-
-
-                </div>
-                <h2 className="text-xl font-semibold mb-2">{partnerName}</h2>
-                <p className="text-gray-400 mb-6">Cuộc gọi âm thanh</p>
-                {startTime && (
-                    <div className="mt-2 text-sm text-gray-400">
-                        ⏱️ {Math.floor(duration / 60)} phút {duration % 60} giây
-                    </div>
-                )}
-                <div className="flex space-x-6 mt-4">
-                    <button
-                        onClick={toggleMute}
-                        className={`p-4 rounded-full ${isMuted ? "bg-red-500" : "bg-gray-700"}`}
-                    >
-                        {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-                    </button>
-                    <button
-                        onClick={handleEndCall}
-                        className="p-4 rounded-full bg-red-600"
-                    >
-                        <PhoneOff className="h-6 w-6 text-white" />
-                    </button>
-                </div>
+                    );
+                })}
             </div>
+
+            {/* Settings panel */}
+            {showSettings && (
+                <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h3 className="text-lg font-medium mb-2">Cài đặt âm thanh</h3>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1">Chọn microphone:</label>
+                        <select
+                            value={selectedDevice}
+                            onChange={(e) => changeAudioDevice(e.target.value)}
+                            className="w-full bg-gray-700 rounded px-3 py-2 text-sm"
+                        >
+                            {audioDevices.map(device => (
+                                <option key={device.deviceId} value={device.deviceId}>
+                                    {device.label || `Microphone ${device.deviceId.slice(0, 5)}...`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        onClick={() => setShowSettings(false)}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded"
+                    >
+                        Đóng
+                    </button>
+                </div>
+            )}
+
+            {/* Call controls */}
+            <div className="mt-auto p-4 flex items-center space-x-6">
+                <button onClick={toggleMute} className="p-4 rounded-full bg-gray-700">
+                    {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                </button>
+                <button onClick={() => setShowSettings(!showSettings)} className="p-4 rounded-full bg-gray-700">
+                    <Settings className="w-6 h-6" />
+                </button>
+                <button onClick={handleEndCall} className="p-4 rounded-full bg-red-600">
+                    <PhoneOff className="w-6 h-6 text-white" />
+                </button>
+            </div>
+
+            {/* Duration */}
+            {startTime && (
+                <div className="absolute top-4 right-4 text-gray-400">
+                    ⏱️ {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
+                </div>
+            )}
         </div>
     );
 }

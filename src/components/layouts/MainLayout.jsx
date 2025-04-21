@@ -34,6 +34,9 @@ import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 
+const requests = [
+];
+
 const MainLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
