@@ -26,6 +26,7 @@ import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
+import { set } from "lodash";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
@@ -38,7 +39,10 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
 
   const handleSubmit = async (selectedUserIds) => {
     try {
-      const responseAddMembers = await conversationApi.addMembersToConversation(conversation._id, selectedUserIds);
+      const responseAddMembers = await conversationApi.addMembersToConversation(
+        conversation._id,
+        selectedUserIds
+      );
       console.log("Selected user IDs:", responseAddMembers);
     } catch (error) {
       console.error("Error forwarding message:", error);
@@ -75,9 +79,21 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const handleEditClick = () => {
     setIsEditing(true);
   };
-  const handleSaveClick = () => {
-    setIsEditing(false);
+
+  const handleSaveClick = async () => {
+    try {
+      setIsEditing(false);
+      const responseName = await conversationApi.updateGroupName(
+        conversation._id,
+        name
+      );
+      setName(responseName.name);
+    } catch {
+      alert("You do not have permission to change the group name");
+      setName(conversation.name);
+    }
   };
+
   return (
     <>
       <Modal
@@ -121,13 +137,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <input
               type="text"
               value={name}
-              onChange={async (e) => {
-                const responseName = await conversationApi.updateGroupName(
-                  conversation._id,
-                  e.target.value
-                );
-                setName(responseName.name);
-              }}
+              onChange={(e) => setName(e.target.value)}
               className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-32"
             />
           ) : (
