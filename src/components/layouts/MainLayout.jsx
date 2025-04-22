@@ -15,7 +15,7 @@ import {
   setIncomingCall,
   clearIncomingCall,
   setCallStarted,
-  endCall
+  endCall,
 } from "../../features/chat/callSlice";
 
 import {
@@ -34,8 +34,7 @@ import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 
-const requests = [
-];
+const requests = [];
 
 const MainLayout = () => {
   const dispatch = useDispatch();
@@ -126,6 +125,12 @@ const MainLayout = () => {
             content: data.content,
           })
         );
+        dispatch(
+          updateConversation({
+            conversationId: data.conversationId,
+            lastMessage: data,
+          })
+        );
       });
     });
     socket.on(
@@ -178,45 +183,110 @@ const MainLayout = () => {
     };
   }, [socket, userId, conversations]);
 
-
-
   useEffect(() => {
-    const handleNewUserCall = ({ conversationId, userId: callerId, peerId, type, initiator }) => {
-      console.log("⚡️ NEW_USER_CALL", { conversationId, callerId, peerId, type, initiator });
+    const handleNewUserCall = ({
+      conversationId,
+      userId: callerId,
+      peerId,
+      type,
+      initiator,
+    }) => {
+      console.log("⚡️ NEW_USER_CALL", {
+        conversationId,
+        callerId,
+        peerId,
+        type,
+        initiator,
+      });
       if (currentCall) {
         console.log("📵 Bỏ qua NEW_USER_CALL vì đang trong cuộc gọi");
         return;
       }
       const base = `/call/${conversationId}`;
       if (location.pathname.startsWith(base)) return;
-      const conv = conversations.find(c => c._id === conversationId);
+      const conv = conversations.find((c) => c._id === conversationId);
       if (initiator) {
         // caller
         dispatch(clearIncomingCall());
-        dispatch(setCallStarted({ type, conversationId, initiator: true, peerId, remotePeerId: null, conversation: conv }));
-        console.log("caller", { type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv });
+        dispatch(
+          setCallStarted({
+            type,
+            conversationId,
+            initiator: true,
+            peerId,
+            remotePeerId: null,
+            conversation: conv,
+          })
+        );
+        console.log("caller", {
+          type,
+          conversationId,
+          callerId,
+          peerId,
+          remotePeerId: null,
+          conversation: conv,
+        });
         navigate(`${base}?type=${type}`, { state: { conversation: conv } });
       } else {
         // callee (room‑broadcast)
-        console.log("callee", { type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv });
-        dispatch(setIncomingCall({ type, conversationId, callerId, peerId, remotePeerId: null, conversation: conv }));
+        console.log("callee", {
+          type,
+          conversationId,
+          callerId,
+          peerId,
+          remotePeerId: null,
+          conversation: conv,
+        });
+        dispatch(
+          setIncomingCall({
+            type,
+            conversationId,
+            callerId,
+            peerId,
+            remotePeerId: null,
+            conversation: conv,
+          })
+        );
       }
     };
 
-    const handleCallUser = ({ from: callerId, fromName, conversationId, type, peerId }) => {
-      console.log("⚡️ CALL_USER", { callerId, fromName, conversationId, type, peerId });
+    const handleCallUser = ({
+      from: callerId,
+      fromName,
+      conversationId,
+      type,
+      peerId,
+    }) => {
+      console.log("⚡️ CALL_USER", {
+        callerId,
+        fromName,
+        conversationId,
+        type,
+        peerId,
+      });
       const base = `/call/${conversationId}`;
       if (location.pathname.startsWith(base)) return;
-      const conv = conversations.find(c => c._id === conversationId);
-      console.log("handleCallUser", { type, conversationId, callerId, fromName, peerId, remotePeerId: null, conversation: conv });
-      dispatch(setIncomingCall({
+      const conv = conversations.find((c) => c._id === conversationId);
+      console.log("handleCallUser", {
         type,
         conversationId,
-        callerId, fromName,
+        callerId,
+        fromName,
         peerId,
         remotePeerId: null,
         conversation: conv,
-      }));
+      });
+      dispatch(
+        setIncomingCall({
+          type,
+          conversationId,
+          callerId,
+          fromName,
+          peerId,
+          remotePeerId: null,
+          conversation: conv,
+        })
+      );
     };
 
     socket.on(SOCKET_EVENTS.NEW_USER_CALL, handleNewUserCall);
@@ -231,14 +301,13 @@ const MainLayout = () => {
   useEffect(() => {
     const onRejected = ({ userId, reason }) => {
       console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
-      dispatch(endCall())
+      dispatch(endCall());
       navigate("/home");
     };
 
     socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
     return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
   }, []);
-
 
   useEffect(() => {
     if (!socket || !user?._id) return;
@@ -281,20 +350,29 @@ const MainLayout = () => {
       console.log("conversation._id:", conversation._id);
       console.log("userId:", userId);
       if (!conversation._id || !userId) {
-        console.error("❌ Invalid data - conversation._id:", conversation._id, "userId:", userId);
+        console.error(
+          "❌ Invalid data - conversation._id:",
+          conversation._id,
+          "userId:",
+          userId
+        );
         return;
       }
-      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversation._id.toString(), () => {
-        console.log("✅ FE joined room:", conversation._id.toString());
-        socket.emit("JOINED_CONVERSATION", {
-          conversationId: conversation._id.toString(),
-          userId: userId,
-        });
-        console.log("📤 Sent JOINED_CONVERSATION:", {
-          conversationId: conversation._id.toString(),
-          userId: userId,
-        });
-      });
+      socket.emit(
+        SOCKET_EVENTS.JOIN_CONVERSATION,
+        conversation._id.toString(),
+        () => {
+          console.log("✅ FE joined room:", conversation._id.toString());
+          socket.emit("JOINED_CONVERSATION", {
+            conversationId: conversation._id.toString(),
+            userId: userId,
+          });
+          console.log("📤 Sent JOINED_CONVERSATION:", {
+            conversationId: conversation._id.toString(),
+            userId: userId,
+          });
+        }
+      );
       startTransition(() => {
         dispatch(addConversation(conversation));
         console.log("Added conversation to state:", conversation._id);
@@ -302,26 +380,34 @@ const MainLayout = () => {
     };
 
     const handleNewGroupConversation = ({ conversation, defaultChannel }) => {
-
       console.log("📥 Received JOIN_CONVERSATION:", conversation);
       console.log("DefaultChannel:", defaultChannel);
       console.log("conversation._id:", conversation._id);
       console.log("userId:", userId);
       if (!conversation._id || !userId) {
-        console.error("❌ Invalid data - conversation._id:", conversation._id, "userId:", userId);
+        console.error(
+          "❌ Invalid data - conversation._id:",
+          conversation._id,
+          "userId:",
+          userId
+        );
         return;
       }
-      socket.emit(SOCKET_EVENTS.JOIN_CONVERSATION, conversation._id.toString(), () => {
-        console.log("✅ FE joined room:", conversation._id.toString());
-        socket.emit("JOINED_CONVERSATION", {
-          conversationId: conversation._id.toString(),
-          userId: userId,
-        });
-        console.log("📤 Sent JOINED_CONVERSATION:", {
-          conversationId: conversation._id.toString(),
-          userId: userId,
-        });
-      });
+      socket.emit(
+        SOCKET_EVENTS.JOIN_CONVERSATION,
+        conversation._id.toString(),
+        () => {
+          console.log("✅ FE joined room:", conversation._id.toString());
+          socket.emit("JOINED_CONVERSATION", {
+            conversationId: conversation._id.toString(),
+            userId: userId,
+          });
+          console.log("📤 Sent JOINED_CONVERSATION:", {
+            conversationId: conversation._id.toString(),
+            userId: userId,
+          });
+        }
+      );
       startTransition(() => {
         dispatch(addConversation(conversation));
         console.log("Added conversation to state:", conversation._id);
@@ -366,7 +452,9 @@ const MainLayout = () => {
 
         if (data.isTyping) {
           setTimeout(() => {
-            dispatch(setFriendTypingStatus({ friendId: data.userId, isTyping: false }));
+            dispatch(
+              setFriendTypingStatus({ friendId: data.userId, isTyping: false })
+            );
           }, 3000);
         }
       });

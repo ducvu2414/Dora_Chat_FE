@@ -12,6 +12,9 @@ const conversationApi = {
       userIds: members,
     });
   },
+  deleteConversationBeforetime: (conversationId) => {
+    return axios.delete(`/api/conversations/${conversationId}`);
+  },
   removeMemberFromConversation: (conversationId, memberId) => {
     return axios.delete(
       `/api/conversations/${conversationId}/members/${memberId}`
