@@ -88,6 +88,19 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
     }
   };
 
+  const handleDisband = async () => {
+    try {
+      setIsOpenUser(false);
+      const responseDisband = await conversationApi.disbandGroup(
+        conversation._id
+      );
+      console.log("Selected user IDs:", responseDisband);
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+      alert("You do not have permission to decentralize in this group");
+    }
+  };
+
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -397,14 +410,11 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <ChooseModal
               isOpen={isConfirmModalOpen}
               onClose={() => setIsConfirmModalOpen(false)}
-              onConfirm={() => {
-                // Handle confirmation action
-                console.log("User confirmed the action");
-              }}
-              title="Delete Conversation"
-              message="Are you sure you want to delete this conversation? This action cannot be undone."
-              confirmText="Delete"
-              cancelText="Keep"
+              onConfirm={handleDisband}
+              title="Disband Conversation"
+              message="Are you sure you want to disband this conversation? This action cannot be undone."
+              confirmText="Disband"
+              cancelText="Cancel"
               confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
             />
             <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75" onClick={() => setIsConfirmModalOpen(true)}>
