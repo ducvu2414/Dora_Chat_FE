@@ -37,6 +37,14 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [loading, setLoading] = useState(false);
   const [quantityMember, setQuantityMember] = useState(0);
 
+  useEffect(() => {
+    setName(conversation.name);
+  }, [conversation.name]);
+
+  useEffect(() => {
+    setIsMuted(conversation.mute);
+  }, [conversation.mute]);
+
   const handleSubmit = async (selectedUserIds) => {
     try {
       const responseAddMembers = await conversationApi.addMembersToConversation(

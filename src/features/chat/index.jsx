@@ -92,9 +92,10 @@ export default function ChatSingle() {
 
   return (
     <>
-      {loading || !conversation || channels.length === 0 ? (
+    {console.log(loading, conversation, (conversation?.type ? channels.length === 0 : false))}
+      {loading || !conversation || (conversation?.type ? channels.length === 0 : false) ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
-          <Spinner />
+          <Spinner /> 
         </div>
       ) : (
         <div className="flex w-full h-screen">
@@ -104,7 +105,7 @@ export default function ChatSingle() {
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
               <HeaderSignleChat
                 channelTabs={channels}
-                activeTab={channels[0].id}
+                activeTab={channels[0]?.id}
                 handleDetail={setShowDetail}
                 conversation={conversation}
               />

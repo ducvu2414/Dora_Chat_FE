@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
