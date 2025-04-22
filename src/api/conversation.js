@@ -37,6 +37,9 @@ const conversationApi = {
       newAdminId: newLeaderId,
     });
   },
+  leaveConversation: (conversationId) => {
+    return axios.delete(`/api/conversations/members/leave/${conversationId}`);
+  },
   disbandGroup: (conversationId) => {
     return axios.delete(`/api/conversations/disband/${conversationId}`);
   },

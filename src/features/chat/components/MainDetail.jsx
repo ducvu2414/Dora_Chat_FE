@@ -26,11 +26,14 @@ import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
-import {ChooseModal} from "@/components/ui/choose-modal";
+import { ChooseModal } from "@/components/ui/choose-modal";
+import { set } from "lodash";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [isOpenOk, setIsOpenOk] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -171,9 +174,46 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
       setName(conversation.name);
     }
   };
+  const handleDeleteChat = async () => {
+    try {
+      await conversationApi.deleteConversationBeforetime(conversation._id);
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+    }
+  };
+  const handleLeaveChat = async () => {
+    try {
+      if (conversation.type) {
+        if (conversation.leaderId === memberLoginNow._id) {
+          setIsOpenOk(true);
+        } else {
+          await conversationApi.leaveConversation(conversation._id);
+        }
+      }
+    } catch (error) {
+      console.error("Error leaving chat:", error);
+    }
+  };
 
   return (
     <>
+      {/* kha */}
+      <ChooseModal
+        isOpen={isOpenOk}
+        onClose={() => setIsOpenOk(false)}
+        onConfirm={() => setIsOpenOk(false)}
+        title="Thông báo"
+        message="Bạn đang là leader của nhóm này, hãy chuyển quyền cho người khác trước khi rời nhóm"
+        isSingleButton={true}
+        confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
+      />
+      <ChooseModal
+        isOpen={isOpenDelete}
+        onClose={() => setIsOpenDelete(false)}
+        onConfirm={handleDeleteChat}
+        title="Cảnh báo"
+        message="Bạn chắc chắn muốn xóa cuộc trò chuyện này bên phía mình?"
+      />
       <Modal
         isOpen={isOpenAddUser}
         onClose={() => setIsOpenAddUser(false)}
@@ -417,7 +457,10 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
               cancelText="Cancel"
               confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
             />
-            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75" onClick={() => setIsConfirmModalOpen(true)}>
+            <div
+              className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
+              onClick={() => setIsConfirmModalOpen(true)}
+            >
               <img
                 src={Dissolve}
                 className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
@@ -432,18 +475,31 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">
           {conversation.type ? (
             <>
-              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+              <button
+                className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl"
+                onClick={() => {
+                  setIsOpenDelete(true);
+                }}
+              >
                 <img src={Trash} alt="trash" />
                 <span className="text-[#086DC0]  text-xs ml-2">Delete</span>
               </button>
-              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+              <button
+                className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl"
+                onClick={handleLeaveChat}
+              >
                 <img src={Leave} alt="leave" />
                 <span className="text-[#086DC0]  text-xs ml-2">Leave</span>
               </button>
             </>
           ) : (
             <>
-              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+              <button
+                className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl"
+                onClick={() => {
+                  setIsOpenDelete(true);
+                }}
+              >
                 <img src={Trash} alt="trash" />
                 <span className="text-[#086DC0]  text-xs ml-2">Delete</span>
               </button>

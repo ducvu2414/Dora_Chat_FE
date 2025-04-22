@@ -96,6 +96,39 @@ const chatSlice = createSlice({
         state.conversations[convIndex].lastMessageId = newLastMessage || null;
       }
     },
+
+    deleteAllMessages: (state, action) => {
+      const { conversationId } = action.payload;
+      if (state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+    },
+    updateLeader: (state, action) => {
+      const { conversationId, newAdmin } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        conversation.leaderId = newAdmin._id;
+      }
+    },
+    leaveConverSation: (state, action) => {
+      const { conversationId, member } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        conversation.members = conversation.members.filter((m) => m !== member);
+        // Nếu không còn thành viên nào, xóa cuộc trò chuyện
+        if (conversation.members.length === 0) {
+          state.conversations = state.conversations.filter(
+            (conv) => conv._id !== conversationId
+          );
+          delete state.messages[conversationId];
+          delete state.unread[conversationId];
+        }
+      }
+    },
     disbandConversation: (state, action) => {
       const { conversationId } = action.payload;
       const index = state.conversations.findIndex(
@@ -121,5 +154,8 @@ export const {
   recallMessage,
   deleteMessageForMe,
   disbandConversation,
+  deleteAllMessages,
+  updateLeader,
+  leaveConverSation,
 } = chatSlice.actions;
 export default chatSlice.reducer;
