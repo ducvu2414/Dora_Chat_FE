@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-"use client"
+"use client";
 
-import { Modal } from "./modal"
-import { Button } from "./button"
+import { Modal } from "./modal";
+import { Button } from "./button";
 
 export function ChooseModal({
   isOpen,
@@ -14,30 +14,37 @@ export function ChooseModal({
   cancelText = "Cancel",
   confirmButtonClass = "bg-blue-600 hover:bg-blue-700 text-white",
   cancelButtonClass = "bg-gray-200 hover:bg-gray-300 text-gray-800",
+  isSingleButton = false, // If true, only show the confirm button
 }) {
   const handleConfirm = () => {
     if (onConfirm) {
-      onConfirm()
+      onConfirm();
     }
-    onClose()
-  }
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-6">
-        {/* Message */}
         <p className="text-center text-gray-700">{message}</p>
 
-        {/* Action Buttons */}
         <div className="flex justify-center gap-4">
-          <Button className={confirmButtonClass} onClick={handleConfirm}>
-            {confirmText}
-          </Button>
-          <Button className={cancelButtonClass} onClick={onClose}>
-            {cancelText}
-          </Button>
+          {isSingleButton ? (
+            <Button className={confirmButtonClass} onClick={handleConfirm}>
+              OK
+            </Button>
+          ) : (
+            <>
+              <Button className={confirmButtonClass} onClick={handleConfirm}>
+                {confirmText}
+              </Button>
+              <Button className={cancelButtonClass} onClick={onClose}>
+                {cancelText}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>
-  )
+  );
 }

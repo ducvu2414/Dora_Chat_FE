@@ -102,6 +102,32 @@ const chatSlice = createSlice({
         state.messages[conversationId] = [];
       }
     },
+    updateLeader: (state, action) => {
+      const { conversationId, newAdmin } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        conversation.leaderId = newAdmin._id;
+      }
+    },
+    leaveConverSation: (state, action) => {
+      const { conversationId, member } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        conversation.members = conversation.members.filter((m) => m !== member);
+        // Nếu không còn thành viên nào, xóa cuộc trò chuyện
+        if (conversation.members.length === 0) {
+          state.conversations = state.conversations.filter(
+            (conv) => conv._id !== conversationId
+          );
+          delete state.messages[conversationId];
+          delete state.unread[conversationId];
+        }
+      }
+    },
   },
 });
 
@@ -115,5 +141,8 @@ export const {
   setActiveConversation,
   recallMessage,
   deleteMessageForMe,
+  deleteAllMessages,
+  updateLeader,
+  leaveConverSation,
 } = chatSlice.actions;
 export default chatSlice.reducer;

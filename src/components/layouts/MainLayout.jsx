@@ -10,6 +10,9 @@ import {
   deleteMessageForMe,
   addConversation,
   updateConversation,
+  deleteAllMessages,
+  updateLeader,
+  leaveConverSation,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -159,15 +162,61 @@ const MainLayout = () => {
         dispatch(
           updateConversation({
             conversationId: result.conversationId,
-            lastMessage: result,
+            lastMessage: null,
+          })
+        );
+        dispatch(
+          deleteAllMessages({
+            conversationId: result.conversationId,
+          })
+        );
+      });
+    });
+    socket.on(SOCKET_EVENTS.TRANSFER_ADMIN, ({ newAdmin, notifyMessage }) => {
+      startTransition(() => {
+        console.log("Received transfer admin:", newAdmin, notifyMessage);
+        dispatch(
+          updateLeader({
+            conversationId: notifyMessage.conversationId,
+            lastMessage: notifyMessage,
+            newAdmin: newAdmin,
           })
         );
         dispatch(
           updateConversation({
-            conversationId: result.conversationId,
-            lastMessage: null,
+            conversationId: notifyMessage.conversationId,
+            lastMessage: notifyMessage,
           })
         );
+        dispatch(
+          addMessage({
+            conversationId: notifyMessage.conversationId,
+            message: notifyMessage,
+          })
+        );
+      });
+    });
+    socket.on(SOCKET_EVENTS.LEAVE_CONVERSATION, ({ member, notifyMessage }) => {
+      startTransition(() => {
+        console.log("Received leave conversation:", member, notifyMessage);
+        // dispatch(
+        //   updateConversation({
+        //     conversationId: notifyMessage.conversationId,
+        //     lastMessage: notifyMessage,
+        //   })
+        // );
+        // dispatch(
+        //   addMessage({
+        //     conversationId: notifyMessage.conversationId,
+        //     message: notifyMessage,
+        //   })
+        // );
+        // dispatch(
+        //   leaveConverSation({
+        //     conversationId: notifyMessage.conversationId,
+        //     member: member._id,
+        //   })
+        // );
       });
     });
 

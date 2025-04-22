@@ -32,7 +32,7 @@ export const SOCKET_EVENTS = {
   LEAVE_CONVERSATION: "leave-conversation",
   NEW_GROUP_CONVERSATION: "new-group-conversation",
   DELETE_CONVERSATION: "delete-conversation",
-
+  TRANSFER_ADMIN: "transfer-admin",
   // Typing indicators
   TYPING: "typing",
   NOT_TYPING: "not-typing",

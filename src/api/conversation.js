@@ -37,7 +37,9 @@ const conversationApi = {
       newAdminId: newLeaderId,
     });
   },
-
+  leaveConversation: (conversationId) => {
+    return axios.delete(`/api/conversations/members/leave/${conversationId}`);
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

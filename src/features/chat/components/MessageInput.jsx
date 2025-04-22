@@ -284,7 +284,7 @@ export default function MessageInput({ onSend, isMember }) {
             <>
               <input
                 ref={inputRef}
-                value={input}
+                value={input || ""}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 type="text"
