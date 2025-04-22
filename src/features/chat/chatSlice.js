@@ -113,14 +113,14 @@ const chatSlice = createSlice({
       }
     },
     leaveConverSation: (state, action) => {
-      const { conversationId, member } = action.payload;
+      const { conversationId, member, disbanded } = action.payload;
       const conversation = state.conversations.find(
         (conv) => conv._id === conversationId
       );
       if (conversation) {
         conversation.members = conversation.members.filter((m) => m !== member);
         // Nếu không còn thành viên nào, xóa cuộc trò chuyện
-        if (conversation.members.length === 0) {
+        if (disbanded) {
           state.conversations = state.conversations.filter(
             (conv) => conv._id !== conversationId
           );
