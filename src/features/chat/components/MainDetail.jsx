@@ -26,6 +26,7 @@ import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
+import {ChooseModal} from "@/components/ui/choose-modal";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
@@ -39,6 +40,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [quantityMember, setQuantityMember] = useState(0);
   const [members, setMembers] = useState([]);
   const [memberLoginNow, setMemberLoginNow] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
@@ -420,7 +422,20 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
                 {"Decentralize"}
               </p>
             </div>
-            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75">
+            <ChooseModal
+              isOpen={isConfirmModalOpen}
+              onClose={() => setIsConfirmModalOpen(false)}
+              onConfirm={() => {
+                // Handle confirmation action
+                console.log("User confirmed the action");
+              }}
+              title="Delete Conversation"
+              message="Are you sure you want to delete this conversation? This action cannot be undone."
+              confirmText="Delete"
+              cancelText="Keep"
+              confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+            />
+            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75" onClick={() => setIsConfirmModalOpen(true)}>
               <img
                 src={Dissolve}
                 className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
