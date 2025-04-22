@@ -29,6 +29,7 @@ import conversationApi from "@/api/conversation";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
+  const [isOpenUser, setIsOpenUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -36,6 +37,8 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
   const [quantityMember, setQuantityMember] = useState(0);
+  const [members, setMembers] = useState([]);
+  const [memberLoginNow, setMemberLoginNow] = useState(null);
 
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
@@ -69,6 +72,20 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
     }
   };
 
+  const handleDecentralize = async (selectedUserId) => {
+    try {
+      setIsOpenUser(false);
+      const responseTransferAdmin = await conversationApi.transferAdmin(
+        conversation._id,
+        selectedUserId[0]
+      );
+      console.log("Selected user IDs:", responseTransferAdmin);
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+      alert("You do not have permission to decentralize in this group");
+    }
+  };
+
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -77,6 +94,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
 
         const friendsData = [];
         response.forEach(async (friend) => {
+          console.log(conversation._id, friend._id);
           if (!(await memberApi.isMember(conversation._id, friend._id)).data) {
             friendsData.push({
               id: friend._id,
@@ -86,6 +104,22 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           }
         });
         const membersInGroup = await memberApi.getMembers(conversation._id);
+        const memberLoginNow = await memberApi.getByConversationIdAndUserId(
+          conversation._id,
+          JSON.parse(localStorage.getItem("user"))._id
+        );
+        setMemberLoginNow(memberLoginNow.data);
+        const membersInGroupFilter = membersInGroup.data.filter(
+          (member) => member._id !== memberLoginNow.data._id
+        );
+        setMembers(
+          membersInGroupFilter.map((member) => ({
+            id: member._id,
+            name: member.name,
+            avatar: member.avatar,
+            active: member.active,
+          }))
+        );
         // quantity member
         setQuantityMember(
           membersInGroup.data.reduce((acc, member) => {
@@ -136,6 +170,26 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           </div>
         ) : (
           <UserSelectionModal onSubmit={handleSubmit} users={friends} />
+        )}
+      </Modal>
+      <Modal
+        isOpen={isOpenUser}
+        onClose={() => setIsOpenUser(false)}
+        title="Choose a new team leader before leaving"
+      >
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          (console.log("members", members),
+          (
+            <UserSelectionModal
+              buttonText={"Confirm"}
+              onSubmit={handleDecentralize}
+              users={members}
+            />
+          ))
         )}
       </Modal>
       <div className="flex items-center justify-between">
@@ -283,7 +337,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         </div>
         <div className="w-full mt-3">
           {/* Header */}
-          {conversation.type ? (
+          {conversation.type && conversation.leaderId === memberLoginNow?._id ? (
             <div
               className="flex items-center cursor-pointer"
               onClick={() => setIsOpenSetting(!isOpenSetting)}
@@ -314,25 +368,39 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             transition={{ duration: 0.3 }}
             className="px-4 mt-2 overflow-hidden"
           >
-            {[
-              { img: CheckDecentraliza, text: "Approve members (2)" },
-              { img: Decentraliza, text: "Decentralize" },
-              { img: Dissolve, text: "Disband" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
-              >
-                <img
-                  src={item.img}
-                  className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
-                  alt="Icon"
-                />
-                <p className="text-[#F49300] font-bold text-sm ml-1">
-                  {item.text}
-                </p>
-              </div>
-            ))}
+            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75">
+              <img
+                src={CheckDecentraliza}
+                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
+                alt="Icon"
+              />
+              <p className="text-[#F49300] font-bold text-sm ml-1">
+                {"Approve members (2)"}
+              </p>
+            </div>
+            <div
+              className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
+              onClick={() => setIsOpenUser(true)}
+            >
+              <img
+                src={Decentraliza}
+                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
+                alt="Icon"
+              />
+              <p className="text-[#F49300] font-bold text-sm ml-1">
+                {"Decentralize"}
+              </p>
+            </div>
+            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75">
+              <img
+                src={Dissolve}
+                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
+                alt="Icon"
+              />
+              <p className="text-[#F49300] font-bold text-sm ml-1">
+                {"Disband"}
+              </p>
+            </div>
           </motion.div>
         </div>
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">

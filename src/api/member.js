@@ -13,6 +13,10 @@ const memberApi = {
     getMembers: (conversationId) => {
         return axios.get(`api/members/${conversationId}`);
     },
+
+    getByConversationIdAndUserId: (conversationId, userId) => {
+        return axios.get(`api/members/${conversationId}/${userId}`);
+    },
 }
 
 export default memberApi;

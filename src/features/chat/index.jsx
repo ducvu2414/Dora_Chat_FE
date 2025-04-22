@@ -14,6 +14,7 @@ import HeaderSignleChat from "./components/HeaderSignleChat";
 import MessageInput from "./components/MessageInput";
 import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
+import memberApi from "@/api/member";
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
@@ -23,6 +24,7 @@ export default function ChatSingle() {
   const [conversation, setConversation] = useState(null);
   const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState(null);
+  const [isMember, setIsMember] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       if (!conversationId) return;
@@ -38,10 +40,12 @@ export default function ChatSingle() {
           channels = await channelApi.getAllChannelByConversationId(
             conversationId
           );
+          const isMember = (await memberApi.isMember(conversationId, JSON.parse(localStorage.getItem('user'))._id)).data;
           const mappedChannels = channels.map((channel) => ({
             id: channel._id,
             label: channel.name,
           }));
+          setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
           setActiveChannel(channels[0]?._id || null);
@@ -126,7 +130,7 @@ export default function ChatSingle() {
                 setActiveChannel={setActiveChannel}
               />
               <ChatBox messages={conversationMessages} />
-              <MessageInput onSend={handleSendMessage} />
+              <MessageInput onSend={handleSendMessage} isMember={isMember} />
             </div>
 
             {/* DetailChat*/}
