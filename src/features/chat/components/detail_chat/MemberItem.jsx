@@ -87,7 +87,7 @@ export default function MemberItem({
               align="left"
               verticalAlign={dropdownPosition}
             >
-              <DropdownItem icon={UserPlus} onClick={() => onAddFriend(member)}>
+              {/* <DropdownItem icon={UserPlus} onClick={() => onAddFriend(member)}>
                 Kết bạn
               </DropdownItem>
               <DropdownItem
@@ -95,7 +95,7 @@ export default function MemberItem({
                 onClick={() => onMessage(member)}
               >
                 Nhắn tin
-              </DropdownItem>
+              </DropdownItem> */}
               <DropdownItem icon={Trash2} onClick={() => onRemove(member)}>
                 Xóa khỏi nhóm
               </DropdownItem>

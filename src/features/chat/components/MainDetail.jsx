@@ -101,7 +101,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
       console.log("Selected user IDs:", responseAddManager);
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("You do not have permission to decentralize in this group");
+      alert("You do not add manager for this member in group");
     }
   };
 
