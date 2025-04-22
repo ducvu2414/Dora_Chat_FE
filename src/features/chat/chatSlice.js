@@ -96,6 +96,17 @@ const chatSlice = createSlice({
         state.conversations[convIndex].lastMessageId = newLastMessage || null;
       }
     },
+    disbandConversation: (state, action) => {
+      const { conversationId } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations.splice(index, 1);
+        delete state.messages[conversationId];
+        delete state.unread[conversationId];
+      }
+    },
   },
 });
 
@@ -109,5 +120,6 @@ export const {
   setActiveConversation,
   recallMessage,
   deleteMessageForMe,
+  disbandConversation,
 } = chatSlice.actions;
 export default chatSlice.reducer;

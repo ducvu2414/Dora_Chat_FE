@@ -10,6 +10,7 @@ import {
   deleteMessageForMe,
   addConversation,
   updateConversation,
+  disbandConversation,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -414,8 +415,27 @@ const MainLayout = () => {
       });
     };
 
+    const handleDisbandedConversation = ({ conversationId }) => {
+      console.log("📥 Received JOIN_CONVERSATION:", conversationId);
+      socket.emit(SOCKET_EVENTS.HIDE_CONVERSATION, conversationId.toString());
+      dispatch(
+        disbandConversation({
+          conversationId: conversationId.toString(),
+          userId: userId,
+        })
+      );
+      navigate("/home");
+      startTransition(() => {
+        console.log("Added conversation to state:", conversationId);
+      });
+    };
+
     socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
     socket.on(SOCKET_EVENTS.NEW_GROUP_CONVERSATION, handleNewGroupConversation);
+    socket.on(
+      SOCKET_EVENTS.CONVERSATION_DISBANDED,
+      handleDisbandedConversation
+    );
 
     const handleRevokeToken = ({ key }) => {
       if (codeRevokeRef.current !== key) {
