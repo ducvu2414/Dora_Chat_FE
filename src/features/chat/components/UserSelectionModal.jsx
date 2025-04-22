@@ -15,7 +15,6 @@ export default function UserSelectionModal({
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState(initialSelectedUsers);
 
-
   const toggleSelectUser = (id) => {
     setSelectedUsers((prev) =>
       prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]

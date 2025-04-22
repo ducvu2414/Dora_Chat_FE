@@ -1,25 +1,24 @@
 /* eslint-disable react/prop-types */
+import { ChannelTab } from "@/features/chat/components/ChannelTab";
+import { SOCKET_EVENTS } from "@/utils/constant";
+import { socket } from "@/utils/socketClient";
+import Avatar from "@assets/chat/avatar.png";
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PhoneCall, Video } from "lucide-react";
-import { SOCKET_EVENTS } from "@/utils/constant";
-import { socket } from "@/utils/socketClient";
 import { v4 as uuidv4 } from "uuid";
-import { useState, useEffect } from "react";
-import { ChannelTab } from "@/features/chat/components/ChannelTab";
-import Avatar from "@assets/chat/avatar.png";
 
 export default function HeaderSignleChat({
   channelTabs,
   activeTab,
   handleDetail,
   conversation,
+  setActiveChannel,
 }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const [activeChannel, setActiveChannel] = useState(activeTab);
   const userId = user._id;
   const partner =
     conversation.name ||
@@ -31,7 +30,6 @@ export default function HeaderSignleChat({
   const name = conversation.name || partner?.name || partner?.username;
 
   const peerId = uuidv4();
-
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
     const payload = {
@@ -66,7 +64,7 @@ export default function HeaderSignleChat({
   }, [activeTab]);
 
   return (
-    <div className="relative z-10 flex flex-col shadow-md w-full h-auto ">
+    <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
           src={Avatar}
@@ -83,19 +81,19 @@ export default function HeaderSignleChat({
         </div>
         <div className="flex flex-row ml-auto space-x-4">
           <button
-            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
+            className="p-2 duration-200 ease-in-out border-none cursor-pointer hover:scale-110"
             onClick={() => handleCall("audio")}
           >
             <img src={Call} alt="Call" />
           </button>
           <button
-            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
+            className="p-2 duration-200 ease-in-out border-none cursor-pointer hover:scale-110"
             onClick={() => handleCall("video")}
           >
             <img src={VideoCall} alt="Video Call" />
           </button>
           <div
-            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
+            className="p-2 duration-200 ease-in-out border-none cursor-pointer hover:scale-110"
             onClick={() => handleDetail((prev) => !prev)}
           >
             <img src={DetailChatIcon} alt="Detail Chat" />
@@ -107,9 +105,9 @@ export default function HeaderSignleChat({
       ) : (
         <ChannelTab
           tabs={channelTabs}
-          activeTab={activeChannel}
+          activeTab={activeTab}
           onTabChange={setActiveChannel}
-          className="fixed top-0 right-0 left-0"
+          className="fixed top-0 left-0 right-0"
         />
       )}
     </div>

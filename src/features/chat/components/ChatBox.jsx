@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
 /* eslint-disable react/prop-types */
 export default function ChatBox({ messages }) {
+  console.log("messages", messages);
   const chatContainerRef = useRef(null);
 
   // Tự động cuộn xuống khi có tin nhắn mới

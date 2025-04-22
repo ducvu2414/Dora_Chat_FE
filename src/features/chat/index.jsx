@@ -23,70 +23,81 @@ export default function ChatSingle() {
   const conversationMessages = messages[conversationId] || [];
   const [conversation, setConversation] = useState(null);
   const [channels, setChannels] = useState([]);
-  const [loading, setLoading] = useState(false);
-const [isMember, setIsMember] = useState(false);
-
+  const [activeChannel, setActiveChannel] = useState(null);
+  const [isMember, setIsMember] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
+      if (!conversationId) return;
+
       try {
-        setLoading(true);
-        dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
-        const fetchConversation = async () => {
-          try {
-            const res = await conversationApi.getConversationById(
-              conversationId
-            );
-            const channels = await channelApi.getAllChannelByConversationId(
-              conversationId
-            );
-            const isMember = (await memberApi.isMember(conversationId, JSON.parse(localStorage.getItem('user'))._id)).data;
-            setIsMember(isMember);
+        dispatch(setActiveConversation(conversationId));
 
-            const mappedChannels = channels.map((channel) => ({
-              id: channel._id,
-              label: channel.name,
-            }));
-            setChannels(mappedChannels);
-            setConversation(res);
-          } catch (error) {
-            console.error("Error fetching conversation:", error);
+        let res = null;
+        let channels = [];
+
+        try {
+          res = await conversationApi.getConversationById(conversationId);
+          channels = await channelApi.getAllChannelByConversationId(
+            conversationId
+          );
+          const isMember = (await memberApi.isMember(conversationId, JSON.parse(localStorage.getItem('user'))._id)).data;
+          const mappedChannels = channels.map((channel) => ({
+            id: channel._id,
+            label: channel.name,
+          }));
+          setIsMember(isMember);
+          setChannels(mappedChannels);
+          setConversation(res);
+          setActiveChannel(channels[0]?._id || null);
+        } catch (error) {
+          console.error("Error fetching conversation:", error);
+        }
+
+        if (res) {
+          if (!res.type) {
+            try {
+              const messages = await messageApi.fetchMessages(conversationId);
+              dispatch(setMessages({ conversationId, messages }));
+            } catch (error) {
+              console.error("Error fetching messages:", error);
+            }
+          } else {
+            try {
+              const messages = await messageApi.fetchMessagesByChannelId(
+                channels[0]?._id
+              );
+              dispatch(setMessages({ conversationId, messages }));
+            } catch (error) {
+              console.error("Error fetching messages by channel:", error);
+            }
           }
-        };
-        fetchConversation();
-        // Lấy tin nhắn ban đầu
-        messageApi
-          .fetchMessages(conversationId)
-          .then((res) => {
-            dispatch(setMessages({ conversationId, messages: res }));
-          })
-          .catch((error) => {
-            console.error("Error fetching messages:", error);
-          });
+        }
 
-        // Đánh dấu đã đọc
         if (unread[conversationId] > 0) {
           dispatch(markRead({ conversationId }));
         }
       } catch (error) {
         console.error("Error in useEffect:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [conversationId, dispatch, unread]);
-
   const handleSendMessage = async ({ content, type, files }) => {
+    const channelId = activeChannel;
     try {
       if (type === "TEXT") {
-        await messageApi.sendTextMessage({ conversationId, content });
+        await messageApi.sendTextMessage({
+          conversationId,
+          content,
+          channelId,
+        });
       } else if (type === "IMAGE") {
-        await messageApi.sendImageMessage(conversationId, files);
+        await messageApi.sendImageMessage(conversationId, files, channelId);
       } else if (type === "FILE") {
-        await messageApi.sendFileMessage(conversationId, files[0]);
+        await messageApi.sendFileMessage(conversationId, files[0], channelId);
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(conversationId, files[0]);
+        await messageApi.sendVideoMessage(conversationId, files[0], channelId);
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -94,13 +105,16 @@ const [isMember, setIsMember] = useState(false);
     }
   };
   const [showDetail, setShowDetail] = useState(false);
-
+  console.log("channels", activeChannel);
   return (
     <>
-    {console.log(loading, conversation, (conversation?.type ? channels.length === 0 : false))}
-      {loading || !conversation || (conversation?.type ? channels.length === 0 : false) ? (
+      {console.log(
+        conversation,
+        conversation?.type ? channels.length === 0 : false
+      )}
+      {!conversation ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
-          <Spinner /> 
+          <Spinner />
         </div>
       ) : (
         <div className="flex w-full h-screen">
@@ -110,9 +124,10 @@ const [isMember, setIsMember] = useState(false);
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
               <HeaderSignleChat
                 channelTabs={channels}
-                activeTab={channels[0]?.id}
+                activeTab={activeChannel}
                 handleDetail={setShowDetail}
                 conversation={conversation}
+                setActiveChannel={setActiveChannel}
               />
               <ChatBox messages={conversationMessages} />
               <MessageInput onSend={handleSendMessage} isMember={isMember} />
