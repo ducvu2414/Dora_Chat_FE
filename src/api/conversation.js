@@ -43,6 +43,11 @@ const conversationApi = {
   disbandGroup: (conversationId) => {
     return axios.delete(`/api/conversations/disband/${conversationId}`);
   },
+  addManagersToConversation: (conversationId, members) => {
+    return axios.post(`/api/conversations/${conversationId}/managers`, {
+      memberIds: members,
+    });
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

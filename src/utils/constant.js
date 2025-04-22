@@ -31,6 +31,9 @@ export const SOCKET_EVENTS = {
   JOIN_CONVERSATION: "join-conversation",
   LEAVE_CONVERSATION: "leave-conversation",
   NEW_GROUP_CONVERSATION: "new-group-conversation",
+  CONVERSATION_DISBANDED: "conversation-disbanded",
+  HIDE_CONVERSATION: "hide-conversation",
+
   DELETE_CONVERSATION: "delete-conversation",
   TRANSFER_ADMIN: "transfer-admin",
   // Typing indicators

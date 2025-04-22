@@ -31,6 +31,7 @@ import { ChooseModal } from "@/components/ui/choose-modal";
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
+  const [isOpenManager, setIsOpenManager] = useState(false);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
   const [isOpenOk, setIsOpenOk] = useState(false);
   const [isConfirmLeave, setIsConfirmLeave] = useState(false);
@@ -85,6 +86,20 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         selectedUserId[0]
       );
       console.log("Selected user IDs:", responseTransferAdmin);
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+      alert("You do not have permission to decentralize in this group");
+    }
+  };
+
+  const handleAddManager = async (selectedUserIds) => {
+    try {
+      setIsOpenManager(false);
+      const responseAddManager = await conversationApi.addManagersToConversation(
+        conversation._id,
+        selectedUserIds
+      );
+      console.log("Selected user IDs:", responseAddManager);
     } catch (error) {
       console.error("Error forwarding message:", error);
       alert("You do not have permission to decentralize in this group");
@@ -255,6 +270,26 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
               buttonText={"Confirm"}
               onSubmit={handleDecentralize}
               users={memberFilter}
+            />
+          ))
+        )}
+      </Modal>
+      <Modal
+        isOpen={isOpenManager}
+        onClose={() => setIsOpenManager(false)}
+        title="Adjust manager"
+      >
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          (console.log("members", members),
+          (
+            <UserSelectionModal
+              buttonText={"Confirm"}
+              onSubmit={handleAddManager}
+              users={members}
             />
           ))
         )}
@@ -480,6 +515,19 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
               />
               <p className="text-[#F49300] font-bold text-sm ml-1">
                 {"Disband"}
+              </p>
+            </div>
+            <div
+              className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
+              onClick={() => setIsOpenManager(true)}
+            >
+              <img
+                src={Decentraliza}
+                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
+                alt="Icon"
+              />
+              <p className="text-[#F49300] font-bold text-sm ml-1">
+                {"Add manager"}
               </p>
             </div>
           </motion.div>

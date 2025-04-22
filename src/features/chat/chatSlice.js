@@ -96,6 +96,7 @@ const chatSlice = createSlice({
         state.conversations[convIndex].lastMessageId = newLastMessage || null;
       }
     },
+
     deleteAllMessages: (state, action) => {
       const { conversationId } = action.payload;
       if (state.messages[conversationId]) {
@@ -128,6 +129,17 @@ const chatSlice = createSlice({
         }
       }
     },
+    disbandConversation: (state, action) => {
+      const { conversationId } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations.splice(index, 1);
+        delete state.messages[conversationId];
+        delete state.unread[conversationId];
+      }
+    },
   },
 });
 
@@ -141,6 +153,7 @@ export const {
   setActiveConversation,
   recallMessage,
   deleteMessageForMe,
+  disbandConversation,
   deleteAllMessages,
   updateLeader,
   leaveConverSation,
