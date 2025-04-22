@@ -156,9 +156,37 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
       setName(conversation.name);
     }
   };
+  const handleDeleteChat = async () => {
+    try {
+      await conversationApi.deleteConversationBeforetime(conversation._id);
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+    }
+  };
+  const handleLeaveChat = async () => {
+    try {
+      await conversationApi.leaveConversation(conversation._id);
+    } catch (error) {
+      console.error("Error leaving chat:", error);
+    }
+  };
 
   return (
     <>
+      {/* kha */}
+      <Modal
+        isOpen={isOpenAddUser}
+        onClose={() => setIsOpenAddUser(false)}
+        title="Add member"
+      >
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          <UserSelectionModal onSubmit={handleSubmit} users={friends} />
+        )}
+      </Modal>
       <Modal
         isOpen={isOpenAddUser}
         onClose={() => setIsOpenAddUser(false)}
@@ -337,7 +365,8 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         </div>
         <div className="w-full mt-3">
           {/* Header */}
-          {conversation.type && conversation.leaderId === memberLoginNow?._id ? (
+          {conversation.type &&
+          conversation.leaderId === memberLoginNow?._id ? (
             <div
               className="flex items-center cursor-pointer"
               onClick={() => setIsOpenSetting(!isOpenSetting)}
@@ -417,7 +446,10 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             </>
           ) : (
             <>
-              <button className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl">
+              <button
+                className="flex items-center px-5 py-2 bg-white cursor-pointer hover:opacity-75 rounded-2xl"
+                onClick={handleDeleteChat}
+              >
                 <img src={Trash} alt="trash" />
                 <span className="text-[#086DC0]  text-xs ml-2">Delete</span>
               </button>

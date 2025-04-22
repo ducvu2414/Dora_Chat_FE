@@ -161,7 +161,7 @@ export default function MessageInput({ onSend, isMember }) {
     const cursorPos = inputRef.current.selectionStart;
     const newText =
       input.slice(0, cursorPos) + emojiData.emoji + input.slice(cursorPos);
-    setInput(newText);
+    setInput(newText || "");
 
     // Cập nhật vị trí con trỏ sau khi thêm emoji
     setTimeout(() => {
@@ -274,12 +274,12 @@ export default function MessageInput({ onSend, isMember }) {
            focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300"
         >
           {isLoading || !isMemberState ? (
-              <input
-                type="text"
-                placeholder="You cannot message this conversation"
-                className="w-full text-sm outline-none bg-inherit italic placeholder:text-center"
-                disabled={true}
-              />
+            <input
+              type="text"
+              placeholder="You cannot message this conversation"
+              className="w-full text-sm italic outline-none bg-inherit placeholder:text-center"
+              disabled={true}
+            />
           ) : (
             <>
               <input

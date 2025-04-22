@@ -36,7 +36,8 @@ const conversationApi = {
     return axios.patch(`/api/conversations/transfer-admin/${leaderId}`, {
       newAdminId: newLeaderId,
     });
-  }
+  },
+
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

@@ -31,6 +31,7 @@ export const SOCKET_EVENTS = {
   JOIN_CONVERSATION: "join-conversation",
   LEAVE_CONVERSATION: "leave-conversation",
   NEW_GROUP_CONVERSATION: "new-group-conversation",
+  DELETE_CONVERSATION: "delete-conversation",
 
   // Typing indicators
   TYPING: "typing",
@@ -51,7 +52,6 @@ export const SOCKET_EVENTS = {
   ANSWER_CALL: "answer-call",
   RECEIVE_SIGNAL: "receive-signal",
   LEAVE_CALL: "leave-call",
-
 
   // Last view tracking
   CONVERSATION_LAST_VIEW: "conversation-last-view",

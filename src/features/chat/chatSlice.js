@@ -96,6 +96,12 @@ const chatSlice = createSlice({
         state.conversations[convIndex].lastMessageId = newLastMessage || null;
       }
     },
+    deleteAllMessages: (state, action) => {
+      const { conversationId } = action.payload;
+      if (state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+    },
   },
 });
 

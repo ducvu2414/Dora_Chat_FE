@@ -153,6 +153,23 @@ const MainLayout = () => {
         });
       }
     );
+    socket.on(SOCKET_EVENTS.DELETE_CONVERSATION, (result) => {
+      startTransition(() => {
+        console.log("Received delete conversation:", result);
+        dispatch(
+          updateConversation({
+            conversationId: result.conversationId,
+            lastMessage: result,
+          })
+        );
+        dispatch(
+          updateConversation({
+            conversationId: result.conversationId,
+            lastMessage: null,
+          })
+        );
+      });
+    });
 
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 
