@@ -29,6 +29,11 @@ const conversationApi = {
   updateGroupName: (conversationId, name) => {
     return axios.patch(`/api/conversations/${conversationId}/name`, { name });
   },
+  transferAdmin: (leaderId, newLeaderId) => {
+    return axios.patch(`/api/conversations/transfer-admin/${leaderId}`, {
+      newAdminId: newLeaderId,
+    });
+  }
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

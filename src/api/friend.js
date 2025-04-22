@@ -10,8 +10,15 @@ const friendApi = {
       },
     });
   },
-  acceptRequestFriend: (userId) => {
-    return axios.post(`/api/friends/${userId}`);
+  
+  fetchFriendsToGroupConversation: (id, name, conversationId) => {
+    return axios.get(`/api/friends/to-add-group`, {
+      params: {
+        _id: id,
+        name,
+        conversationId,
+      },
+    });
   },
 
   deleteFriend: (userId) => {
