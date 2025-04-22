@@ -27,13 +27,13 @@ import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
-import { set } from "lodash";
 
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
   const [isOpenOk, setIsOpenOk] = useState(false);
+  const [isConfirmLeave, setIsConfirmLeave] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -44,7 +44,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [members, setMembers] = useState([]);
   const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-
+  const [memberFilter, setMemberFilter] = useState([]);
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
     else
@@ -126,12 +126,13 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           conversation._id,
           JSON.parse(localStorage.getItem("user"))._id
         );
-        setMemberLoginNow(memberLoginNow.data);
-        const membersInGroupFilter = membersInGroup.data.filter(
+        const memberFilter = membersInGroup.data.filter(
           (member) => member._id !== memberLoginNow.data._id
         );
+        setMemberFilter(memberFilter);
+        setMemberLoginNow(memberLoginNow.data);
         setMembers(
-          membersInGroupFilter.map((member) => ({
+          membersInGroup.data.map((member) => ({
             id: member._id,
             name: member.name,
             avatar: member.avatar,
@@ -184,10 +185,12 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const handleLeaveChat = async () => {
     try {
       if (conversation.type) {
-        if (conversation.leaderId === memberLoginNow._id) {
-          setIsOpenOk(true);
+        const isLastMember = members.length === 1;
+        const isLeader = conversation.leaderId === memberLoginNow._id;
+        if (isLastMember || !isLeader) {
+          setIsConfirmLeave(true);
         } else {
-          await conversationApi.leaveConversation(conversation._id);
+          setIsOpenOk(true);
         }
       }
     } catch (error) {
@@ -202,10 +205,19 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         isOpen={isOpenOk}
         onClose={() => setIsOpenOk(false)}
         onConfirm={() => setIsOpenOk(false)}
-        title="Thông báo"
-        message="Bạn đang là leader của nhóm này, hãy chuyển quyền cho người khác trước khi rời nhóm"
+        title="Cảnh báo"
+        message="Vui lòng chọn người thay thế trưởng nhóm trước khi rời khỏi nhóm"
         isSingleButton={true}
         confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
+      />
+      <ChooseModal
+        isOpen={isConfirmLeave}
+        onClose={() => setIsConfirmLeave(false)}
+        onConfirm={async () => {
+          await conversationApi.leaveConversation(conversation._id);
+        }}
+        title="Cảnh báo"
+        message="Bạn chắn chắn muốn rời khỏi nhóm này?"
       />
       <ChooseModal
         isOpen={isOpenDelete}
@@ -242,7 +254,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <UserSelectionModal
               buttonText={"Confirm"}
               onSubmit={handleDecentralize}
-              users={members}
+              users={memberFilter}
             />
           ))
         )}
