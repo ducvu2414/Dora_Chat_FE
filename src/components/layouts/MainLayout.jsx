@@ -196,29 +196,33 @@ const MainLayout = () => {
         );
       });
     });
-    socket.on(SOCKET_EVENTS.LEAVE_CONVERSATION, ({ member, notifyMessage }) => {
-      startTransition(() => {
-        console.log("Received leave conversation:", member, notifyMessage);
-        // dispatch(
-        //   updateConversation({
-        //     conversationId: notifyMessage.conversationId,
-        //     lastMessage: notifyMessage,
-        //   })
-        // );
-        // dispatch(
-        //   addMessage({
-        //     conversationId: notifyMessage.conversationId,
-        //     message: notifyMessage,
-        //   })
-        // );
-        // dispatch(
-        //   leaveConverSation({
-        //     conversationId: notifyMessage.conversationId,
-        //     member: member._id,
-        //   })
-        // );
-      });
-    });
+    socket.on(
+      SOCKET_EVENTS.LEAVE_CONVERSATION,
+      ({ member, notifyMessage, disbanded }) => {
+        startTransition(() => {
+          console.log("Received leave conversation:", member, notifyMessage);
+          dispatch(
+            updateConversation({
+              conversationId: notifyMessage.conversationId,
+              lastMessage: notifyMessage,
+            })
+          );
+          // dispatch(
+          //   addMessage({
+          //     conversationId: notifyMessage.conversationId,
+          //     message: notifyMessage,
+          //   })
+          // );
+          dispatch(
+            leaveConverSation({
+              conversationId: notifyMessage.conversationId,
+              member: member._id,
+              disbanded,
+            })
+          );
+        });
+      }
+    );
 
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 
