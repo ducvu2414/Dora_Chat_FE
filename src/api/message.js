@@ -18,9 +18,10 @@ const messageApi = {
     return response.data;
   },
 
-  async sendImageMessage(conversationId, images) {
+  async sendImageMessage(conversationId, images, channelId) {
     const formData = new FormData();
     formData.append("conversationId", conversationId);
+    formData.append("channelId", channelId);
     images.forEach((image) => formData.append("image", image));
     const res = await axios.post(`/api/messages/images`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -28,9 +29,10 @@ const messageApi = {
     return res.data;
   },
 
-  async sendFileMessage(conversationId, file) {
+  async sendFileMessage(conversationId, file, channelId) {
     const formData = new FormData();
     formData.append("conversationId", conversationId);
+    formData.append("channelId", channelId);
     formData.append("file", file);
     const res = await axios.post(`/api/messages/file`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -46,16 +48,17 @@ const messageApi = {
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },
-  async sendVideoMessage(conversationId, video) {
+  async sendVideoMessage(conversationId, video, channelId) {
     const formData = new FormData();
     formData.append("conversationId", conversationId);
     formData.append("video", video);
+    formData.append("channelId", channelId);
     const res = await axios.post(`/api/messages/video`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     console.log("res", res.data);
     return res.data;
-  }
+  },
 };
 
 export default messageApi;

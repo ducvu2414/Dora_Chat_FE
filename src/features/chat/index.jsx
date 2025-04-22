@@ -22,12 +22,10 @@ export default function ChatSingle() {
   const conversationMessages = messages[conversationId] || [];
   const [conversation, setConversation] = useState(null);
   const [channels, setChannels] = useState([]);
-  const [loading, setLoading] = useState(false);
-
+  const [activeChannel, setActiveChannel] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
         const fetchConversation = async () => {
           try {
@@ -37,12 +35,14 @@ export default function ChatSingle() {
             const channels = await channelApi.getAllChannelByConversationId(
               conversationId
             );
+            console.log("res", res);
             const mappedChannels = channels.map((channel) => ({
               id: channel._id,
               label: channel.name,
             }));
             setChannels(mappedChannels);
             setConversation(res);
+            setActiveChannel(channels[0]?._id || null); // Đặt kênh đầu tiên làm kênh hoạt động
           } catch (error) {
             console.error("Error fetching conversation:", error);
           }
@@ -64,24 +64,26 @@ export default function ChatSingle() {
         }
       } catch (error) {
         console.error("Error in useEffect:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [conversationId, dispatch, unread]);
-
   const handleSendMessage = async ({ content, type, files }) => {
+    const channelId = activeChannel;
     try {
       if (type === "TEXT") {
-        await messageApi.sendTextMessage({ conversationId, content });
+        await messageApi.sendTextMessage({
+          conversationId,
+          content,
+          channelId,
+        });
       } else if (type === "IMAGE") {
-        await messageApi.sendImageMessage(conversationId, files);
+        await messageApi.sendImageMessage(conversationId, files, channelId);
       } else if (type === "FILE") {
-        await messageApi.sendFileMessage(conversationId, files[0]);
+        await messageApi.sendFileMessage(conversationId, files[0], channelId);
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(conversationId, files[0]);
+        await messageApi.sendVideoMessage(conversationId, files[0], channelId);
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -89,13 +91,16 @@ export default function ChatSingle() {
     }
   };
   const [showDetail, setShowDetail] = useState(false);
-
+  console.log("channels", activeChannel);
   return (
     <>
-    {console.log(loading, conversation, (conversation?.type ? channels.length === 0 : false))}
-      {loading || !conversation || (conversation?.type ? channels.length === 0 : false) ? (
+      {console.log(
+        conversation,
+        conversation?.type ? channels.length === 0 : false
+      )}
+      {!conversation ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
-          <Spinner /> 
+          <Spinner />
         </div>
       ) : (
         <div className="flex w-full h-screen">
@@ -105,9 +110,10 @@ export default function ChatSingle() {
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
               <HeaderSignleChat
                 channelTabs={channels}
-                activeTab={channels[0]?.id}
+                activeTab={activeChannel}
                 handleDetail={setShowDetail}
                 conversation={conversation}
+                setActiveChannel={setActiveChannel}
               />
               <ChatBox messages={conversationMessages} />
               <MessageInput onSend={handleSendMessage} />
