@@ -30,7 +30,7 @@ import conversationApi from "@/api/conversation";
 export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(conversation.name);
+  const [name, setName] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
@@ -38,8 +38,19 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [quantityMember, setQuantityMember] = useState(0);
 
   useEffect(() => {
-    setName(conversation.name);
-  }, [conversation.name]);
+    if (conversation.type) setName(conversation.name);
+    else
+      setName(
+        conversation.members?.find(
+          (member) => member.userId !== conversation._id
+        )?.name || ""
+      );
+  }, [
+    conversation.name,
+    conversation.members,
+    conversation._id,
+    conversation.type,
+  ]);
 
   useEffect(() => {
     setIsMuted(conversation.mute);
@@ -194,18 +205,22 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             ></div>
           </div>
         </div>
-        <div
-          className="flex items-center w-full mt-3 cursor-pointer"
-          onClick={() => handleSetActiveTab({ tab: "members" })}
-        >
-          <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
-            <img src={Member} />
+        {conversation.type ? (
+          <div
+            className="flex items-center w-full mt-3 cursor-pointer"
+            onClick={() => handleSetActiveTab({ tab: "members" })}
+          >
+            <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+              <img src={Member} />
+            </div>
+            <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
+            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+              <img src={ArrowRight} />
+            </div>
           </div>
-          <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
-          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
-            <img src={ArrowRight} />
-          </div>
-        </div>
+        ) : (
+          <></>
+        )}
         <div className="w-full mt-3">
           <div
             className="flex items-center cursor-pointer"
@@ -268,22 +283,26 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         </div>
         <div className="w-full mt-3">
           {/* Header */}
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => setIsOpenSetting(!isOpenSetting)}
-          >
-            <div className="flex items-center justify-center w-[26px] h-[26px] bg-white rounded-full">
-              <img src={Setting} />
+          {conversation.type ? (
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => setIsOpenSetting(!isOpenSetting)}
+            >
+              <div className="flex items-center justify-center w-[26px] h-[26px] bg-white rounded-full">
+                <img src={Setting} />
+              </div>
+              <p className="text-[#086DC0] ml-2">Administration</p>
+              <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+                <motion.img
+                  src={ArrowRight}
+                  animate={{ rotate: isOpenSetting ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </div>
             </div>
-            <p className="text-[#086DC0] ml-2">Administration</p>
-            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
-              <motion.img
-                src={ArrowRight}
-                animate={{ rotate: isOpenSetting ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              />
-            </div>
-          </div>
+          ) : (
+            <></>
+          )}
 
           {/* Danh sách xổ xuống */}
           <motion.div

@@ -9,6 +9,7 @@ import { socket } from "@/utils/socketClient";
 import { v4 as uuidv4 } from "uuid";
 import { useState, useEffect } from "react";
 import { ChannelTab } from "@/features/chat/components/ChannelTab";
+import Avatar from "@assets/chat/avatar.png";
 
 export default function HeaderSignleChat({
   channelTabs,
@@ -32,7 +33,6 @@ export default function HeaderSignleChat({
   const peerId = uuidv4();
 
   const handleCall = (type) => {
-
     if (!conversation._id || !userId) return;
     const payload = {
       conversationId: conversation._id,
@@ -40,8 +40,10 @@ export default function HeaderSignleChat({
       peerId,
       type,
     };
-    console.log("🚀 ~ file: HeaderSignleChat.jsx:22 ~ handleCall ~ payload", payload);
-
+    console.log(
+      "🚀 ~ file: HeaderSignleChat.jsx:22 ~ handleCall ~ payload",
+      payload
+    );
 
     if (type === "audio") {
       socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);
@@ -67,7 +69,7 @@ export default function HeaderSignleChat({
     <div className="relative z-10 flex flex-col shadow-md w-full h-auto ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
-          src={avatarMessage || "/placeholder.svg"}
+          src={Avatar}
           className="w-[70px] h-[70px] object-cover rounded-full"
         />
         <div className="ml-3">
@@ -80,27 +82,36 @@ export default function HeaderSignleChat({
           </div>
         </div>
         <div className="flex flex-row ml-auto space-x-4">
-          <button className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110" onClick={() => handleCall("audio")}>
+          <button
+            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
+            onClick={() => handleCall("audio")}
+          >
             <img src={Call} alt="Call" />
           </button>
-          <button className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110" onClick={() => handleCall("video")}>
+          <button
+            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
+            onClick={() => handleCall("video")}
+          >
             <img src={VideoCall} alt="Video Call" />
           </button>
           <div
-            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110"
+            className="p-2 duration-200 ease-in-out cursor-pointer hover:scale-110 border-none"
             onClick={() => handleDetail((prev) => !prev)}
           >
             <img src={DetailChatIcon} alt="Detail Chat" />
           </div>
         </div>
       </div>
-      <ChannelTab
-        tabs={channelTabs}
-        activeTab={activeChannel}
-        onTabChange={setActiveChannel}
-        className="fixed top-0 right-0 left-0"
-      />
+      {channelTabs.length === 0 ? (
+        <></>
+      ) : (
+        <ChannelTab
+          tabs={channelTabs}
+          activeTab={activeChannel}
+          onTabChange={setActiveChannel}
+          className="fixed top-0 right-0 left-0"
+        />
+      )}
     </div>
-
   );
 }

@@ -46,6 +46,7 @@ import { useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
+import Avatar from "@assets/chat/avatar.png";
 
 export function Conversation({
   onClick,
@@ -139,7 +140,7 @@ export function Conversation({
         onMouseLeave={handleConversationLeave}
       >
         <img
-          src={avatarMessage || "/placeholder.svg"}
+          src={Avatar}
           alt={name}
           className="object-cover rounded-full w-14 h-14"
         />
