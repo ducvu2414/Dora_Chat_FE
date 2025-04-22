@@ -8,6 +8,9 @@ const messageApi = {
   fetchMessages: (conversationId) => {
     return axios.get(`/api/messages/${conversationId}`);
   },
+  fetchMessagesByChannelId: (channelId) => {
+    return axios.get(`/api/messages/channel/${channelId}`);
+  },
   sendTextMessage: (body) => {
     return axios.post(`/api/messages/text`, body);
   },

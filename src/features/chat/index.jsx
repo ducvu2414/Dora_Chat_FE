@@ -25,40 +25,50 @@ export default function ChatSingle() {
   const [activeChannel, setActiveChannel] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        dispatch(setActiveConversation(conversationId)); // Đặt cuộc trò chuyện đang mở
-        const fetchConversation = async () => {
-          try {
-            const res = await conversationApi.getConversationById(
-              conversationId
-            );
-            const channels = await channelApi.getAllChannelByConversationId(
-              conversationId
-            );
-            console.log("res", res);
-            const mappedChannels = channels.map((channel) => ({
-              id: channel._id,
-              label: channel.name,
-            }));
-            setChannels(mappedChannels);
-            setConversation(res);
-            setActiveChannel(channels[0]?._id || null); // Đặt kênh đầu tiên làm kênh hoạt động
-          } catch (error) {
-            console.error("Error fetching conversation:", error);
-          }
-        };
-        fetchConversation();
-        // Lấy tin nhắn ban đầu
-        messageApi
-          .fetchMessages(conversationId)
-          .then((res) => {
-            dispatch(setMessages({ conversationId, messages: res }));
-          })
-          .catch((error) => {
-            console.error("Error fetching messages:", error);
-          });
+      if (!conversationId) return;
 
-        // Đánh dấu đã đọc
+      try {
+        dispatch(setActiveConversation(conversationId));
+
+        let res = null;
+        let channels = [];
+
+        try {
+          res = await conversationApi.getConversationById(conversationId);
+          channels = await channelApi.getAllChannelByConversationId(
+            conversationId
+          );
+          const mappedChannels = channels.map((channel) => ({
+            id: channel._id,
+            label: channel.name,
+          }));
+          setChannels(mappedChannels);
+          setConversation(res);
+          setActiveChannel(channels[0]?._id || null);
+        } catch (error) {
+          console.error("Error fetching conversation:", error);
+        }
+
+        if (res) {
+          if (!res.type) {
+            try {
+              const messages = await messageApi.fetchMessages(conversationId);
+              dispatch(setMessages({ conversationId, messages }));
+            } catch (error) {
+              console.error("Error fetching messages:", error);
+            }
+          } else {
+            try {
+              const messages = await messageApi.fetchMessagesByChannelId(
+                channels[0]?._id
+              );
+              dispatch(setMessages({ conversationId, messages }));
+            } catch (error) {
+              console.error("Error fetching messages by channel:", error);
+            }
+          }
+        }
+
         if (unread[conversationId] > 0) {
           dispatch(markRead({ conversationId }));
         }
