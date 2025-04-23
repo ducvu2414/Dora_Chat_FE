@@ -145,7 +145,14 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
         const memberFilter = membersInGroup.data.filter(
           (member) => member._id !== memberLoginNow.data._id
         );
-        setMemberFilter(memberFilter);
+        setMemberFilter(
+          memberFilter.data.map((member) => ({
+            id: member._id,
+            name: member.name,
+            avatar: member.avatar,
+            active: member.active,
+          }))
+        );
         setMemberLoginNow(memberLoginNow.data);
         setMembers(
           membersInGroup.data.map((member) => ({
