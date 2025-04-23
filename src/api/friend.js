@@ -10,7 +10,7 @@ const friendApi = {
       },
     });
   },
-  
+
   fetchFriendsToGroupConversation: (id, name, conversationId) => {
     return axios.get(`/api/friends/to-add-group`, {
       params: {
@@ -19,6 +19,10 @@ const friendApi = {
         conversationId,
       },
     });
+  },
+
+  acceptRequestFriend: (userId) => {
+    return axios.post(`/api/friends/${userId}`);
   },
 
   deleteFriend: (userId) => {
@@ -44,6 +48,7 @@ const friendApi = {
   fetchMyRequestFriend: () => {
     return axios.get(`/api/friends/invites/me`);
   },
+
   fetchSuggestFriend: (page = 0, size = 12) => {
     return axios.get(`/api/friends/suggest`, {
       params: {
@@ -52,6 +57,7 @@ const friendApi = {
       },
     });
   },
+
   isFriend: (userId1, userId2) => {
     return axios.get(`/api/friends/is-friend`, {
       params: {
