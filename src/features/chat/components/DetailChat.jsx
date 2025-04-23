@@ -42,6 +42,8 @@ export default function DetailChat({ conversation }) {
             }))
           }
           conversationId={conversation._id}
+          managers={conversation?.managerIds}
+          leader={conversation?.leaderId}
         />
       )}
     </div>

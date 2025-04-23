@@ -95,10 +95,11 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const handleAddManager = async (selectedUserIds) => {
     try {
       setIsOpenManager(false);
-      const responseAddManager = await conversationApi.addManagersToConversation(
-        conversation._id,
-        selectedUserIds
-      );
+      const responseAddManager =
+        await conversationApi.addManagersToConversation(
+          conversation._id,
+          selectedUserIds
+        );
       console.log("Selected user IDs:", responseAddManager);
     } catch (error) {
       console.error("Error forwarding message:", error);

@@ -40,7 +40,12 @@ export default function ChatSingle() {
           channels = await channelApi.getAllChannelByConversationId(
             conversationId
           );
-          const isMember = (await memberApi.isMember(conversationId, JSON.parse(localStorage.getItem('user'))._id)).data;
+          const isMember = (
+            await memberApi.isMember(
+              conversationId,
+              JSON.parse(localStorage.getItem("user"))._id
+            )
+          ).data;
           const mappedChannels = channels.map((channel) => ({
             id: channel._id,
             label: channel.name,

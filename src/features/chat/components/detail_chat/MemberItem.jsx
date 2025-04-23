@@ -5,12 +5,16 @@ import { MoreVertical, UserPlus, MessageSquare, Trash2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
 import InfoContent from "@components/ui/Info/InfoContent";
 import { Modal } from "@/components/ui/modal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
 export default function MemberItem({
   members,
   onAddFriend,
   onMessage,
   onRemove,
+  managers,
+  leader,
 }) {
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
@@ -64,8 +68,28 @@ export default function MemberItem({
             onClick={() => handleShowInfo(member._id)}
             className="relative flex items-center  justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
           >
+            {member._id === leader && (
+              <FontAwesomeIcon
+                icon={faCrown}
+                size="xs"
+                style={{ color: "#FFD43B" }} // Leader: vàng
+                className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
+              />
+            )}
+            {member._id !== leader && managers.includes(member._id) && (
+              <FontAwesomeIcon
+                icon={faCrown}
+                size="xs"
+                style={{ color: "#ebe9e6" }} // Manager: trắng ngà
+                className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
+              />
+            )}
             <div className="flex items-center gap-2">
-              <img src={member.avatar} alt="icon" className="w-12 h-12 rounded-full" />
+              <img
+                src={member.avatar}
+                alt="icon"
+                className="w-12 h-12 rounded-full"
+              />
               <p className="text-sm font-medium">{member.name}</p>
             </div>
 

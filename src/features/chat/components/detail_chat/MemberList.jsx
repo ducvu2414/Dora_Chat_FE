@@ -7,7 +7,12 @@ import { Spinner } from "@/page/Spinner";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
 
-export default function MemberList({ onBack, conversationId }) {
+export default function MemberList({
+  onBack,
+  conversationId,
+  managers,
+  leader,
+}) {
   const [membersState, setMembers] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,14 +42,16 @@ export default function MemberList({ onBack, conversationId }) {
 
   const handleRemove = async (member) => {
     try {
-      const responseRemoveMember = await conversationApi.removeMemberFromConversation(conversationId, member._id);
+      const responseRemoveMember =
+        await conversationApi.removeMemberFromConversation(
+          conversationId,
+          member._id
+        );
       console.log(responseRemoveMember);
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error removing member:", error);
       alert("You cannot remove this member from the group chat");
     }
-
   };
 
   return loading || !membersState ? (
@@ -60,7 +67,9 @@ export default function MemberList({ onBack, conversationId }) {
         >
           <img src={ArrowRight} className="rotate-180" />
         </div>
-        <p className="text-lg font-bold text-[#086DC0] ml-2">Members ({membersState.length})</p>
+        <p className="text-lg font-bold text-[#086DC0] ml-2">
+          Members ({membersState.length})
+        </p>
       </div>
       <div className="mt-4 overflow-auto h-[calc(100vh-7rem)]">
         <MemberItem
@@ -68,6 +77,8 @@ export default function MemberList({ onBack, conversationId }) {
           onAddFriend={handleAddFriend}
           onMessage={handleMessage}
           onRemove={handleRemove}
+          managers={managers}
+          leader={leader}
         />
       </div>
     </div>

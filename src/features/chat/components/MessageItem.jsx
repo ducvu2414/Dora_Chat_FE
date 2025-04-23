@@ -24,7 +24,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const isFile = msg.type === "FILE";
   const isVideo = msg.type === "VIDEO";
   const isMe = msg.memberId?.userId === userId;
-  const isNotify = msg.type === "NOTIFY"
+  const isNotify = msg.type === "NOTIFY";
 
   useEffect(() => {
     if (!msg?.content) {
@@ -126,8 +126,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       ) : (
         <div
           key={msg._id}
-          className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "justify-start"
-            } group`}
+          className={`flex items-end gap-2 ${
+            isMe ? "flex-row-reverse" : "justify-start"
+          }  mb-4`}
         >
           {showAvatar ? (
             <img
@@ -141,8 +142,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
 
           <div className="flex flex-col max-w-[468px] text-start relative">
             <div
-              className={`absolute top-3 ${isMe ? "left-[-30px]" : "right-[-30px]"
-                } opacity-0 group-hover:opacity-100 transition-opacity`}
+              className={`absolute top-3 ${
+                isMe ? "left-[-30px]" : "right-[-30px]"
+              } opacity-0 group-hover:opacity-100 transition-opacity`}
             >
               {!msg.isDeleted && (
                 <MessageActionsMenu
@@ -156,7 +158,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             </div>
             {/* Message sender name (if not showing avatar and not from current user) */}
             {showAvatar && !isMe && (
-              <span className="mb-1 ml-1 text-xs font-medium text-gray-500 absolute top-[-20px] left-2 w-full text-nowrap">
+              <span className="mb-1 ml-1 text-xs font-medium text-gray-500">
                 {msg.memberId?.name || "User"}
               </span>
             )}
@@ -255,12 +257,13 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             ) : (
               <p
                 className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${msg.isDeleted
-                    ? "bg-gray-100 text-gray-400 italic"
-                    : isMe
-                      ? "bg-[#EFF8FF] text-[#000000] ml-auto"
-                      : "bg-[#F5F5F5] text-[#000000]"
-                  }`}
+            ${
+              msg.isDeleted
+                ? "bg-gray-100 text-gray-400 italic"
+                : isMe
+                ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+                : "bg-[#F5F5F5] text-[#000000]"
+            }`}
               >
                 {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
@@ -276,14 +279,16 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
 
             {showTime && (
               <span
-                className={`text-xs text-[#959595F3] mt-2 ${isMe ? "self-end" : ""
-                  }`}
+                className={`text-xs text-[#959595F3] mt-2 ${
+                  isMe ? "self-end" : ""
+                }`}
               >
                 {dayjs(msg.createdAt).fromNow()}
               </span>
             )}
           </div>
-        </div>)}
+        </div>
+      )}
     </>
   );
 }
