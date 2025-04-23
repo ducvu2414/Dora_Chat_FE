@@ -142,25 +142,19 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
           conversation._id,
           JSON.parse(localStorage.getItem("user"))._id
         );
-        const memberFilter = membersInGroup.data.filter(
-          (member) => member._id !== memberLoginNow.data._id
-        );
-        setMemberFilter(
-          memberFilter.data.map((member) => ({
-            id: member._id,
-            name: member.name,
-            avatar: member.avatar,
-            active: member.active,
-          }))
-        );
+        const formattedMembers = membersInGroup.data.map((member) => ({
+          id: member._id,
+          name: member.name,
+          avatar: member.avatar,
+          active: member.active,
+        }));
+
+        setMembers(formattedMembers);
         setMemberLoginNow(memberLoginNow.data);
-        setMembers(
-          membersInGroup.data.map((member) => ({
-            id: member._id,
-            name: member.name,
-            avatar: member.avatar,
-            active: member.active,
-          }))
+        setMemberFilter(
+          formattedMembers.filter(
+            (member) => member.id !== memberLoginNow.data._id
+          )
         );
         // quantity member
         setQuantityMember(
