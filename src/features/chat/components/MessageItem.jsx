@@ -116,7 +116,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             />
           </div>
         </div>
-      )}{" "}
+      )}
       {isNotify ? (
         <div className="flex justify-center w-full my-4">
           <div className="bg-[#F0F2F5] text-xs text-gray-600 px-4 py-2 rounded-md shadow-sm italic">
@@ -140,11 +140,14 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             <div className="w-10 h-10 rounded-full" />
           )}
 
-          <div className="flex flex-col max-w-[468px] text-start relative">
+          <div
+            className="flex flex-col max-w-[468px] text-start relative
+          group"
+          >
             <div
               className={`absolute top-3 ${
                 isMe ? "left-[-30px]" : "right-[-30px]"
-              } opacity-0 group-hover:opacity-100 transition-opacity`}
+              } opacity-0 group-hover:opacity-100 transition-opacity `}
             >
               {!msg.isDeleted && (
                 <MessageActionsMenu
@@ -158,7 +161,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             </div>
             {/* Message sender name (if not showing avatar and not from current user) */}
             {showAvatar && !isMe && (
-              <span className="mb-1 ml-1 text-xs font-medium text-gray-500">
+              <span className="mb-1 ml-1 text-xs font-medium text-gray-500 ">
                 {msg.memberId?.name || "User"}
               </span>
             )}
