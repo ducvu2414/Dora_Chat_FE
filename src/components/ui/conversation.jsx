@@ -42,11 +42,13 @@
 //   )
 // }
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 import Avatar from "@assets/chat/avatar.png";
+import { SOCKET_EVENTS } from "../../utils/constant";
+import { socket } from "../../utils/socketClient";
 
 export function Conversation({
   onClick,
@@ -60,7 +62,9 @@ export function Conversation({
   time,
   id, // Add id parameter to support proper routing
   unread,
+  type,
 }) {
+  const [nameState, setNameState] = useState(name);
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -73,6 +77,14 @@ export function Conversation({
       setIsConversationHovered(true);
     });
   };
+
+  useEffect(() => {
+    socket.on(SOCKET_EVENTS.UPDATE_NAME_CONVERSATION, (name) => {
+      if (name) {
+        setNameState(name);
+      }
+    });
+  }, []);
 
   const handleConversationLeave = () => {
     setTimeout(() => {
@@ -122,7 +134,7 @@ export function Conversation({
     }
   };
   const partner =
-    name ||
+    nameState ? nameState : name ||
     members?.filter((member) => {
       return member.userId !== idUser;
     });
@@ -133,21 +145,22 @@ export function Conversation({
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
-          } ${isPending ? "opacity-70" : ""}`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
+          isActive ? "bg-blue-100" : "hover:bg-gray-100"
+        } ${isPending ? "opacity-70" : ""}`}
         onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
       >
         <img
           src={Avatar}
-          alt={name}
+          alt={nameState ? nameState : name}
           className="object-cover rounded-full w-14 h-14"
         />
         <div className="flex-1 min-w-0 pl-3">
           <div className="relative flex items-center justify-between">
             <h3 className="text-sm font-medium text-left truncate">
-              {name ? name : partner[0].name}
+              {type ? (nameState ? nameState : name) : (nameState ? nameState : partner[0].name)}
             </h3>
             {unread > 0 && (
               <span className="absolute top-0 -left-10 ml-2 min-w-[20px] h-[20px] px-1 flex items-center justify-center text-xs font-semibold text-white bg-red-500 rounded-full shadow">

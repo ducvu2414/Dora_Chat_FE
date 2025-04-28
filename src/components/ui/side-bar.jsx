@@ -18,6 +18,7 @@ export function SideBar({
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { unread } = useSelector((state) => state.chat);
+  
   const getConversations = () => {
     switch (activeTab) {
       case "messages":

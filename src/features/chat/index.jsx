@@ -16,6 +16,8 @@ import MessageInput from "./components/MessageInput";
 import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
+import { SOCKET_EVENTS } from "../../utils/constant";
+import { socket } from "../../utils/socketClient";
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
@@ -112,7 +114,15 @@ export default function ChatSingle() {
     setFiles(files);
     setLinks(links);
 
-  }, [conversationMessages, conversationMessages.length]);
+  }, [conversationMessages.length]);
+
+  useEffect(() => {
+    socket.on(SOCKET_EVENTS.UPDATE_NAME_CONVERSATION, (name) => {
+      if (name) {
+        setConversation((prev) => ({ ...prev, name }));
+      }
+    });
+  });
 
   const handleSendMessage = async ({ content, type, files }) => {
     const channelId = activeChannel;

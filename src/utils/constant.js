@@ -33,6 +33,7 @@ export const SOCKET_EVENTS = {
   NEW_GROUP_CONVERSATION: "new-group-conversation",
   CONVERSATION_DISBANDED: "conversation-disbanded",
   HIDE_CONVERSATION: "hide-conversation",
+  UPDATE_NAME_CONVERSATION: "update-name-conversation",
 
   DELETE_CONVERSATION: "delete-conversation",
   TRANSFER_ADMIN: "transfer-admin",

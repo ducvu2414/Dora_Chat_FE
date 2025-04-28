@@ -500,13 +500,6 @@ const MainLayout = () => {
       });
     };
 
-    socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
-    socket.on(SOCKET_EVENTS.NEW_GROUP_CONVERSATION, handleNewGroupConversation);
-    socket.on(
-      SOCKET_EVENTS.CONVERSATION_DISBANDED,
-      handleDisbandedConversation
-    );
-
     const handleRevokeToken = ({ key }) => {
       if (codeRevokeRef.current !== key) {
         localStorage.removeItem("token");
@@ -562,6 +555,12 @@ const MainLayout = () => {
     socket.on(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
     socket.on(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
 
+    socket.on(SOCKET_EVENTS.NEW_GROUP_CONVERSATION, handleNewGroupConversation);
+    socket.on(
+      SOCKET_EVENTS.CONVERSATION_DISBANDED,
+      handleDisbandedConversation
+    );
+
     return () => {
       socket.off(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
       socket.off(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -573,6 +572,15 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.JOIN_CONVERSATION, handleJoinConversation);
       socket.off(SOCKET_EVENTS.FRIEND_ONLINE_STATUS, handleFriendOnlineStatus);
       socket.off(SOCKET_EVENTS.FRIEND_TYPING, handleFriendTyping);
+
+      socket.off(
+        SOCKET_EVENTS.NEW_GROUP_CONVERSATION,
+        handleNewGroupConversation
+      );
+      socket.off(
+        SOCKET_EVENTS.CONVERSATION_DISBANDED,
+        handleDisbandedConversation
+      );
     };
   }, [socket]);
 
