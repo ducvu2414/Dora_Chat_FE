@@ -25,6 +25,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const isVideo = msg.type === "VIDEO";
   const isMe = msg.memberId?.userId === userId;
   const isNotify = msg.type === "NOTIFY";
+  const isLink = msg.type === "TEXT" && msg.content.includes("http");
 
   useEffect(() => {
     if (!msg?.content) {
@@ -266,7 +267,15 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 : isMe
                 ? "bg-[#EFF8FF] text-[#000000] ml-auto"
                 : "bg-[#F5F5F5] text-[#000000]"
-            }`}
+            }
+            ${isLink ? "text-[#086DC0] hover:underline cursor-pointer" : ""}
+              
+`}
+                onClick={() => {
+                  if (isLink) {
+                    window.open(msg.content, "_blank");
+                  }
+                }}
               >
                 {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (

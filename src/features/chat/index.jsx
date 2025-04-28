@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import messageApi from "@/api/message";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
