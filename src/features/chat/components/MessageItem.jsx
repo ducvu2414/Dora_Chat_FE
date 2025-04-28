@@ -246,7 +246,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                   className="flex items-center text-[#086DC0] text-sm hover:underline"
                 >
                   <AiOutlinePaperClip size={20} className="mr-1" />
-                  {"file" + msg.content.split("file").pop() || "Tải xuống file"}
+                  {"file" + msg.fileName || "Tải xuống file"}
                 </a>
                 <span className="text-xs text-gray-500">
                   Loại: {getFileTypeLabel(msg.content)}

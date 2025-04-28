@@ -171,7 +171,6 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
-              {console.log("conversationMessages", conversationMessages)}
               {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} />}
             </div>
           </div>

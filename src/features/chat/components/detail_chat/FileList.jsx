@@ -1,35 +1,39 @@
+/* eslint-disable no-constant-binary-expression */
 /* eslint-disable react/prop-types */
-export default function FileList({ limit }) {
-  const files = [
-    { name: "file1.docx", size: "1MB" },
-    { name: "file2.pdf", size: "2MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-    { name: "file3.zip", size: "3MB" },
-    { name: "file4.zip", size: "3MB" },
-  ];
+export default function FileList({ limit, files }) {
+  console.log("files", files);
+
+  function formatFileSize(bytes) {
+    if (isNaN(bytes) || bytes < 0) return '0 KB';
+    
+    const KB_SIZE = 1024;
+    const MB_SIZE = KB_SIZE * 1024;
+    
+    // Nếu nhỏ hơn 1MB thì hiển thị KB
+    if (bytes < MB_SIZE) {
+      return (bytes / KB_SIZE).toFixed(2) + ' KB';
+    }
+    
+    // Ngược lại hiển thị MB
+    return (bytes / MB_SIZE).toFixed(2) + ' MB';
+  }
+
+  const filesHandle = files?.map((item) => {
+    return {
+      name: item.fileName,
+      size: formatFileSize(item.fileSize),
+      link: item.content,
+    };
+  });
+
+
   const getFileIcon = (filename) => {
-    const ext = filename.split(".").pop().toLowerCase();
+    const basename = filename.split(/[\\/]/).pop(); 
+    
+    const ext = basename.includes('.') 
+        ? basename.split('.').pop().toLowerCase() 
+        : '';
+
     switch (ext) {
       case "docx":
         return "../src/assets/chat/word.svg";
@@ -41,7 +45,8 @@ export default function FileList({ limit }) {
         return "../src/assets/chat/default.png";
     }
   };
-  const displayedFiles = limit ? files.slice(0, limit) : files;
+
+  const displayedFiles = limit ? filesHandle.slice(0, limit) : filesHandle;
   return (
     <ul className="px-4 mt-2">
       {displayedFiles.map((file, index) => (
@@ -49,7 +54,7 @@ export default function FileList({ limit }) {
           key={index}
           className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
         >
-          <img src={getFileIcon(file.name)} alt="icon" />
+          <img src={getFileIcon(file.link)} alt="icon" />
           <div>
             <p className="text-sm font-medium">{file.name}</p>
             <p className="text-xs text-[#086DC0] font-light text-start">

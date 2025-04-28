@@ -420,7 +420,7 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
               <img src={ArrowRight} />
             </div>
           </div>
-          <FileList limit={3} />
+          <FileList limit={3} files={files} />
         </div>
         <div className="w-full mt-3">
           <div
