@@ -25,6 +25,10 @@ export default function ChatSingle() {
   const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
+  const [photosVideos, setPhotosVideos] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [links, setLinks] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!conversationId) return;
@@ -88,6 +92,27 @@ export default function ChatSingle() {
 
     fetchData();
   }, [conversationId, dispatch, unread]);
+
+  useEffect(() => {
+    // filter type message is image, video in array conversationMessages
+    const photosVideos = conversationMessages.filter(
+      (message) => message.type === "IMAGE" || message.type === "VIDEO"
+    );
+
+    const files = conversationMessages.filter(
+      (message) => message.type === "FILE"
+    );
+
+    const links = conversationMessages.filter(
+      (message) => message.type === "TEXT" && message.content.includes("http")
+    );
+
+    setPhotosVideos(photosVideos);
+    setFiles(files);
+    setLinks(links);
+
+  }, [conversationMessages, conversationMessages.length]);
+
   const handleSendMessage = async ({ content, type, files }) => {
     const channelId = activeChannel;
     try {
@@ -144,7 +169,9 @@ export default function ChatSingle() {
                 showDetail ? "w-[385px]" : "w-0"
               }`}
             >
-              {showDetail && <DetailChat conversation={conversation} />}
+              {/* log messages */}
+              {console.log("conversationMessages", conversationMessages)}
+              {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} />}
             </div>
           </div>
         </div>

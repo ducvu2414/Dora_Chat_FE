@@ -2,29 +2,10 @@
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 
-export default function PictureList({ limit }) {
+export default function PictureList({ limit, imagesVideos }) {
   const [previewImage, setPreviewImage] = useState(null);
 
-  const images = [
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-    "../src/assets/tiger_demo.png",
-  ];
+  const images = imagesVideos?.filter(item => item.type === 'IMAGE')?.map(item => item.content);
   const displayedImages = limit ? images.slice(0, limit) : images;
   return (
     <>

@@ -28,7 +28,7 @@ import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
 
-export default function MainDetail({ handleSetActiveTab, conversation }) {
+export default function MainDetail({ handleSetActiveTab, conversation, imagesVideos, files, links }) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [isOpenManager, setIsOpenManager] = useState(false);
@@ -46,6 +46,8 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
   const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [memberFilter, setMemberFilter] = useState([]);
+
+  // Set name of conversation
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
     else
@@ -61,6 +63,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
     conversation.type,
   ]);
 
+  // Set muted status
   useEffect(() => {
     setIsMuted(conversation.mute);
   }, [conversation.mute]);
@@ -392,12 +395,12 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Picture} />
             </div>
-            <p className="text-[#086DC0] ml-2">Photo/videos (125)</p>
+            <p className="text-[#086DC0] ml-2">Photo/videos ({imagesVideos.length})</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
-          <PictureList limit={6} />
+          <PictureList limit={6} imagesVideos={imagesVideos} />
         </div>
         <div className="w-full mt-3">
           <div
@@ -412,7 +415,7 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={File} />
             </div>
-            <p className="text-[#086DC0] ml-2">Files (3)</p>
+            <p className="text-[#086DC0] ml-2">Files ({files.length})</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
@@ -432,12 +435,12 @@ export default function MainDetail({ handleSetActiveTab, conversation }) {
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Link} />
             </div>
-            <p className="text-[#086DC0] ml-2">Link</p>
+            <p className="text-[#086DC0] ml-2">Link ({links.length})</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
           </div>
-          <LinkList limit={3} />
+          <LinkList limit={3} links={links} />
         </div>
         <div className="w-full mt-3">
           {/* Header */}

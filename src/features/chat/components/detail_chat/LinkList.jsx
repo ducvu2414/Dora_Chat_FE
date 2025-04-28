@@ -1,14 +1,25 @@
 /* eslint-disable react/prop-types */
 import Link from "@assets/chat/link_list.svg";
 
-export default function LinkList({ limit }) {
-  const links = [
-    { name: "FaceBook", link: "facebook.com" },
-    { name: "Google", link: "google.com" },
-    { name: "Twitter", link: "twitter.com" },
-    { name: "Instagram", link: "instagram.com" },
-  ];
-  const displayedLinks = limit ? links.slice(0, limit) : links;
+export default function LinkList({ limit, links }) {
+  function getDomainName(url) {
+    let domain = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+    domain = domain.split(/[/?#]/)[0];
+    return domain;
+  }
+
+  function removeProtocol(url) {
+    return url.replace(/^(https?:\/\/)?(www\.)?/, '');
+  }
+  
+  const linksHandle = links?.map((item) => {
+    return {
+      name: getDomainName(item.content),
+      link: removeProtocol(item.content),
+    };
+  });
+
+  const displayedLinks = limit ? linksHandle.slice(0, limit) : linksHandle;
   return (
     <ul className="px-4 mt-2">
       {displayedLinks.map((file, index) => (

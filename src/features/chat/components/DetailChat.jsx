@@ -4,7 +4,8 @@ import { useState } from "react";
 import MainDetail from "./MainDetail";
 import MediaDetail from "./detail_chat/MediaDetail";
 import MemberList from "./detail_chat/MemberList";
-export default function DetailChat({ conversation }) {
+export default function DetailChat({ conversation, imagesVideos, files, links }) {
+  
   const [activeTab, setActiveTab] = useState({
     tab: "detail",
   });
@@ -20,17 +21,9 @@ export default function DetailChat({ conversation }) {
         <MainDetail
           handleSetActiveTab={handleSetActiveTab}
           conversation={conversation}
-        />
-      )}
-      {activeTab.tab === "media" && (
-        <MediaDetail
-          onBack={() =>
-            setActiveTab((prev) => ({
-              ...prev,
-              tab: "detail",
-            }))
-          }
-          media={activeTab?.media}
+          imagesVideos={imagesVideos}
+          files={files}
+          links={links}
         />
       )}
       {activeTab.tab === "members" && (
@@ -44,6 +37,20 @@ export default function DetailChat({ conversation }) {
           conversationId={conversation._id}
           managers={conversation?.managerIds}
           leader={conversation?.leaderId}
+        />
+      )}
+      {activeTab.tab === "media" && (
+        <MediaDetail
+          onBack={() =>
+            setActiveTab((prev) => ({
+              ...prev,
+              tab: "detail",
+            }))
+          }
+          media={activeTab?.media}
+          imagesVideos={imagesVideos}
+          files={files}
+          links={links}
         />
       )}
     </div>

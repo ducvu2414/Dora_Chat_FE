@@ -12,16 +12,16 @@ const TABS = [
   { id: "links", label: "Links" },
 ];
 
-export default function MediaDetail({ onBack, media }) {
+export default function MediaDetail({ onBack, media, imagesVideos, files, links }) {
   const [activeTab, setActiveTab] = useState(media || "photos/videos");
   const renderContent = () => {
     switch (activeTab) {
       case "photos/videos":
-        return <PictureList />;
+        return <PictureList imagesVideos={imagesVideos} />;
       case "files":
-        return <FileList />;
+        return <FileList files={files} />;
       case "links":
-        return <LinkList />;
+        return <LinkList links={links} />;
       default:
         return null;
     }
