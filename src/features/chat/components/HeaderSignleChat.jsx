@@ -29,35 +29,57 @@ export default function HeaderSignleChat({
   const avatarMessage = conversation.avatar || partner?.avatar;
   const name = conversation.name || partner?.name || partner?.username;
 
-  const peerId = uuidv4();
+
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
-    const payload = {
-      conversationId: conversation._id,
-      userId,
-      peerId,
-      type,
-    };
-    console.log(
-      "🚀 ~ file: HeaderSignleChat.jsx:22 ~ handleCall ~ payload",
-      payload
-    );
+    const isGroup = conversation.type;
 
-    if (type === "audio") {
-      socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);
+    if (isGroup) {
+      const channelId = activeTab;
+      const payload = {
+        conversationId: conversation._id,
+        callerId: userId,
+        channelId,
+        type,
+      };
+
+      console.log("🚀 Group Call payload", payload);
+
+      socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, payload);
+
+      navigate(`/group-call/${conversation._id}`, {
+        state: {
+          channelId,
+          conversation,
+        },
+      });
     } else {
-      socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_VIDEO, payload);
-    }
-
-    // Navigate to call page with params
-    navigate(`/call/${conversation._id}?type=${type}`, {
-      state: {
-        conversation,
-        initiator: true,
+      const peerId = uuidv4();
+      const payload = {
+        conversationId: conversation._id,
+        userId,
         peerId,
-      },
-    });
+        type,
+      };
+
+      console.log("🚀 1-1 Call payload", payload);
+
+      if (type === "audio") {
+        socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);
+      } else {
+        socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_VIDEO, payload);
+      }
+
+      navigate(`/call/${conversation._id}?type=${type}`, {
+        state: {
+          conversation,
+          initiator: true,
+          peerId,
+        },
+      });
+    }
   };
+
 
   useEffect(() => {
     setActiveChannel(activeTab);

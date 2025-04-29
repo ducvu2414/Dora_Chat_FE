@@ -83,7 +83,7 @@ const MainLayout = () => {
   }, []);
 
   useEffect(() => {
-    if (!isConnected()) {
+    if (!socketInitialized && !isConnected()) {
       startTransition(() => {
         init();
         setSocketInitialized(true);
@@ -91,11 +91,12 @@ const MainLayout = () => {
     }
 
     return () => {
-      if (socket) {
+      if (socket && isConnected()) {
         socket.close();
+        setSocketInitialized(false);
       }
     };
-  }, []);
+  }, [socketInitialized]);
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
     if (!socket) return;

@@ -29,6 +29,8 @@ const OtherPeopleInformation = React.lazy(() => import("@/page/OtherPeopleInform
 const PreviewPage = React.lazy(() => import("@/page/PreviewPage"));
 
 const CallPage = React.lazy(() => import("@/features/chat/CallPage"));
+const GroupCallPage = React.lazy(() => import("@/features/chat/GroupCallPage"));
+
 
 const withSuspense = (Component) => (
   <Suspense fallback={<LoadingFallback />}>
@@ -96,6 +98,11 @@ const routes = [
       {
         path: "call/:conversationId",
         element: withSuspense(CallPage)
+      }
+      ,
+      {
+        path: "group-call/:conversationId",
+        element: withSuspense(GroupCallPage)
       }
       ,
       {
