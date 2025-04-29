@@ -59,7 +59,7 @@ export default function ForwardMessageModal({ message, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("Không thể chuyển tiếp tin nhắn");
+      alert("Unable to forward message");
     }
   };
 
@@ -69,10 +69,10 @@ export default function ForwardMessageModal({ message, onClose }) {
     <Modal
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
-      title="Chuyển tiếp tin nhắn"
+      title="Forward messages"
     >
       <UserSelectionModal
-        buttonText="Chuyển tiếp"
+        buttonText="Forward"
         onSubmit={handleSubmit}
         users={friends}
         message={message.content}

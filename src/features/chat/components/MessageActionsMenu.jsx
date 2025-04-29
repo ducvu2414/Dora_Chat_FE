@@ -55,7 +55,7 @@ export default function MessageActionsMenu({
       setOpen(false);
     } catch (error) {
       console.error("Error recalling message:", error);
-      alert("Không thể thu hồi tin nhắn");
+      alert("Message cannot be recalled");
     }
   };
   const handleForwardMessage = () => {
@@ -79,7 +79,7 @@ export default function MessageActionsMenu({
       setOpen(false);
     } catch (error) {
       console.error("Error deleting message for me:", error);
-      alert("Không thể xóa tin nhắn");
+      alert("Cannot delete message");
     }
   };
   useEffect(() => {
@@ -113,30 +113,30 @@ export default function MessageActionsMenu({
             onMouseLeave={handleMouseLeave}
           >
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-              Trả lời
+              Reply
             </button>
             <button
               className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
               onClick={handleForwardMessage}
             >
-              Chuyển tiếp
+              Forward
             </button>
             {isMe && (
               <button
                 className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
                 onClick={handleRecallMessage}
               >
-                Thu hồi
+                Retrieve
               </button>
             )}
             <button
               className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
               onClick={handleDeleteForMe}
             >
-              Xóa phía tôi
+              Delete my side
             </button>
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-              Ghim
+              Pin
             </button>
           </div>
         )}

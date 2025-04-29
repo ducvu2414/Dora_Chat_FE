@@ -67,7 +67,7 @@ export function AddFriendModal({ isOpen, onClose }) {
       setEnableSentRequest(true);
     } catch (error) {
       setSearchResult(null);
-      AlertMessage({ type: "error", message: "Không tìm thấy người dùng" });
+      AlertMessage({ type: "error", message: "User not found" });
       console.error("Error searching for user:", error);
     }
   };

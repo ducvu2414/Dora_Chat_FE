@@ -232,8 +232,8 @@ export default function MainDetail({
         isOpen={isOpenOk}
         onClose={() => setIsOpenOk(false)}
         onConfirm={() => setIsOpenOk(false)}
-        title="Cảnh báo"
-        message="Vui lòng chọn người thay thế trưởng nhóm trước khi rời khỏi nhóm"
+        title="Warning"
+        message="Please choose a replacement leader before leaving the group"
         isSingleButton={true}
         confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
       />
@@ -243,15 +243,15 @@ export default function MainDetail({
         onConfirm={async () => {
           await conversationApi.leaveConversation(conversation._id);
         }}
-        title="Cảnh báo"
-        message="Bạn chắn chắn muốn rời khỏi nhóm này?"
+        title="Warning"
+        message="Are you sure you want to leave this group?"
       />
       <ChooseModal
         isOpen={isOpenDelete}
         onClose={() => setIsOpenDelete(false)}
         onConfirm={handleDeleteChat}
-        title="Cảnh báo"
-        message="Bạn chắc chắn muốn xóa cuộc trò chuyện này bên phía mình?"
+        title="Warning"
+        message="Are you sure you want to delete this conversation on your side?"
       />
       <Modal
         isOpen={isOpenAddUser}

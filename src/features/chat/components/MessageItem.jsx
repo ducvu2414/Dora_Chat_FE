@@ -178,7 +178,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               <div className="relative">
                 {!videoLoaded && !videoError && (
                   <div className="bg-gray-100 rounded-lg flex items-center justify-center w-[300px] h-[200px]">
-                    <div className="animate-pulse">Đang tải video...</div>
+                    <div className="animate-pulse">Loading video...</div>
                   </div>
                 )}
 
@@ -186,7 +186,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                   <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
                     <MdError size={32} className="mb-2 text-red-500" />
                     <p className="text-sm text-center text-gray-600">
-                      Không thể tải video
+                    Video could not be loaded
                     </p>
                   </div>
                 )}

@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import QRCode from 'react-qr-code';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import QRCode from "react-qr-code";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-import authApi from '@/api/auth';
-import { AlertMessage } from '@/components/ui/alert-message';
-import { setCredentials } from '@/features/auth/authSlice';
+import authApi from "@/api/auth";
+import { AlertMessage } from "@/components/ui/alert-message";
+import { setCredentials } from "@/features/auth/authSlice";
 
 const QR_EXPIRE_TIME = 180 * 1000;
 
@@ -35,8 +35,8 @@ export const QRLoginBox = () => {
         setQrExpired(true);
       }, QR_EXPIRE_TIME);
     } catch (err) {
-      console.error('❌ Không thể tạo mã QR:', err);
-      AlertMessage({ type: 'error', message: 'Không thể tạo mã QR' });
+      console.error("❌ Unable to generate QR code:", err);
+      AlertMessage({ type: "error", message: "Unable to generate QR code" });
     }
   };
 
@@ -48,27 +48,26 @@ export const QRLoginBox = () => {
       try {
         const res = await authApi.checkQRStatus(sessionId);
         console.log(res);
-        if (res.status === 'VERIFIED') {
-
-          console.log('✅ Đã xác thực ', res);
+        if (res.status === "VERIFIED") {
+          console.log("✅ Đã xác thực ", res);
           const { user, accessToken: token, refreshToken } = res;
 
           // Cập nhật vào Redux
           dispatch(setCredentials({ user, token, refreshToken }));
 
           // Lưu vào localStorage
-          localStorage.setItem('token', token);
-          localStorage.setItem('refreshToken', refreshToken);
-          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem("token", token);
+          localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("user", JSON.stringify(user));
 
           clearInterval(pollingInterval.current);
           clearTimeout(qrTimeout.current);
 
-          AlertMessage({ type: 'success', message: 'Đăng nhập bằng QR thành công!' });
-          navigate('/home');
+          AlertMessage({ type: "success", message: "QR login successful!" });
+          navigate("/home");
         }
       } catch (err) {
-        console.error('❌ Lỗi kiểm tra QR:', err);
+        console.error("❌ Error checking QR:", err);
       }
     }, 2000);
 
@@ -86,15 +85,15 @@ export const QRLoginBox = () => {
 
   return (
     <div className="mt-6">
-      <h3 className="text-center text-gray-600 text-sm">Đăng nhập bằng mã QR</h3>
+      <h3 className="text-center text-gray-600 text-sm">Login with QR code</h3>
       {qrExpired ? (
         <div className="text-center mt-4">
-          <p className="text-sm text-gray-500">⚠️ Mã QR đã hết hạn</p>
+          <p className="text-sm text-gray-500">⚠️ QR code has expired</p>
           <button
             onClick={getQR}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Làm mới mã QR
+            Refresh QR code
           </button>
         </div>
       ) : sessionId ? (
@@ -102,7 +101,9 @@ export const QRLoginBox = () => {
           <QRCode value={`qrlogin:${sessionId}`} size={180} />
         </div>
       ) : (
-        <p className="text-center text-sm text-gray-500 mt-2">Đang tạo mã QR...</p>
+        <p className="text-center text-sm text-gray-500 mt-2">
+          Generating QR code...
+        </p>
       )}
     </div>
   );
