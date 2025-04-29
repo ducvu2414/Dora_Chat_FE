@@ -9,6 +9,8 @@ import {
   setActiveConversation,
   setMessages,
 } from "../../features/chat/chatSlice";
+import { SOCKET_EVENTS } from "../../utils/constant";
+import { socket } from "../../utils/socketClient";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
 import HeaderSignleChat from "./components/HeaderSignleChat";
@@ -16,21 +18,23 @@ import MessageInput from "./components/MessageInput";
 import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
-import { SOCKET_EVENTS } from "../../utils/constant";
-import { socket } from "../../utils/socketClient";
+import pinMessageApi from "@/api/pinMessage";
+import userApi from "../../api/user";
+
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
   const { messages, unread } = useSelector((state) => state.chat);
   const conversationMessages = messages[conversationId] || [];
-  const [conversation, setConversation] = useState(null);
-  const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
+  const [conversation, setConversation] = useState(null);
+  const [channels, setChannels] = useState([]);
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
+  const [pinMessages, setPinMessages] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,23 +48,47 @@ export default function ChatSingle() {
 
         try {
           res = await conversationApi.getConversationById(conversationId);
+
           channels = await channelApi.getAllChannelByConversationId(
             conversationId
           );
+          const mappedChannels = channels.map((channel) => ({
+            id: channel._id,
+            label: channel.name,
+          }));
+
           const isMember = (
             await memberApi.isMember(
               conversationId,
               JSON.parse(localStorage.getItem("user"))._id
             )
           ).data;
-          const mappedChannels = channels.map((channel) => ({
-            id: channel._id,
-            label: channel.name,
-          }));
+
+          const pinMessages = await pinMessageApi.getAllByConversationId(conversationId);
+          // create array mappedPinMessages has data message by messageId in each item of pinMessages (get data message by conversationMessages) and in each item of pinMessages has pinnedBy (this is memberId), i want to get member by memberId in each item of pinMessages
+          const mappedPinMessages = await Promise.all(
+            pinMessages.map(async (pinMessage) => {
+              const message = conversationMessages.find(
+                (message) => message._id === pinMessage.messageId
+              );
+              const member = await memberApi.getByMemberId(pinMessage.pinnedBy);
+              const userPin = await userApi.getByMemberId(pinMessage.pinnedBy);
+              member.data.avatar = userPin.avatar;
+
+              return {
+                ...pinMessage,
+                ...message,
+                pinnedBy: member.data,
+              };
+            })
+          );
+          console.log(mappedPinMessages);
+
           setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
           setActiveChannel(channels[0]?._id || null);
+          setPinMessages(mappedPinMessages);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
@@ -181,7 +209,7 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
-              {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} />}
+              {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} pinMessages={pinMessages} />}
             </div>
           </div>
         </div>

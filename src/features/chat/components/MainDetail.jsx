@@ -28,7 +28,14 @@ import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
 
-export default function MainDetail({ handleSetActiveTab, conversation, imagesVideos, files, links }) {
+export default function MainDetail({
+  handleSetActiveTab,
+  conversation,
+  imagesVideos,
+  files,
+  links,
+  pinMessages,
+}) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [isOpenManager, setIsOpenManager] = useState(false);
@@ -374,7 +381,7 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Member} />
             </div>
-            <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
+            <p className="text-[#086DC0] ml-2">Members ({quantityMember})</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
@@ -382,6 +389,18 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
         ) : (
           <></>
         )}
+        <div
+          className="flex items-center w-full mt-3 cursor-pointer"
+          onClick={() => handleSetActiveTab({ tab: "pins" })}
+        >
+          <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+            <img src={MarkChat} />
+          </div>
+          <p className="text-[#086DC0] ml-2">Pin messages ({pinMessages.length})</p>
+          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+            <img src={ArrowRight} />
+          </div>
+        </div>
         <div className="w-full mt-3">
           <div
             className="flex items-center cursor-pointer"
@@ -395,7 +414,9 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Picture} />
             </div>
-            <p className="text-[#086DC0] ml-2">Photo/videos ({imagesVideos.length})</p>
+            <p className="text-[#086DC0] ml-2">
+              Photos/videos ({imagesVideos.length})
+            </p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
