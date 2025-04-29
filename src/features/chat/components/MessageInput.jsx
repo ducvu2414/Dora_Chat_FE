@@ -255,25 +255,27 @@ export default function MessageInput({ onSend, isMember }) {
       )}
 
       <div className="flex items-center p-3 border-t">
-        {isLoading || !isMemberState ? (
+        {!isMemberState ? (
           <></>
         ) : (
-          <label className="mr-2 cursor-pointer hover:opacity-70">
-            <img src={FileIcon} alt="File" />
-            <input
-              type="file"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-            />
-          </label>
+          // !isLoading && (
+            <label className="mr-2 cursor-pointer hover:opacity-70">
+              <img src={FileIcon} alt="File" />
+              <input
+                type="file"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+              />
+            </label>
+          // )
         )}
 
         <div
           className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4
            focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300"
         >
-          {isLoading || !isMemberState ? (
+          {!isMemberState ? (
             <input
               type="text"
               placeholder="You cannot message this conversation"
@@ -281,49 +283,53 @@ export default function MessageInput({ onSend, isMember }) {
               disabled={true}
             />
           ) : (
-            <>
-              <input
-                ref={inputRef}
-                value={input || ""}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                type="text"
-                placeholder="Type a message..."
-                className="w-full text-sm outline-none bg-inherit"
-              />
-              <label className="cursor-pointer hover:opacity-70">
-                <img src={PictureIcon} className="p-2" alt="Picture" />
+            // !isLoading && (
+              <>
                 <input
-                  type="file"
-                  // accept="image/*,video/*"
-                  accept="image/*,video/*"
-                  className="hidden"
-                  multiple
-                  ref={imageInputRef}
-                  onChange={handleImageOrVideoSelect}
-                  disabled={isLoading}
+                  ref={inputRef}
+                  value={input || ""}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  type="text"
+                  placeholder="Type a message..."
+                  className="w-full text-sm outline-none bg-inherit"
                 />
-              </label>
-              <button
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
-              >
-                <img src={EmojiIcon} alt="Emoji" />
-              </button>
-            </>
+                <label className="cursor-pointer hover:opacity-70">
+                  <img src={PictureIcon} className="p-2" alt="Picture" />
+                  <input
+                    type="file"
+                    // accept="image/*,video/*"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    multiple
+                    ref={imageInputRef}
+                    onChange={handleImageOrVideoSelect}
+                    disabled={isLoading}
+                  />
+                </label>
+                <button
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
+                >
+                  <img src={EmojiIcon} alt="Emoji" />
+                </button>
+              </>
+            // )
           )}
         </div>
-        {isLoading || !isMemberState ? (
+        {!isMemberState ? (
           <></>
         ) : (
-          <div
-            onClick={handleSend}
-            className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
-              isLoading ? "opacity-50" : ""
-            }`}
-          >
-            <img src={SendIcon} alt="Send" />
-          </div>
+          // !isLoading && (
+            <div
+              onClick={handleSend}
+              className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
+                isLoading ? "opacity-50" : ""
+              }`}
+            >
+              <img src={SendIcon} alt="Send" />
+            </div>
+          // )
         )}
       </div>
     </div>
