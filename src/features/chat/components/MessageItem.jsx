@@ -3,7 +3,7 @@ import Avatar from "@assets/chat/avatar.png";
 import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
 
@@ -18,6 +18,9 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const [isClicked, setIsClicked] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [hoverVideoUrl, setHoverVideoUrl] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const timeoutRef = useRef(null);
+
   const MAX_TEXT_LENGTH = 350;
 
   const isImage = msg.type === "IMAGE";
@@ -66,6 +69,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       setHoverVideoUrl(msg.content);
     }
   }, [msg?.content]);
+
   const handleVideoLoad = () => {
     setVideoLoaded(true);
     setVideoError(false);
@@ -97,6 +101,20 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     const url = encodeURIComponent(msg.content);
     const name = encodeURIComponent(msg.content?.split("/").pop());
     window.open(`/preview?url=${url}&name=${name}`, "_blank");
+  };
+
+  const handleHover = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleNonHover = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 300);
   };
 
   return (
@@ -144,19 +162,23 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
           <div
             className="flex flex-col max-w-[468px] text-start relative
           group"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleNonHover}
           >
             <div
               className={`absolute top-3 ${
                 isMe ? "left-[-30px]" : "right-[-30px]"
-              } opacity-0 group-hover:opacity-100 transition-opacity `}
+              }`}
             >
-              {!msg.isDeleted && (
+              {!msg.isDeleted && (isHovered || menuOpen) && (
                 <MessageActionsMenu
                   isMe={isMe}
                   messageId={msg._id.toString()}
                   conversationId={msg.conversationId.toString()}
                   messageContent={msg.content}
                   type={msg.type}
+                  isOpen={menuOpen}
+                  setIsOpen={setMenuOpen}
                 />
               )}
             </div>
@@ -186,7 +208,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                   <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
                     <MdError size={32} className="mb-2 text-red-500" />
                     <p className="text-sm text-center text-gray-600">
-                    Video could not be loaded
+                      Video could not be loaded
                     </p>
                   </div>
                 )}
@@ -194,8 +216,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 {/* Container video */}
                 <div
                   className="relative"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
+                  onMouseEnter={handleHover}
+                  onMouseLeave={handleNonHover}
                   onClick={() => setIsClicked(true)}
                 >
                   {/* Hiển thị thumbnail khi không hover và chưa click */}
