@@ -4,6 +4,7 @@ import ArrowRight from "@assets/chat/arrow_right.svg";
 import { useState, useEffect } from "react";
 import { Spinner } from "@/page/Spinner";
 import PinItem from "./PinItem";
+import pinMessageApi from "@/api/pinMessage";
 
 export default function PinList({ onBack, pinMessages }) {
   const [pinMessagesState, setPinMessages] = useState(pinMessages);
@@ -12,7 +13,19 @@ export default function PinList({ onBack, pinMessages }) {
     setPinMessages(pinMessages);
   }, [pinMessages]);
 
-  const handleRemovePinMessage = (pinMessage) => {
+  const handleRemovePinMessage = async (pinMessage) => {
+    // console.log(pinMessage.pinnedBy._id);
+    try {
+      const responseRemovePinMessage = await pinMessageApi.deletePinMessage(
+        pinMessage.messageId,
+        pinMessage.pinnedBy._id
+      );
+      console.log(responseRemovePinMessage);
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "You cannot remove this pin message"
+      );
+    }
     console.log(pinMessage);
   };
 
