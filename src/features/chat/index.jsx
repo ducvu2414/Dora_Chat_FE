@@ -150,7 +150,19 @@ export default function ChatSingle() {
         setConversation((prev) => ({ ...prev, name }));
       }
     });
-  });
+
+    socket.on(SOCKET_EVENTS.PIN_MESSAGE, (pinMessage) => {
+      if (pinMessage) {
+        setPinMessages((prev) => {
+          const isDuplicate = prev.some(item => item._id === pinMessage._id);
+          if (!isDuplicate) {
+            return [...prev, pinMessage];
+          }
+          return prev; 
+        });
+      }
+    });
+  }, []);
 
   const handleSendMessage = async ({ content, type, files }) => {
     const channelId = activeChannel;
