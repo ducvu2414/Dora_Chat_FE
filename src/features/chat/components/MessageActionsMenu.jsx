@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import messageApi from "../../../api/message";
+import pinMessageApi from "../../../api/pinMessage";
+import memberApi from "../../../api/member";
 import ForwardMessageModal from "./ForwardMessageModal";
 
 export default function MessageActionsMenu({
@@ -84,12 +86,29 @@ export default function MessageActionsMenu({
     }
   };
 
+  const handlePinMessage = async () => {
+    try {
+      const res = await pinMessageApi.addPinMessage(
+        messageId,
+        conversationId,
+        await memberApi.getByConversationIdAndUserId(conversationId, JSON.parse(localStorage.getItem('user'))._id).then((res) => res.data._id)
+      );
+      console.log("Pinned message:", res);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error pin message:", error);
+      alert(error.response?.data?.message);
+    }
+  };
+
   return (
     <>
       <div className="relative">
         {/* Button với cả hover và click */}
         <button
-          className={`p-1 rounded-full transition-colors duration-200 ${isOpen ? "bg-gray-200" : "hover:bg-gray-200"}`}
+          className={`p-1 rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+          }`}
           onClick={toggleMenu}
           ref={buttonRef}
           aria-label="Message actions"
@@ -128,7 +147,10 @@ export default function MessageActionsMenu({
             >
               Delete my side
             </button>
-            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={handlePinMessage}
+            >
               Pin
             </button>
           </div>
