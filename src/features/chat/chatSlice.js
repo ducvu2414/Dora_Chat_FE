@@ -7,6 +7,7 @@ const chatSlice = createSlice({
     unread: {}, // { conversationId: number }
     conversations: [], // Danh sách conversation
     activeConversationId: null, // Cuộc trò chuyện đang mở
+    classifies: [], // Mảng phân loại
   },
   reducers: {
     setConversations: (state, action) => {
@@ -38,6 +39,9 @@ const chatSlice = createSlice({
       const { conversationId, messages } = action.payload;
       state.messages[conversationId] = messages;
       state.unread[conversationId] = 0;
+    },
+    setClassifies: (state, action) => {
+      state.classifies = action.payload;
     },
     addMessage: (state, action) => {
       const { conversationId, message } = action.payload;
@@ -157,5 +161,6 @@ export const {
   deleteAllMessages,
   updateLeader,
   leaveConverSation,
+  setClassifies,
 } = chatSlice.actions;
 export default chatSlice.reducer;
