@@ -14,6 +14,8 @@ import {
   deleteAllMessages,
   updateLeader,
   leaveConverSation,
+  addPinMessage,
+  deletePinMessage,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -69,6 +71,7 @@ const MainLayout = () => {
     };
     fetchData();
   }, [dispatch]);
+
   // Lọc messages và groups
   const messages = conversations.filter((conv) => !conv.type); // Cá nhân
   const groups = conversations.filter((conv) => conv.type); // Nhóm
@@ -96,9 +99,11 @@ const MainLayout = () => {
       }
     };
   }, []);
+
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
     if (!socket) return;
+    console.log(socket.connected);
     if (conversations.length > 0) {
       const conversationIds = conversations.map((conv) => conv._id);
       socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationIds);
@@ -583,6 +588,32 @@ const MainLayout = () => {
       );
     };
   }, [socket]);
+
+  useEffect(() => {
+    if (!socket || !userId) return;
+    console.log('test connected? ' + socket.connected);
+    const handlePinMessage = (pinMessage) => {
+      console.log("test socket listen unpin message", pinMessage);
+      if (pinMessage) {
+        dispatch(addPinMessage(pinMessage));
+      }
+    };
+
+    const handleUnpinMessage = (pinMessage) => {
+      console.log("test socket listen unpin message", pinMessage);
+      if (pinMessage) {
+        dispatch(deletePinMessage(pinMessage));
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.PIN_MESSAGE, handlePinMessage);
+    socket.on(SOCKET_EVENTS.UNPIN_MESSAGE, handleUnpinMessage);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.PIN_MESSAGE, handlePinMessage);
+      socket.off(SOCKET_EVENTS.UNPIN_MESSAGE, handleUnpinMessage);
+    };
+  }, [socket, dispatch]);
 
   const handleConversationClick = (id) => {
     startTransition(() => {

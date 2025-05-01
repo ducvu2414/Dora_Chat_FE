@@ -14,7 +14,6 @@ export default function PinList({ onBack, pinMessages }) {
   }, [pinMessages]);
 
   const handleRemovePinMessage = async (pinMessage) => {
-    // console.log(pinMessage.pinnedBy._id);
     try {
       const responseRemovePinMessage = await pinMessageApi.deletePinMessage(
         pinMessage.messageId,

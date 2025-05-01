@@ -8,9 +8,8 @@ import {
   markRead,
   setActiveConversation,
   setMessages,
+  setPinMessages
 } from "../../features/chat/chatSlice";
-import { SOCKET_EVENTS } from "../../utils/constant";
-import { socket } from "../../utils/socketClient";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
 import HeaderSignleChat from "./components/HeaderSignleChat";
@@ -19,13 +18,12 @@ import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
 import pinMessageApi from "@/api/pinMessage";
-import userApi from "../../api/user";
 
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread } = useSelector((state) => state.chat);
+  const { messages, unread, pinMessages } = useSelector((state) => state.chat);
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
@@ -34,7 +32,6 @@ export default function ChatSingle() {
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
-  const [pinMessages, setPinMessages] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,30 +62,13 @@ export default function ChatSingle() {
           ).data;
 
           const pinMessages = await pinMessageApi.getAllByConversationId(conversationId);
-          // create array mappedPinMessages has data message by messageId in each item of pinMessages (get data message by conversationMessages) and in each item of pinMessages has pinnedBy (this is memberId), i want to get member by memberId in each item of pinMessages
-          const mappedPinMessages = await Promise.all(
-            pinMessages.map(async (pinMessage) => {
-              const message = conversationMessages.find(
-                (message) => message._id === pinMessage.messageId
-              );
-              const member = await memberApi.getByMemberId(pinMessage.pinnedBy);
-              const userPin = await userApi.getByMemberId(pinMessage.pinnedBy);
-              member.data.avatar = userPin.avatar;
-
-              return {
-                ...pinMessage,
-                ...message,
-                pinnedBy: member.data,
-              };
-            })
-          );
-          console.log(mappedPinMessages);
+          
+          dispatch(setPinMessages(pinMessages));
 
           setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
           setActiveChannel(channels[0]?._id || null);
-          setPinMessages(mappedPinMessages);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
@@ -143,26 +123,6 @@ export default function ChatSingle() {
     setLinks(links);
 
   }, [conversationMessages.length]);
-
-  useEffect(() => {
-    socket.on(SOCKET_EVENTS.UPDATE_NAME_CONVERSATION, (name) => {
-      if (name) {
-        setConversation((prev) => ({ ...prev, name }));
-      }
-    });
-
-    socket.on(SOCKET_EVENTS.PIN_MESSAGE, (pinMessage) => {
-      if (pinMessage) {
-        setPinMessages((prev) => {
-          const isDuplicate = prev.some(item => item._id === pinMessage._id);
-          if (!isDuplicate) {
-            return [...prev, pinMessage];
-          }
-          return prev; 
-        });
-      }
-    });
-  }, []);
 
   const handleSendMessage = async ({ content, type, files }) => {
     const channelId = activeChannel;
@@ -221,6 +181,7 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
+              {console.log("pinMessage", typeof pinMessages[0]._id)}
               {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} pinMessages={pinMessages} />}
             </div>
           </div>

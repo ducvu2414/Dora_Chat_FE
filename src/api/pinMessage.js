@@ -15,11 +15,7 @@ const pinMessageApi = {
     },
 
     deletePinMessage: (messageId, memberId) => {
-        return axios.delete(`api/pin-messages/${messageId}`, {
-            data: {
-                pinnedBy: memberId,
-            },
-        });
+        return axios.delete(`api/pin-messages/${messageId}/${memberId}`);
     }
 
 }

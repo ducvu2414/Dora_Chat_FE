@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/prop-types */
 import { useState, useRef, useCallback } from "react";
 import { MoreVertical, Trash2, Paperclip } from "lucide-react";
@@ -21,9 +20,9 @@ export default function PinItem({ pinMessages, onRemove }) {
     const spaceBelow = window.innerHeight - rect.bottom;
     const dropdownHeight = 150;
 
-    setDropdownPositions(prev => ({
+    setDropdownPositions((prev) => ({
       ...prev,
-      [id]: spaceBelow < dropdownHeight ? "top" : "bottom"
+      [id]: spaceBelow < dropdownHeight ? "top" : "bottom",
     }));
   }, []);
 
@@ -35,12 +34,12 @@ export default function PinItem({ pinMessages, onRemove }) {
 
   function formatPinTime(timestamp) {
     const date = new Date(timestamp);
-    return date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
@@ -75,7 +74,7 @@ export default function PinItem({ pinMessages, onRemove }) {
                 {pinMessage.content}
               </p>
 
-              {pinMessage.type === 'FILE' && (
+              {pinMessage.type === "FILE" && (
                 <div className="mt-1 text-xs text-gray-500 flex items-center gap-1">
                   <Paperclip className="w-3 h-3" />
                   <span>Attachment</span>
@@ -103,7 +102,13 @@ export default function PinItem({ pinMessages, onRemove }) {
             align="left"
             verticalAlign={dropdownPositions[pinMessage._id] || "bottom"}
           >
-            <DropdownItem icon={Trash2} onClick={() => onRemove(pinMessage)}>
+            <DropdownItem
+              icon={Trash2}
+              onClick={() => {
+                console.log(pinMessage);
+                onRemove(pinMessage);
+              }}
+            >
               Delete pin
             </DropdownItem>
           </Dropdown>

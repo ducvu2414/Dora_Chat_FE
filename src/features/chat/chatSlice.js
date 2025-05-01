@@ -7,6 +7,7 @@ const chatSlice = createSlice({
     unread: {}, // { conversationId: number }
     conversations: [], // Danh sách conversation
     activeConversationId: null, // Cuộc trò chuyện đang mở
+    pinMessages: [], // Danh sách tin nhắn đã ghim
   },
   reducers: {
     setConversations: (state, action) => {
@@ -140,6 +141,22 @@ const chatSlice = createSlice({
         delete state.unread[conversationId];
       }
     },
+
+    setPinMessages: (state, action) => {
+      state.pinMessages = action.payload;
+    },
+
+    addPinMessage: (state, action) => {
+      const pinMessage = action.payload;
+      if (!state.pinMessages.some((msg) => msg._id === pinMessage._id)) {
+        state.pinMessages.push(pinMessage); 
+      }
+    },
+
+    deletePinMessage: (state, action) => {
+      const { _id } = action.payload;
+      state.pinMessages = state.pinMessages.filter((msg) => msg._id !== _id);
+    },
   },
 });
 
@@ -147,15 +164,18 @@ export const {
   setConversations,
   addConversation,
   updateConversation,
+  setActiveConversation,
+  disbandConversation,
+  leaveConverSation,
   setMessages,
   addMessage,
-  markRead,
-  setActiveConversation,
   recallMessage,
   deleteMessageForMe,
-  disbandConversation,
   deleteAllMessages,
+  markRead,
   updateLeader,
-  leaveConverSation,
+  setPinMessages,
+  addPinMessage,
+  deletePinMessage,
 } = chatSlice.actions;
 export default chatSlice.reducer;
