@@ -3,6 +3,7 @@ import { memo, Suspense, useEffect, useState, useTransition } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
+import classifiesApi from "../../api/classifies";
 import {
   setConversations,
   addMessage,
@@ -16,6 +17,7 @@ import {
   leaveConverSation,
   addPinMessage,
   deletePinMessage,
+  setClassifies
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -63,10 +65,14 @@ const MainLayout = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await conversationApi.fetchConversations();
-        dispatch(setConversations(response));
+        const [convs, classifies] = await Promise.all([
+          conversationApi.fetchConversations(),
+          classifiesApi.getAllByUserId(),
+        ]);
+        dispatch(setConversations(convs));
+        dispatch(setClassifies(classifies));
       } catch (error) {
-        console.error("Error fetching conversations:", error);
+        console.error("Error fetching data:", error);
       }
     };
     fetchData();
