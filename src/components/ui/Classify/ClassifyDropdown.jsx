@@ -19,7 +19,7 @@ export function ClassifyDropdown({ selectedIds = [], onSelect, onManage }) {
         <div className="relative inline-block text-left z-[99999999]">
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center px-3 py-2 text-sm rounded bg-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:border-transparent"
+                className="flex items-center px-3 py-2 text-sm rounded outline-none hover:outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:border-transparent"
             >
                 Phân loại <ChevronDown className="w-4 h-4 ml-2" />
             </button>
