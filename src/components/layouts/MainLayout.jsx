@@ -597,7 +597,7 @@ const MainLayout = () => {
 
   useEffect(() => {
     if (!socket || !userId) return;
-    console.log('test connected? ' + socket.connected);
+    
     const handlePinMessage = (pinMessage) => {
       console.log("test socket listen unpin message", pinMessage);
       if (pinMessage) {

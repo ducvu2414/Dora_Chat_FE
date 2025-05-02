@@ -6,12 +6,36 @@ export default function VoteDisplay({
   vote,
   onSelected,
   onDeselected,
-  currentUserVotes = [],
-  totalVotes = 0,
   showResults = false,
+  member,
 }) {
-  const [selectedOptions, setSelectedOptions] = useState([...currentUserVotes]);
+  // Calculate total votes
+  const totalVotes = vote.options.reduce((acc, option) => {
+    return acc + (option.members ? option.members.length : 0);
+  }, 0);
+
+  const currentUserVoteIds = vote.options.reduce((acc, option) => {
+    const userVote = option.members?.find(
+      (memberTemp) => memberTemp.memberId === member._id
+    );
+    if (userVote) {
+      acc.push(option._id);
+    }
+    return acc;
+  }, []);
+
+  const [selectedOptions, setSelectedOptions] = useState([
+    ...currentUserVoteIds,
+  ]);
   const [viewingResults, setViewingResults] = useState(showResults);
+
+  // Thêm hàm kiểm tra xem selectedOptions có khác với giá trị ban đầu không
+  const hasSelectionChanged = () => {
+    if (selectedOptions.length !== currentUserVoteIds.length) return true;
+    return !selectedOptions.every((optionId) =>
+      currentUserVoteIds.includes(optionId)
+    );
+  };
 
   const handleOptionSelect = (optionId) => {
     if (vote.isMultipleChoice) {
@@ -29,13 +53,13 @@ export default function VoteDisplay({
 
   const handleVote = () => {
     if (selectedOptions.length > 0) {
-      onSelected(selectedOptions);
+      onSelected(selectedOptions, vote._id);
       setViewingResults(true);
     }
   };
 
   const handleCancelVote = () => {
-    onDeselected(selectedOptions);
+    onDeselected(selectedOptions, vote._id);
     setSelectedOptions([]);
     setViewingResults(false);
   };
@@ -103,8 +127,12 @@ export default function VoteDisplay({
                 >
                   <div className="flex items-center">
                     <div
-                      className={`w-5 h-5 rounded-${vote.isMultipleChoice ? "md" : "full"} border flex items-center justify-center mr-3 ${
-                        isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                      className={`w-5 h-5 rounded-${
+                        vote.isMultipleChoice ? "md" : "full"
+                      } border flex items-center justify-center mr-3 ${
+                        isSelected
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-300"
                       }`}
                     >
                       {isSelected && (
@@ -144,7 +172,7 @@ export default function VoteDisplay({
         {!viewingResults ? (
           <Button
             onClick={handleVote}
-            disabled={selectedOptions.length === 0}
+            disabled={!hasSelectionChanged()}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Vote

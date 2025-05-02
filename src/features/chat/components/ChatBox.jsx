@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
 /* eslint-disable react/prop-types */
-export default function ChatBox({ messages, onSelected, onDeselected }) {
+export default function ChatBox({ messages, onSelected, onDeselected, member }) {
   console.log("messages", messages);
   const chatContainerRef = useRef(null);
 
@@ -35,6 +35,7 @@ export default function ChatBox({ messages, onSelected, onDeselected }) {
               showTime={isLastInGroup}
               onSelected={onSelected}
               onDeselected={onDeselected}
+              member={member}
             />
           );
         })}

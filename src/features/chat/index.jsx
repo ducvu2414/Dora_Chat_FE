@@ -176,22 +176,27 @@ export default function ChatSingle() {
     console.log("Created poll:", resCreateVote);
   };
 
-  const onSelected = (optionIds) => {
-    // Update the poll with the new votes
-    // const updatedPoll = {
-    //   ...currentPoll,
-    //   options: currentPoll.options.map((option) => ({
-    //     ...option,
-    //     votes: optionIds.includes(option.id) ? option.votes + 1 : option.votes,
-    //   })),
-    // };
-
-    // setCurrentPoll(updatedPoll);
-    // Here you would typically send this to your backend
-    console.log("Updated poll with votes:", optionIds);
+  const onSelected = (optionIds, voteId) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const reqSelectVoteOption = {
+      memberId: member.data._id,
+      memberInfo: {
+        name: user.name,
+        avatar: user.avatar,
+        avatarColor: "black",
+      },
+    };
+    optionIds.forEach(async (optionId) => {
+      const resSelectVoteOption = await voteApi.selectVoteOption(
+        voteId,
+        optionId,
+        reqSelectVoteOption
+      );
+      console.log("Updated poll with votes:", resSelectVoteOption);
+    });
   };
 
-  const onDeselected = (optionIds) => {
+  const onDeselected = (optionIds, voteId) => {
     // Update the poll with the new votes
     // const updatedPoll = {
     //   ...currentPoll,
@@ -225,7 +230,7 @@ export default function ChatSingle() {
       ) : (
         <div className="flex w-full h-screen">
           {/* Main Content */}
-          <div className="flex flex-1 overflow-sauto ">
+          <div className="flex flex-1 overflow-auto">
             {/* ChatBox  */}
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
               <HeaderSignleChat
@@ -235,7 +240,12 @@ export default function ChatSingle() {
                 conversation={conversation}
                 setActiveChannel={setActiveChannel}
               />
-              <ChatBox messages={conversationMessages} onSelected={onSelected} onDeselected={onDeselected} />
+              <ChatBox
+                messages={conversationMessages}
+                onSelected={onSelected}
+                onDeselected={onDeselected}
+                member={member.data}
+              />
 
               <button
                 onClick={() => setIsVoteModalOpen(true)}

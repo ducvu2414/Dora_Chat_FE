@@ -8,7 +8,7 @@ import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
 import VoteDisplay from "@/components/ui/vote-display";
 
-export default function MessageItem({ msg, showAvatar, showTime, onSelected, onDeselected }) {
+export default function MessageItem({ msg, showAvatar, showTime, onSelected, onDeselected, member }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [previewImage, setPreviewImage] = useState(null);
@@ -290,6 +290,7 @@ export default function MessageItem({ msg, showAvatar, showTime, onSelected, onD
                   <VoteDisplay vote={msg} 
                   onSelected={onSelected}
                   onDeselected={onDeselected}
+                  member={member}
                   />
                 </div>
               </div>
