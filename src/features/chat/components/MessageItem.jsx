@@ -6,8 +6,9 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useState, useEffect, useRef } from "react";
 import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
+import VoteDisplay from "@/components/ui/vote-display";
 
-export default function MessageItem({ msg, showAvatar, showTime }) {
+export default function MessageItem({ msg, showAvatar, showTime, onSelected, onDeselected }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [previewImage, setPreviewImage] = useState(null);
@@ -29,6 +30,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const isMe = msg.memberId?.userId === userId;
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
+  const isVote = msg.type === "VOTE";
 
   useEffect(() => {
     if (!msg?.content) {
@@ -182,12 +184,14 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 />
               )}
             </div>
+
             {/* Message sender name (if not showing avatar and not from current user) */}
             {showAvatar && !isMe && (
               <span className="mb-1 ml-1 text-xs font-medium text-gray-500 ">
                 {msg.memberId?.name || "User"}
               </span>
             )}
+
             {/* Message content */}
             {isImage ? (
               <img
@@ -279,6 +283,15 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 >
                   Xem trước
                 </span>
+              </div>
+            ) : isVote ? (
+              <div className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000]">
+                <div className="mt-4">
+                  <VoteDisplay vote={msg} 
+                  onSelected={onSelected}
+                  onDeselected={onDeselected}
+                  />
+                </div>
               </div>
             ) : (
               <p

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
 /* eslint-disable react/prop-types */
-export default function ChatBox({ messages }) {
+export default function ChatBox({ messages, onSelected, onDeselected }) {
   console.log("messages", messages);
   const chatContainerRef = useRef(null);
 
@@ -12,6 +12,7 @@ export default function ChatBox({ messages }) {
         chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
   return (
     <div className="flex-1 flex flex-col h-px bg-[#fff] py-2">
       <div
@@ -25,12 +26,15 @@ export default function ChatBox({ messages }) {
           const isLastInGroup =
             index === messages.length - 1 ||
             messages[index + 1].memberId.userId !== msg.memberId.userId;
+
           return (
             <MessageItem
               key={msg._id}
               msg={msg}
               showAvatar={isFirstInGroup}
               showTime={isLastInGroup}
+              onSelected={onSelected}
+              onDeselected={onDeselected}
             />
           );
         })}

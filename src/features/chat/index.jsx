@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import messageApi from "@/api/message";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -8,7 +7,7 @@ import {
   markRead,
   setActiveConversation,
   setMessages,
-  setPinMessages
+  setPinMessages,
 } from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
@@ -17,8 +16,10 @@ import MessageInput from "./components/MessageInput";
 import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
+import messageApi from "@/api/message";
 import pinMessageApi from "@/api/pinMessage";
-
+import voteApi from "@/api/vote";
+import VoteModal from "@/components/ui/vote-modal";
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
@@ -32,6 +33,9 @@ export default function ChatSingle() {
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
+  const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [member, setMember] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +49,13 @@ export default function ChatSingle() {
 
         try {
           res = await conversationApi.getConversationById(conversationId);
+
+          setMember(
+            await memberApi.getByConversationIdAndUserId(
+              conversationId,
+              JSON.parse(localStorage.getItem("user"))._id
+            )
+          );
 
           channels = await channelApi.getAllChannelByConversationId(
             conversationId
@@ -61,8 +72,10 @@ export default function ChatSingle() {
             )
           ).data;
 
-          const pinMessages = await pinMessageApi.getAllByConversationId(conversationId);
-          
+          const pinMessages = await pinMessageApi.getAllByConversationId(
+            conversationId
+          );
+
           dispatch(setPinMessages(pinMessages));
 
           setIsMember(isMember);
@@ -121,7 +134,6 @@ export default function ChatSingle() {
     setPhotosVideos(photosVideos);
     setFiles(files);
     setLinks(links);
-
   }, [conversationMessages.length]);
 
   const handleSendMessage = async ({ content, type, files }) => {
@@ -145,10 +157,63 @@ export default function ChatSingle() {
       throw error;
     }
   };
-  const [showDetail, setShowDetail] = useState(false);
-  console.log("channels", activeChannel);
+
+  const handleCreateVote = async (vote) => {
+    const newVote = {
+      memberId: member.data._id,
+      conversationId: conversationId,
+      channelId: channels[0]?.id,
+      content: vote.content,
+      isMultipleChoice: vote.isMultipleChoice,
+      isAnonymous: vote.isAnonymous,
+      options: vote.options.map((option) => ({
+        name: option,
+        members: [],
+      })),
+    };
+
+    const resCreateVote = await voteApi.createVote(newVote);
+    console.log("Created poll:", resCreateVote);
+  };
+
+  const onSelected = (optionIds) => {
+    // Update the poll with the new votes
+    // const updatedPoll = {
+    //   ...currentPoll,
+    //   options: currentPoll.options.map((option) => ({
+    //     ...option,
+    //     votes: optionIds.includes(option.id) ? option.votes + 1 : option.votes,
+    //   })),
+    // };
+
+    // setCurrentPoll(updatedPoll);
+    // Here you would typically send this to your backend
+    console.log("Updated poll with votes:", optionIds);
+  };
+
+  const onDeselected = (optionIds) => {
+    // Update the poll with the new votes
+    // const updatedPoll = {
+    //   ...currentPoll,
+    //   options: currentPoll.options.map((option) => ({
+    //     ...option,
+    //     votes: optionIds.includes(option.id) ? option.votes + 1 : option.votes,
+    //   })),
+    // };
+
+    // setCurrentPoll(updatedPoll);
+    // Here you would typically send this to your backend
+    console.log("Updated poll with votes:", optionIds);
+  };
+
   return (
     <>
+      <VoteModal
+        isOpen={isVoteModalOpen}
+        onClose={() => setIsVoteModalOpen(false)}
+        onSubmit={handleCreateVote}
+      />
+
       {console.log(
         conversation,
         conversation?.type ? channels.length === 0 : false
@@ -170,7 +235,15 @@ export default function ChatSingle() {
                 conversation={conversation}
                 setActiveChannel={setActiveChannel}
               />
-              <ChatBox messages={conversationMessages} />
+              <ChatBox messages={conversationMessages} onSelected={onSelected} onDeselected={onDeselected} />
+
+              <button
+                onClick={() => setIsVoteModalOpen(true)}
+                className="px-4 py-2 bg-regal-blue text-white rounded-md w-1/6"
+              >
+                Create Poll
+              </button>
+
               <MessageInput onSend={handleSendMessage} isMember={isMember} />
             </div>
 
@@ -181,8 +254,15 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
-              {console.log("pinMessage", typeof pinMessages[0]._id)}
-              {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} pinMessages={pinMessages} />}
+              {showDetail && (
+                <DetailChat
+                  conversation={conversation}
+                  imagesVideos={photosVideos}
+                  files={files}
+                  links={links}
+                  pinMessages={pinMessages}
+                />
+              )}
             </div>
           </div>
         </div>
