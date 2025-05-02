@@ -170,9 +170,18 @@ export default function GroupCallComponent() {
 
     const handleScreenBtn = async () => {
         if (!meetingRef.current) return;
-        if (screenShared) await meetingRef.current.stopScreenShare();
-        else await meetingRef.current.startScreenShare();
-        setScreenShared(s => !s);
+
+        try {
+            if (!screenShared) {
+                await meetingRef.current.startScreenShare();
+                setScreenShared(true);
+            } else {
+                await meetingRef.current.stopVideo();
+                setScreenShared(false);
+            }
+        } catch (err) {
+            console.error("Screen share toggle failed:", err);
+        }
     };
 
     const handleLeaveBtn = async () => {

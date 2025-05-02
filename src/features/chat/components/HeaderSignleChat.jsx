@@ -47,7 +47,7 @@ export default function HeaderSignleChat({
 
       socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, payload);
 
-      navigate(`/group-call/${conversation._id}`, {
+      navigate(`/group-call/${conversation._id}_${channelId}`, {
         state: {
           channelId,
           conversation,
