@@ -1,5 +1,7 @@
 import axios from "./axiosClient";
-const colorsApi = {
+
+const colorApi = {
     getAll: () => axios.get("/api/colors"),
 };
-export default colorsApi;
+
+export default colorApi;
