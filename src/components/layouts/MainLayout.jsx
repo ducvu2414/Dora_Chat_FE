@@ -653,12 +653,14 @@ const MainLayout = () => {
     socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
     socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
     socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
 
     return () => {
       socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
       socket.off(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
       socket.off(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
       socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
     };
   }, [socket, dispatch]);
 
