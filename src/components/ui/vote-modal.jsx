@@ -12,6 +12,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
   const [showSettings, setShowSettings] = useState(false);
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [duplicateGroups, setDuplicateGroups] = useState([]);
 
   // Reset form when modal is opened
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
     }
   }, [isOpen]);
 
-  const handlecontentChange = (e) => {
+  const handleContentChange = (e) => {
     const value = e.target.value;
     if (value.length <= 200) {
       setContent(value);
@@ -35,6 +36,37 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+
+    // tìm các nhóm trùng
+    const duplicates = findDuplicateGroups(newOptions);
+    setDuplicateGroups(duplicates);
+  };
+
+  const isOptionDuplicate = (index) => {
+    return duplicateGroups.some((group) => group.includes(index));
+  };
+
+  const findDuplicateGroups = (options) => {
+    const optionMap = {};
+    const duplicates = [];
+
+    options.forEach((option, index) => {
+      const trimmedOption = option.trim().toLowerCase();
+      if (trimmedOption && trimmedOption !== "") {
+        if (!optionMap[trimmedOption]) {
+          optionMap[trimmedOption] = [];
+        }
+        optionMap[trimmedOption].push(index);
+      }
+    });
+
+    Object.values(optionMap).forEach((indices) => {
+      if (indices.length > 1) {
+        duplicates.push(indices);
+      }
+    });
+
+    return duplicates;
   };
 
   const addOption = () => {
@@ -58,8 +90,16 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
     }
 
     const validOptions = options.filter((opt) => opt.trim() !== "");
+
     if (validOptions.length < 2) {
       alert("Please enter at least 2 options");
+      return;
+    }
+
+    const duplicates = findDuplicateGroups(validOptions);
+    if (duplicates.length > 0) {
+      setDuplicateGroups(duplicates);
+      alert("Please remove duplicate options before submitting");
       return;
     }
 
@@ -74,7 +114,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Poll">
+    <Modal isOpen={isOpen} onClose={onClose} title="Create Vote">
       <div className="space-y-4">
         {/* Poll content */}
         <div>
@@ -85,7 +125,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
             <Textarea
               placeholder="Enter your poll topic here..."
               value={content}
-              onChange={handlecontentChange}
+              onChange={handleContentChange}
               className="resize-none bg-gray-50 min-h-[80px]"
             />
             <div className="absolute bottom-2 right-2 text-xs text-gray-500">
@@ -100,24 +140,39 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
             Options
           </label>
           <div className="space-y-2">
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <Input
-                  placeholder={`Option ${index + 1}`}
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  className="bg-gray-50"
-                />
-                {options.length > 2 && (
-                  <button
-                    onClick={() => removeOption(index)}
-                    className="p-1 text-gray-500 hover:text-gray-700"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-            ))}
+            {options.map((option, index) => {
+              const isDuplicate = isOptionDuplicate(index);
+
+              return (
+                <div key={index} className="flex items-start gap-2 mb-1">
+                  <div className="flex-1">
+                    <Input
+                      placeholder={`Option ${index + 1}`}
+                      value={option}
+                      onChange={(e) =>
+                        handleOptionChange(index, e.target.value)
+                      }
+                      className={`bg-gray-50 ${
+                        isDuplicate ? "border-red-500" : ""
+                      }`}
+                    />
+                    {isDuplicate && (
+                      <div className="text-xs text-red-500 mt-1 text-left ml-2">
+                        Duplicate options detected
+                      </div>
+                    )}
+                  </div>
+                  {options.length > 2 && (
+                    <button
+                      onClick={() => removeOption(index)}
+                      className="p-1 text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Add Option Button */}
@@ -184,8 +239,11 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
           <Button
             onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={
+              !content.trim() || options.some((opt) => opt.trim() === "")
+            }
           >
-            Create Poll
+            Create Vote
           </Button>
         </div>
       </div>
