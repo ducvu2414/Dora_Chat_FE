@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useState } from "react";
 import { X, Pencil, Trash2, Plus } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import classifiesApi from "@/api/classifies";
@@ -17,17 +18,17 @@ export default function ClassifyManagerModal({ onClose }) {
             const res = await classifiesApi.getAllByUserId();
             dispatch(setClassifies(res));
         } catch (err) {
-            console.error("Lỗi khi tải phân loại:", err);
+            console.error("Error when load classify:", err);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc muốn xóa thẻ phân loại này?")) return;
+        if (!window.confirm("Do you want to delete this classify?")) return;
         try {
             await classifiesApi.deleteClassify(id);
             refreshClassifies();
         } catch (err) {
-            console.error("Lỗi khi xóa phân loại:", err);
+            console.error("Error when delete the classify:", err);
         }
     };
 
@@ -47,7 +48,7 @@ export default function ClassifyManagerModal({ onClose }) {
                 <div className="bg-white w-[500px] rounded-lg shadow-lg max-h-[90vh] overflow-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 py-4 border-b">
-                        <h2 className="text-lg font-semibold">Quản lý thẻ phân loại</h2>
+                        <h2 className="text-lg font-semibold">Manage classify</h2>
                         <button onClick={onClose}>
                             <X className="w-5 h-5" />
                         </button>
@@ -56,7 +57,7 @@ export default function ClassifyManagerModal({ onClose }) {
                     {/* Body */}
                     <div className="p-5 space-y-3">
                         {classifies.length === 0 ? (
-                            <p className="text-sm text-gray-500">Chưa có thẻ phân loại nào.</p>
+                            <p className="text-sm text-gray-500">There are no classify yet.</p>
                         ) : (
                             Array.isArray(classifies) && classifies.map((cls) => (
 
@@ -90,7 +91,7 @@ export default function ClassifyManagerModal({ onClose }) {
                             className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
                             onClick={handleAdd}
                         >
-                            <Plus className="w-4 h-4" /> Thêm thẻ phân loại
+                            <Plus className="w-4 h-4" /> Add classify
                         </button>
                     </div>
                 </div>
