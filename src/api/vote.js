@@ -6,12 +6,17 @@ const voteApi = {
   },
 
   addVoteOption: (voteId, memberId, option) => {
-    console.log("addVoteOption", voteId, memberId, option);
     return axios.post(`/api/votes/option/${voteId}`, {
       memberId,
       option: {
         name: option,
       },
+    });
+  },
+
+  deleteVoteOption: (voteId, memberId, optionId) => {
+    return axios.delete(`/api/votes/option/${voteId}/${optionId}`, {
+      data: { memberId },
     });
   },
 

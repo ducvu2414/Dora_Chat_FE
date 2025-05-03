@@ -188,6 +188,10 @@ export default function ChatSingle() {
       (oldOption) => !newOptions.includes(oldOption)
     );
 
+    const deletedOptionIds = deletedOptions.map((option) =>
+      vote.oldOptions.options.find((opt) => opt.name === option)._id
+    );
+
     updatedOptions.forEach(async (option) => {
       const resAddVoteOption = await voteApi.addVoteOption(
         vote.oldOptions._id,
@@ -195,6 +199,15 @@ export default function ChatSingle() {
         option
       );
       console.log("Updated poll with new options:", resAddVoteOption);
+    });
+
+    deletedOptionIds.forEach(async (optionId) => {
+      const resDeleteVoteOption = await voteApi.deleteVoteOption(
+        vote.oldOptions._id,
+        member.data._id,
+        optionId
+      );
+      console.log("Updated poll with deleted options:", resDeleteVoteOption);
     });
 
     console.log("vote", vote);
