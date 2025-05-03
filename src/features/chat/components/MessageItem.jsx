@@ -32,7 +32,7 @@ export default function MessageItem({
 
   const MAX_TEXT_LENGTH = 350;
 
-  const isMe = msg.memberId?.userId === userId;
+  const isMe = msg.memberId?.userId === undefined ? (msg.userId === userId) : (msg.memberId?.userId === userId);
   const isImage = msg.type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isVideo = msg.type === "VIDEO";
