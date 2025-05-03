@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { X, Plus, Check, AlertCircle, Loader2 } from "lucide-react";
 import colorsApi from "@/api/color";
@@ -31,11 +32,11 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                         setColorId(res[0]._id);
                     }
                 } else {
-                    throw new Error("Không thể tải danh sách màu");
+                    throw new Error("Not found color");
                 }
             } catch (error) {
                 console.error("Failed to fetch colors", error);
-                setError("Không thể tải danh sách màu. Vui lòng thử lại sau.");
+                setError("Not found color.");
             } finally {
                 setIsLoading(false);
             }
@@ -53,17 +54,17 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
 
     const handleSubmit = async () => {
         if (!name.trim()) {
-            setError("Vui lòng nhập tên thẻ phân loại");
+            setError("Please enter a name");
             return;
         }
 
         if (!colorId) {
-            setError("Vui lòng chọn màu");
+            setError("Please select a color");
             return;
         }
 
         if (selectedConversations.length === 0) {
-            setError("Vui lòng chọn ít nhất một hội thoại");
+            setError("Please select at least one conversation");
             return;
         }
 
@@ -85,7 +86,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
             onSubmit();
         } catch (error) {
             console.error("Failed to save classify", error);
-            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại sau.";
+            const errorMessage = error.response?.data?.message || "Failed to save classify";
             setError(errorMessage);
         } finally {
             setIsSubmitting(false);
@@ -94,13 +95,13 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
 
     const getConversationName = (id) => {
         const conv = allConversations.find((c) => c._id === id);
-        if (!conv) return "Không tìm thấy hội thoại";
+        if (!conv) return "Conversation not found";
 
         if (conv.type || conv.name) return conv.name;
 
         const userId = user?._id || user?.current?._id;
         const partner = conv.members?.find((m) => m.userId !== userId);
-        return partner?.name || "Hội thoại không tên";
+        return partner?.name || "Not found name for this conversation";
     };
 
     const removeConversation = (id) => {
@@ -114,7 +115,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b">
                         <h2 className="text-lg font-semibold">
-                            {isEditing ? "Sửa" : "Thêm"} thẻ phân loại
+                            {isEditing ? "Update" : "Add"} classify
                         </h2>
                         <button
                             onClick={onClose}
@@ -137,14 +138,14 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                         {/* Tên */}
                         <div>
                             <label htmlFor="classify-name" className="block text-sm font-medium mb-1 text-gray-700">
-                                Tên thẻ phân loại <span className="text-red-500">*</span>
+                                Classify name <span className="text-red-500">*</span>
                             </label>
                             <input
                                 id="classify-name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full border rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                placeholder="Nhập tên thẻ"
+                                placeholder="Enter classify name"
                                 disabled={isSubmitting}
                             />
                         </div>
@@ -152,12 +153,12 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                         {/* Màu */}
                         <div>
                             <label className="block text-sm font-medium mb-1 text-gray-700">
-                                Chọn màu <span className="text-red-500">*</span>
+                                Select color <span className="text-red-500">*</span>
                             </label>
                             {isLoading ? (
                                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span>Đang tải danh sách màu...</span>
+                                    <span>Loading...</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-wrap gap-2">
@@ -178,7 +179,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                                             </button>
                                         ))
                                     ) : (
-                                        <p className="text-sm text-gray-500">Không có màu nào</p>
+                                        <p className="text-sm text-gray-500">Not found color</p>
                                     )}
                                 </div>
                             )}
@@ -188,7 +189,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                         <div>
                             <div className="flex items-center justify-between mb-1">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Gán hội thoại
+                                    Select conversations
                                 </label>
                                 <button
                                     className="text-blue-600 text-sm hover:underline flex items-center"
@@ -196,12 +197,12 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                                     disabled={isSubmitting}
                                 >
                                     <Plus className="w-4 h-4 mr-1" />
-                                    Thêm hội thoại
+                                    Add
                                 </button>
                             </div>
                             <div className="mt-2 space-y-1 max-h-32 overflow-y-auto bg-gray-50 rounded-md p-2">
                                 {selectedConversations.length === 0 ? (
-                                    <p className="text-sm text-gray-500 p-1">Chưa chọn hội thoại nào</p>
+                                    <p className="text-sm text-gray-500 p-1">No conversation selected yet</p>
                                 ) : (
                                     selectedConversations.map((id) => (
                                         <div
@@ -213,7 +214,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                                                 onClick={() => removeConversation(id)}
                                                 className="text-gray-400 hover:text-red-600"
                                                 disabled={isSubmitting}
-                                                aria-label="Xóa hội thoại"
+                                                aria-label="Delete conversation"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
@@ -231,7 +232,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
-                            Huỷ
+                            Cancel
                         </button>
                         <button
                             className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
@@ -244,7 +245,7 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                             }
                         >
                             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {isEditing ? "Cập nhật" : "Thêm"}
+                            {isEditing ? "Update" : "Add"}
                         </button>
                     </div>
                 </div>

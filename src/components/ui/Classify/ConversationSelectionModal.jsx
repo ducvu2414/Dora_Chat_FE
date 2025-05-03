@@ -9,7 +9,7 @@ const currentUser = JSON.parse(localStorage.getItem("user"));
 const currentUserId = currentUser?._id || currentUser?.current?._id;
 
 export default function ConversationSelectionModal({
-    buttonText = "Gán",
+    buttonText = "Select",
     onSubmit,
     initialSelected = [],
     conversations = [],
@@ -31,9 +31,9 @@ export default function ConversationSelectionModal({
     };
 
     const getConversationDisplay = (c) => {
-        if (c.type) return c.name || c.title || "Nhóm không tên";
+        if (c.type) return c.name || c.title || "Unknown";
         const partner = c.members?.find((m) => m.userId !== currentUserId);
-        return partner?.name || "Không tên";
+        return partner?.name || "Unknown";
     };
 
     const getConversationAvatar = (c) => {
@@ -50,14 +50,14 @@ export default function ConversationSelectionModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
             <div className="bg-white w-[500px] max-h-[90vh] rounded-lg shadow-lg flex flex-col">
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-lg font-semibold">Chọn hội thoại</h2>
+                    <h2 className="text-lg font-semibold">Select</h2>
                     <button onClick={onClose}>
                         <span className="text-gray-500 hover:text-gray-700 text-xl">&times;</span>
                     </button>
                 </div>
 
                 {message && (
-                    <span className="px-4 mt-2 text-sm text-gray-500">Ghi chú: {message}</span>
+                    <span className="px-4 mt-2 text-sm text-gray-500">Note: {message}</span>
                 )}
 
                 <div className="p-4 pt-2">
@@ -65,7 +65,7 @@ export default function ConversationSelectionModal({
                         <Search className="absolute w-5 h-5 text-[#086DC0] -translate-y-1/2 left-4 top-1/2" />
                         <Input
                             type="search"
-                            placeholder="Tìm kiếm hội thoại..."
+                            placeholder="Search..."
                             className="w-full border rounded-full pl-12 py-2 bg-gray-50 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#086DC0] focus:border-[#086DC0]"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -104,7 +104,7 @@ export default function ConversationSelectionModal({
                             ))
                         ) : (
                             <div className="text-center text-gray-500 py-8">
-                                Không có hội thoại phù hợp
+                                <p className="text-sm">No conversations found</p>
                             </div>
                         )}
                     </div>
@@ -112,7 +112,7 @@ export default function ConversationSelectionModal({
 
                 <div className="p-4 border-t flex justify-end space-x-2">
                     <Button variant="outline" onClick={onClose}>
-                        Hủy
+                        Cancel
                     </Button>
                     <Button
                         className="bg-blue-600 text-white hover:bg-blue-700"
