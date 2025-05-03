@@ -8,7 +8,14 @@ import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
 import VoteDisplay from "@/components/ui/vote-display";
 
-export default function MessageItem({ msg, showAvatar, showTime, onSelected, onDeselected, member }) {
+export default function MessageItem({
+  msg,
+  showAvatar,
+  showTime,
+  onSelected,
+  onDeselected,
+  member,
+}) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [previewImage, setPreviewImage] = useState(null);
@@ -24,10 +31,10 @@ export default function MessageItem({ msg, showAvatar, showTime, onSelected, onD
 
   const MAX_TEXT_LENGTH = 350;
 
+  const isMe = msg.memberId?.userId === userId;
   const isImage = msg.type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isVideo = msg.type === "VIDEO";
-  const isMe = msg.memberId?.userId === userId;
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
   const isVote = msg.type === "VOTE";
@@ -287,10 +294,11 @@ export default function MessageItem({ msg, showAvatar, showTime, onSelected, onD
             ) : isVote ? (
               <div className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000]">
                 <div className="mt-4">
-                  <VoteDisplay vote={msg} 
-                  onSelected={onSelected}
-                  onDeselected={onDeselected}
-                  member={member}
+                  <VoteDisplay
+                    vote={msg}
+                    onSelected={onSelected}
+                    onDeselected={onDeselected}
+                    member={member}
                   />
                 </div>
               </div>

@@ -41,6 +41,25 @@ const chatSlice = createSlice({
       state.messages[conversationId] = messages;
       state.unread[conversationId] = 0;
     },
+
+    // update only 1 field options of message in conversation if exist, else add new message
+    updateVote: (state, action) => {
+      const { conversationId, message } = action.payload;
+
+      if (!state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+      const index = state.messages[conversationId].findIndex(
+        (m) => m._id === message._id
+      );
+      
+      if (index !== -1) {
+        state.messages[conversationId][index].options = message.options;
+      } else {
+        state.messages[conversationId].push(message);
+      }
+    },
+
     setClassifies: (state, action) => {
       state.classifies = action.payload;
     },
@@ -171,6 +190,7 @@ export const {
   setActiveConversation,
   disbandConversation,
   setMessages,
+  updateVote,
   addMessage,
   recallMessage,
   deleteMessageForMe,

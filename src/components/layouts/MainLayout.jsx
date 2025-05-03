@@ -17,7 +17,8 @@ import {
   leaveConverSation,
   addPinMessage,
   deletePinMessage,
-  setClassifies
+  setClassifies,
+  updateVote,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -598,7 +599,7 @@ const MainLayout = () => {
   // Lắng nghe socket cho tin nhắn ghim và bỏ ghim
   useEffect(() => {
     if (!socket || !userId) return;
-    
+
     const handlePinMessage = (pinMessage) => {
       console.log("test socket listen unpin message", pinMessage);
       if (pinMessage) {
@@ -627,9 +628,10 @@ const MainLayout = () => {
     if (!socket || !userId) return;
 
     const handleCreateVote = (vote) => {
-      console.log("test socket listen vote", vote);
       if (vote) {
-        dispatch(addMessage({ conversationId: vote.conversationId, message: vote }));
+        dispatch(
+          addMessage({ conversationId: vote.conversationId, message: vote })
+        );
         dispatch(
           updateConversation({
             conversationId: vote.conversationId,
@@ -639,7 +641,17 @@ const MainLayout = () => {
       }
     };
 
+    const handleSelectVoteOption = (vote) => {
+      console.log("test socket listen vote", vote);
+      if (vote) {
+        dispatch(
+          updateVote({ conversationId: vote.conversationId, message: vote })
+        );
+      }
+    };
+
     socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleSelectVoteOption);
 
     return () => {
       socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
