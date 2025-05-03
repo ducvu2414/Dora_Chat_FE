@@ -595,6 +595,7 @@ const MainLayout = () => {
     };
   }, [socket]);
 
+  // Lắng nghe socket cho tin nhắn ghim và bỏ ghim
   useEffect(() => {
     if (!socket || !userId) return;
     
@@ -618,6 +619,30 @@ const MainLayout = () => {
     return () => {
       socket.off(SOCKET_EVENTS.PIN_MESSAGE, handlePinMessage);
       socket.off(SOCKET_EVENTS.UNPIN_MESSAGE, handleUnpinMessage);
+    };
+  }, [socket, dispatch]);
+
+  // Lắng nghe socket cho tính năng vote
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleCreateVote = (vote) => {
+      console.log("test socket listen vote", vote);
+      if (vote) {
+        dispatch(addMessage({ conversationId: vote.conversationId, message: vote }));
+        dispatch(
+          updateConversation({
+            conversationId: vote.conversationId,
+            lastMessage: vote,
+          })
+        );
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
     };
   }, [socket, dispatch]);
 
