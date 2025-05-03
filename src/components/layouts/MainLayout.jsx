@@ -642,7 +642,6 @@ const MainLayout = () => {
     };
 
     const handleSelectVoteOption = (vote) => {
-      console.log("test socket listen vote", vote);
       if (vote) {
         dispatch(
           updateVote({ conversationId: vote.conversationId, message: vote })
@@ -650,8 +649,17 @@ const MainLayout = () => {
       }
     };
 
+    const handleDeselectVoteOption = (vote) => {
+      if (vote) {
+        dispatch(
+          updateVote({ conversationId: vote.conversationId, message: vote })
+        );
+      }
+    }
+
     socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
     socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleSelectVoteOption);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleDeselectVoteOption);
 
     return () => {
       socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);

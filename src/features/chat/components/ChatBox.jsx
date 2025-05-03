@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
 /* eslint-disable react/prop-types */
 export default function ChatBox({ messages, onSelected, onDeselected, member }) {
-  console.log("messages", messages);
   const chatContainerRef = useRef(null);
 
   // Tự động cuộn xuống khi có tin nhắn mới
@@ -11,7 +10,7 @@ export default function ChatBox({ messages, onSelected, onDeselected, member }) 
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages.length]);
 
   return (
     <div className="flex-1 flex flex-col h-px bg-[#fff] py-2">
