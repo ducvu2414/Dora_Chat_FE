@@ -641,7 +641,7 @@ const MainLayout = () => {
       }
     };
 
-    const handleSelectVoteOption = (vote) => {
+    const handleUpdateOption = (vote) => {
       if (vote) {
         dispatch(
           updateVote({ conversationId: vote.conversationId, message: vote })
@@ -649,20 +649,16 @@ const MainLayout = () => {
       }
     };
 
-    const handleDeselectVoteOption = (vote) => {
-      if (vote) {
-        dispatch(
-          updateVote({ conversationId: vote.conversationId, message: vote })
-        );
-      }
-    }
-
     socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
-    socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleSelectVoteOption);
-    socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleDeselectVoteOption);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
 
     return () => {
       socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
+      socket.off(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
+      socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
     };
   }, [socket, dispatch]);
 

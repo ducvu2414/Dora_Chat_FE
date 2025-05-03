@@ -69,4 +69,5 @@ export const SOCKET_EVENTS = {
   CREATE_VOTE: "create-vote",
   VOTE_OPTION_SELECTED: "vote-option-selected",
   VOTE_OPTION_DESELECTED: "vote-option-deselected",
+  ADD_VOTE_OPTION: "add-vote-option",
 };
