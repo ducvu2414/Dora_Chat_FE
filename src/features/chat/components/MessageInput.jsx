@@ -8,7 +8,7 @@ import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 
-export default function MessageInput({ onSend, isMember, setIsVoteModalOpen }) {
+export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isGroup }) {
   const [input, setInput] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFiles, setVideoFiles] = useState([]);
@@ -275,6 +275,7 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen }) {
                 onClose={() => setIsDropdownOpen(false)}
                 onFileSelect={handleFileSelect}
                 setIsVoteModalOpen={setIsVoteModalOpen}
+                isGroup={isGroup}
               />
             </>
 

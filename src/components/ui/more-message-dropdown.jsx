@@ -10,6 +10,7 @@ export default function MoreMessageDropdown({
   onClose,
   onFileSelect,
   setIsVoteModalOpen,
+  isGroup,
 }) {
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
@@ -36,15 +37,17 @@ export default function MoreMessageDropdown({
         <DropdownItem icon={FileUp} onClick={handleFileInputClick}>
           Upload a file
         </DropdownItem>
-        <DropdownItem
-          icon={Vote}
-          onClick={() => {
-            setIsVoteModalOpen(true);
-            onClose();
-          }}
-        >
-          Create vote
-        </DropdownItem>
+        {isGroup && (
+          <DropdownItem
+            icon={Vote}
+            onClick={() => {
+              setIsVoteModalOpen(true);
+              onClose();
+            }}
+          >
+            Create vote
+          </DropdownItem>
+        )}
       </Dropdown>
       <input
         type="file"

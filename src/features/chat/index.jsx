@@ -268,7 +268,7 @@ export default function ChatSingle() {
                 member={member.data}
               />
 
-              <MessageInput onSend={handleSendMessage} isMember={isMember} setIsVoteModalOpen={setIsVoteModalOpen} />
+              <MessageInput onSend={handleSendMessage} isMember={isMember} setIsVoteModalOpen={setIsVoteModalOpen} isGroup={conversation.type} />
             </div>
 
             {/* DetailChat*/}
