@@ -272,16 +272,16 @@ export default function MessageItem({ msg, showAvatar, showTime, onSelected, onD
                   className="flex items-center text-[#086DC0] text-sm hover:underline"
                 >
                   <AiOutlinePaperClip size={20} className="mr-1" />
-                  {"file" + msg.fileName || "Tải xuống file"}
+                  {msg.fileName || "Download file"}
                 </a>
                 <span className="text-xs text-gray-500">
-                  Loại: {getFileTypeLabel(msg.content)}
+                  Type: {getFileTypeLabel(msg.content)}
                 </span>
                 <span
                   onClick={handleOpenInNewTab}
                   className="text-xs text-[#086DC0] hover:underline cursor-pointer"
                 >
-                  Xem trước
+                  Preview
                 </span>
               </div>
             ) : isVote ? (

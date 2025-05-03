@@ -268,14 +268,7 @@ export default function ChatSingle() {
                 member={member.data}
               />
 
-              <button
-                onClick={() => setIsVoteModalOpen(true)}
-                className="px-4 py-2 bg-regal-blue text-white rounded-md w-1/6"
-              >
-                Create Poll
-              </button>
-
-              <MessageInput onSend={handleSendMessage} isMember={isMember} />
+              <MessageInput onSend={handleSendMessage} isMember={isMember} setIsVoteModalOpen={setIsVoteModalOpen} />
             </div>
 
             {/* DetailChat*/}

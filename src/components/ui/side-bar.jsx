@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
@@ -88,7 +88,7 @@ export function SideBar({
           ))
         ) : (
           <div className="text-sm text-gray-500 text-center py-8">
-            Không có hội thoại nào.
+            There are no conversations.
           </div>
         )}
       </div>
