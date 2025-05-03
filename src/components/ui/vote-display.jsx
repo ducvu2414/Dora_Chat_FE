@@ -39,27 +39,23 @@ export default function VoteDisplay({
 
   const handleOptionSelect = (optionId) => {
     if (vote.isMultipleChoice) {
-      // For multiple choice, toggle the selection
       setSelectedOptions((prev) =>
         prev.includes(optionId)
           ? prev.filter((id) => id !== optionId)
           : [...prev, optionId]
       );
     } else {
-      // For single choice, replace the selection
       setSelectedOptions((prev) => (prev.includes(optionId) ? [] : [optionId]));
     }
   };
 
   const handleVote = () => {
-    if (selectedOptions.length > 0) {
-      onSelected(selectedOptions, vote._id);
-      setViewingResults(true);
-    }
+    onSelected(selectedOptions, vote);
+    setViewingResults(true);
   };
 
   const handleCancelVote = () => {
-    onDeselected(selectedOptions, vote._id);
+    onDeselected(selectedOptions, vote);
     setSelectedOptions([]);
     setViewingResults(false);
   };

@@ -176,7 +176,7 @@ export default function ChatSingle() {
     console.log("Created poll:", resCreateVote);
   };
 
-  const onSelected = (optionIds, voteId) => {
+  const onSelected = (optionIds, vote) => {
     const user = JSON.parse(localStorage.getItem("user"));
     const reqSelectVoteOption = {
       memberId: member.data._id,
@@ -186,28 +186,49 @@ export default function ChatSingle() {
         avatarColor: "black",
       },
     };
-    optionIds.forEach(async (optionId) => {
+
+    // array of optionIds selected by memberId in vote.options (optionIds in dbs by memberId)
+    const selectedOptionIds = vote.options.reduce((acc, option) => {
+      const userVote = option.members?.find(
+        (memberTemp) => memberTemp.memberId === member.data._id
+      );
+      if (userVote) {
+        acc.push(option._id);
+      }
+      return acc;
+    }, []);
+
+    // array of optionIds of selectedOptionIds that optionIds does not have (deselected)
+    const optionIdsNotHave = selectedOptionIds.filter(
+      (optionId) => !optionIds.includes(optionId)
+    );
+
+    // array of optionIds of optionIds that selectedOptionIds does not have (selected)
+    const optionIdsHave = optionIds.filter(
+      (optionId) => !selectedOptionIds.includes(optionId)
+    );
+
+    optionIdsHave.forEach(async (optionId) => {
       const resSelectVoteOption = await voteApi.selectVoteOption(
-        voteId,
+        vote._id,
         optionId,
         reqSelectVoteOption
       );
       console.log("Updated poll with votes:", resSelectVoteOption);
     });
+
+    optionIdsNotHave.forEach(async (optionId) => {
+      const resDeselectVoteOption = await voteApi.deselectVoteOption(
+        vote._id,
+        optionId,
+        member.data._id
+      );
+      console.log("Updated poll with deselected votes:", resDeselectVoteOption);
+    });
   };
 
-  const onDeselected = (optionIds, voteId) => {
-    // Update the poll with the new votes
-    // const updatedPoll = {
-    //   ...currentPoll,
-    //   options: currentPoll.options.map((option) => ({
-    //     ...option,
-    //     votes: optionIds.includes(option.id) ? option.votes + 1 : option.votes,
-    //   })),
-    // };
-
-    // setCurrentPoll(updatedPoll);
-    // Here you would typically send this to your backend
+  const onDeselected = (optionIds, vote) => {
+    console.log("onDeselected", vote);
     console.log("Updated poll with votes:", optionIds);
   };
 
