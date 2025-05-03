@@ -19,6 +19,7 @@ import {
   deletePinMessage,
   setClassifies,
   updateVote,
+  lockVote,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -649,11 +650,20 @@ const MainLayout = () => {
       }
     };
 
+    const handleLockVote = (vote) => {
+      if (vote) {
+        dispatch(
+          lockVote({ conversationId: vote.conversationId, message: vote })
+        );
+      }
+    };
+
     socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
     socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
     socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
     socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
     socket.on(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.VOTE_LOCKED, handleLockVote);
 
     return () => {
       socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
@@ -661,6 +671,7 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
       socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
       socket.off(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.VOTE_LOCKED, handleLockVote);
     };
   }, [socket, dispatch]);
 

@@ -6,7 +6,14 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Plus, Settings, X } from "lucide-react";
 
-export default function VoteModal({ isOpen, onClose, onSubmit, onSave, onLock , vote }) {
+export default function VoteModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  onSave,
+  onLock,
+  vote,
+}) {
   const [content, setContent] = useState(vote ? vote.content : "");
   const [options, setOptions] = useState(
     vote ? vote.options.map((option) => option.name) : ["", ""]
@@ -123,9 +130,11 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, onLock , 
   };
 
   const handleLock = () => {
-    onLock(vote);
-    onClose();
-  }
+    if (confirm("Are you sure you want to lock this vote?")) {
+      onLock(vote);
+      onClose();
+    }
+  };
 
   return (
     <Modal
@@ -260,7 +269,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, onLock , 
         {/* Action Buttons */}
         <div className="flex justify-between gap-3 pt-2">
           <div>
-          <Button
+            <Button
               variant="outline"
               onClick={handleLock}
               className="bg-red-600 hover:bg-red-700 border-0"
