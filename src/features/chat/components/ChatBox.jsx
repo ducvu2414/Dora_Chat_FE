@@ -4,7 +4,6 @@ import MessageItem from "./MessageItem";
 export default function ChatBox({
   messages,
   onSelected,
-  onDeselected,
   member,
   onSave,
   onLock,
@@ -40,7 +39,6 @@ export default function ChatBox({
               showAvatar={isFirstInGroup}
               showTime={isLastInGroup}
               onSelected={onSelected}
-              onDeselected={onDeselected}
               member={member}
               onSave={onSave}
               onLock={onLock}

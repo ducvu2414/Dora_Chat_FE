@@ -13,7 +13,6 @@ export default function MessageItem({
   showAvatar,
   showTime,
   onSelected,
-  onDeselected,
   member,
   onSave,
   onLock,
@@ -299,7 +298,6 @@ export default function MessageItem({
                   <VoteDisplay
                     vote={msg}
                     onSelected={onSelected}
-                    onDeselected={onDeselected}
                     member={member}
                     onSave={onSave}
                     onLock={onLock}

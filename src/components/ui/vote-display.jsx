@@ -7,7 +7,6 @@ import VoteModal from "@/components/ui/vote-modal";
 export default function VoteDisplay({
   vote,
   onSelected,
-  onDeselected,
   showResults = false,
   member,
   onSave,
@@ -66,7 +65,6 @@ export default function VoteDisplay({
   };
 
   const handleCancelVote = () => {
-    onDeselected(selectedOptions, vote);
     setSelectedOptions([]);
     setViewingResults(false);
   };

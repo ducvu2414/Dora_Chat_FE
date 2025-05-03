@@ -264,11 +264,6 @@ export default function ChatSingle() {
     });
   };
 
-  const onDeselected = (optionIds, vote) => {
-    console.log("onDeselected", vote);
-    console.log("Updated poll with votes:", optionIds);
-  };
-
   const handleLockVote = async (vote) => {
     const resLockVote = await voteApi.lockVote(
       vote._id,
@@ -309,7 +304,6 @@ export default function ChatSingle() {
               <ChatBox
                 messages={conversationMessages}
                 onSelected={onSelected}
-                onDeselected={onDeselected}
                 member={member.data}
                 onSave={handleUpdateVote}
                 onLock={handleLockVote}
