@@ -1,7 +1,14 @@
 import { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
 /* eslint-disable react/prop-types */
-export default function ChatBox({ messages, onSelected, onDeselected, member, onSave }) {
+export default function ChatBox({
+  messages,
+  onSelected,
+  onDeselected,
+  member,
+  onSave,
+  onLock,
+}) {
   const chatContainerRef = useRef(null);
 
   // Tự động cuộn xuống khi có tin nhắn mới
@@ -36,6 +43,7 @@ export default function ChatBox({ messages, onSelected, onDeselected, member, on
               onDeselected={onDeselected}
               member={member}
               onSave={onSave}
+              onLock={onLock}
             />
           );
         })}

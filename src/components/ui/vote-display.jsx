@@ -11,6 +11,7 @@ export default function VoteDisplay({
   showResults = false,
   member,
   onSave,
+  onLock,
 }) {
   // Calculate total votes
   const totalVotes = vote.options.reduce((acc, option) => {
@@ -175,6 +176,7 @@ export default function VoteDisplay({
           onClose={() => setShowSettings(false)}
           vote={vote}
           onSave={onSave}
+          onLock={onLock}
         />
 
         <div className="text-sm text-gray-500">

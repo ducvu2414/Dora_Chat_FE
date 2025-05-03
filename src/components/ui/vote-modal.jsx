@@ -6,7 +6,7 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Plus, Settings, X } from "lucide-react";
 
-export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
+export default function VoteModal({ isOpen, onClose, onSubmit, onSave, onLock , vote }) {
   const [content, setContent] = useState(vote ? vote.content : "");
   const [options, setOptions] = useState(
     vote ? vote.options.map((option) => option.name) : ["", ""]
@@ -122,25 +122,33 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
     onClose();
   };
 
+  const handleLock = () => {
+    onLock(vote);
+    onClose();
+  }
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Vote">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={vote ? "Vote" : "Create Vote"}
+    >
       <div className="space-y-4">
-        {/* Poll content */}
+        {/* Vote content */}
         <div>
           <label className="block mb-1 text-sm font-medium text-left">
-            Poll Topic
+            Vote Topic
           </label>
           <div className="relative">
             {vote ? (
               <Textarea
                 placeholder={vote.content}
-                // font size="sm"
                 className="resize-none bg-gray-50 min-h-[80px] !text-lg"
                 disabled
               />
             ) : (
               <Textarea
-                placeholder="Enter your poll topic here..."
+                placeholder="Enter your vote topic here..."
                 value={content}
                 onChange={handleContentChange}
                 className="resize-none bg-gray-50 min-h-[80px]"
@@ -153,7 +161,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
           </div>
         </div>
 
-        {/* Poll Options */}
+        {/* Vote Options */}
         <div>
           <label className="block mb-2 text-sm font-medium text-left">
             Options
@@ -181,12 +189,14 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
                     )}
                   </div>
                   {options.length > 2 && (
-                    <button
-                      onClick={() => removeOption(index)}
-                      className="p-1 text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={16} />
-                    </button>
+                    <div className="mt-2">
+                      <button
+                        onClick={() => removeOption(index)}
+                        className="p-1 text-gray-500 hover:text-gray-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -213,7 +223,7 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
               className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
             >
               <Settings size={16} />
-              Poll settings
+              Vote settings
             </button>
 
             {showSettings && (
@@ -248,35 +258,46 @@ export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-between gap-3 pt-2">
+          <div>
           <Button
-            variant="outline"
-            onClick={onClose}
-            className="bg-gray-200 hover:bg-gray-300 border-0"
-          >
-            Cancel
-          </Button>
-          {vote ? (
-            <Button
-              onClick={handleSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={
-                !content.trim() || options.some((opt) => opt.trim() === "")
-              }
+              variant="outline"
+              onClick={handleLock}
+              className="bg-red-600 hover:bg-red-700 border-0"
             >
-              Save
+              Lock
             </Button>
-          ) : (
+          </div>
+          <div className="flex gap-3 justify-end">
             <Button
-              onClick={handleSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={
-                !content.trim() || options.some((opt) => opt.trim() === "")
-              }
+              variant="outline"
+              onClick={onClose}
+              className="bg-gray-200 hover:bg-gray-300 border-0"
             >
-              Create
+              Cancel
             </Button>
-          )}
+            {vote ? (
+              <Button
+                onClick={handleSubmit}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={
+                  !content.trim() || options.some((opt) => opt.trim() === "")
+                }
+              >
+                Save
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={
+                  !content.trim() || options.some((opt) => opt.trim() === "")
+                }
+              >
+                Create
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </Modal>

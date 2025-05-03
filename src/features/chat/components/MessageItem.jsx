@@ -16,6 +16,7 @@ export default function MessageItem({
   onDeselected,
   member,
   onSave,
+  onLock,
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -301,6 +302,7 @@ export default function MessageItem({
                     onDeselected={onDeselected}
                     member={member}
                     onSave={onSave}
+                    onLock={onLock}
                   />
                 </div>
               </div>

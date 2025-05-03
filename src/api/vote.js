@@ -5,6 +5,10 @@ const voteApi = {
     return axios.post("/api/votes", vote);
   },
 
+  lockVote: (voteId, memberId) => {
+    return axios.put(`/api/votes/${voteId}`, { memberId });
+  },
+
   addVoteOption: (voteId, memberId, option) => {
     return axios.post(`/api/votes/option/${voteId}`, {
       memberId,

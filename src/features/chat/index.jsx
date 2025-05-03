@@ -269,6 +269,14 @@ export default function ChatSingle() {
     console.log("Updated poll with votes:", optionIds);
   };
 
+  const handleLockVote = async (vote) => {
+    const resLockVote = await voteApi.lockVote(
+      vote._id,
+      member.data._id
+    );
+    console.log("Updated poll with votes:", resLockVote);
+  }
+
   return (
     <>
       <VoteModal
@@ -304,6 +312,7 @@ export default function ChatSingle() {
                 onDeselected={onDeselected}
                 member={member.data}
                 onSave={handleUpdateVote}
+                onLock={handleLockVote}
               />
 
               <MessageInput
