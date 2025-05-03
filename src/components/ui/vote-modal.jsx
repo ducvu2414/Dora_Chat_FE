@@ -6,7 +6,7 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Plus, Settings, X } from "lucide-react";
 
-export default function VoteModal({ isOpen, onClose, onSubmit, vote }) {
+export default function VoteModal({ isOpen, onClose, onSubmit, onSave, vote }) {
   const [content, setContent] = useState(vote ? vote.content : "");
   const [options, setOptions] = useState(
     vote ? vote.options.map((option) => option.name) : ["", ""]
@@ -105,12 +105,19 @@ export default function VoteModal({ isOpen, onClose, onSubmit, vote }) {
       return;
     }
 
-    onSubmit({
-      content,
-      options: validOptions,
-      isMultipleChoice,
-      isAnonymous,
-    });
+    if (vote) {
+      onSave({
+        options: validOptions,
+        oldOptions: vote,
+      });
+    } else {
+      onSubmit({
+        content,
+        options: validOptions,
+        isMultipleChoice,
+        isAnonymous,
+      });
+    }
 
     onClose();
   };

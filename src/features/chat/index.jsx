@@ -176,6 +176,30 @@ export default function ChatSingle() {
     console.log("Created poll:", resCreateVote);
   };
 
+  const handleUpdateVote = async (vote) => {
+    const oldOptions = vote.oldOptions.options.map((option) => option.name);
+    const newOptions = vote.options;
+
+    const updatedOptions = newOptions.filter(
+      (newOption) => !oldOptions.includes(newOption)
+    );
+
+    const deletedOptions = oldOptions.filter(
+      (oldOption) => !newOptions.includes(oldOption)
+    );
+
+    updatedOptions.forEach(async (option) => {
+      const resAddVoteOption = await voteApi.addVoteOption(
+        vote.oldOptions._id,
+        member.data._id,
+        option
+      );
+      console.log("Updated poll with new options:", resAddVoteOption);
+    });
+
+    console.log("vote", vote);
+  };
+
   const onSelected = (optionIds, vote) => {
     const user = JSON.parse(localStorage.getItem("user"));
     const reqSelectVoteOption = {
@@ -266,9 +290,15 @@ export default function ChatSingle() {
                 onSelected={onSelected}
                 onDeselected={onDeselected}
                 member={member.data}
+                onSave={handleUpdateVote}
               />
 
-              <MessageInput onSend={handleSendMessage} isMember={isMember} setIsVoteModalOpen={setIsVoteModalOpen} isGroup={conversation.type} />
+              <MessageInput
+                onSend={handleSendMessage}
+                isMember={isMember}
+                setIsVoteModalOpen={setIsVoteModalOpen}
+                isGroup={conversation.type}
+              />
             </div>
 
             {/* DetailChat*/}

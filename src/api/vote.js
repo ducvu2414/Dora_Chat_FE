@@ -5,6 +5,16 @@ const voteApi = {
     return axios.post("/api/votes", vote);
   },
 
+  addVoteOption: (voteId, memberId, option) => {
+    console.log("addVoteOption", voteId, memberId, option);
+    return axios.post(`/api/votes/option/${voteId}`, {
+      memberId,
+      option: {
+        name: option,
+      },
+    });
+  },
+
   selectVoteOption: (voteId, optionId, memberInfo) => {
     return axios.post(
       `/api/votes/option/select/${voteId}/${optionId}`,

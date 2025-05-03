@@ -10,6 +10,7 @@ export default function VoteDisplay({
   onDeselected,
   showResults = false,
   member,
+  onSave,
 }) {
   // Calculate total votes
   const totalVotes = vote.options.reduce((acc, option) => {
@@ -173,6 +174,7 @@ export default function VoteDisplay({
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
           vote={vote}
+          onSave={onSave}
         />
 
         <div className="text-sm text-gray-500">

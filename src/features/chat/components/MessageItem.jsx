@@ -15,6 +15,7 @@ export default function MessageItem({
   onSelected,
   onDeselected,
   member,
+  onSave,
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -299,6 +300,7 @@ export default function MessageItem({
                     onSelected={onSelected}
                     onDeselected={onDeselected}
                     member={member}
+                    onSave={onSave}
                   />
                 </div>
               </div>
