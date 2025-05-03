@@ -18,10 +18,37 @@ export default function VoteModal({
   const [options, setOptions] = useState(
     vote ? vote.options.map((option) => option.name) : ["", ""]
   );
+  const [newOptions, setNewOptions] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [duplicateGroups, setDuplicateGroups] = useState([]);
+  const [allOptionsCombined, setAllOptionsCombined] = useState([]);
+
+  const allOptions = [
+    ...(vote
+      ? vote.options.map((option) => ({
+          ...option,
+          isExisting: true, // Đánh dấu option có sẵn
+        }))
+      : []),
+    ...newOptions.map((option) => ({
+      name: option,
+      isExisting: false, // Đánh dấu option mới thêm
+    })),
+  ];
+
+  useEffect(() => {
+    const combined = [
+      ...(vote ? vote.options.map((o) => o.name) : []),
+      ...newOptions,
+    ];
+    setAllOptionsCombined(combined);
+
+    // Kiểm tra trùng lặp mỗi khi options thay đổi
+    const duplicates = findDuplicateGroups(combined);
+    setDuplicateGroups(duplicates);
+  }, [vote, newOptions]);
 
   // Reset form when modal is opened
   useEffect(() => {
@@ -32,6 +59,7 @@ export default function VoteModal({
       setIsMultipleChoice(false);
       setIsAnonymous(false);
     }
+    setNewOptions([]);
   }, [isOpen, vote]);
 
   const handleContentChange = (e) => {
@@ -39,16 +67,6 @@ export default function VoteModal({
     if (value.length <= 200) {
       setContent(value);
     }
-  };
-
-  const handleOptionChange = (index, value) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-
-    // tìm các nhóm trùng
-    const duplicates = findDuplicateGroups(newOptions);
-    setDuplicateGroups(duplicates);
   };
 
   const isOptionDuplicate = (index) => {
@@ -80,15 +98,23 @@ export default function VoteModal({
 
   const addOption = () => {
     if (options.length < 10) {
-      setOptions([...options, ""]);
+      setNewOptions([...newOptions, ""]);
     }
   };
 
-  const removeOption = (index) => {
-    if (options.length > 2) {
-      const newOptions = options.filter((_, i) => i !== index);
-      setOptions(newOptions);
+  const removeNewOption = (index) => {
+    // const optionIndex = vote ? vote.options.length + index : index;
+    if (allOptions.length > 2) {
+      const updatedNewOptions = [...newOptions];
+      updatedNewOptions.splice(index, 1);
+      setNewOptions(updatedNewOptions);
     }
+  };
+
+  const handleNewOptionChange = (index, value) => {
+    const updatedNewOptions = [...newOptions];
+    updatedNewOptions[index] = value;
+    setNewOptions(updatedNewOptions);
   };
 
   const handleSubmit = () => {
@@ -98,14 +124,21 @@ export default function VoteModal({
       return;
     }
 
-    const validOptions = options.filter((opt) => opt.trim() !== "");
+    const validNewOptions = newOptions.filter((opt) => opt.trim() !== "");
 
-    if (validOptions.length < 2) {
-      alert("Please enter at least 2 options");
-      return;
+    if (vote) {
+      if (validNewOptions.length < 1 && newOptions.length > 0) {
+        alert("Please enter valid options");
+        return;
+      }
+    } else {
+      if (allOptionsCombined.filter((opt) => opt.trim() !== "").length < 2) {
+        alert("Please enter at least 2 options");
+        return;
+      }
     }
 
-    const duplicates = findDuplicateGroups(validOptions);
+    const duplicates = findDuplicateGroups(allOptionsCombined);
     if (duplicates.length > 0) {
       setDuplicateGroups(duplicates);
       alert("Please remove duplicate options before submitting");
@@ -114,13 +147,13 @@ export default function VoteModal({
 
     if (vote) {
       onSave({
-        options: validOptions,
+        options: allOptions.map((option) => option.name),
         oldOptions: vote,
       });
     } else {
       onSubmit({
         content,
-        options: validOptions,
+        options: validNewOptions.filter((opt) => opt.trim() !== ""),
         isMultipleChoice,
         isAnonymous,
       });
@@ -176,20 +209,29 @@ export default function VoteModal({
             Options
           </label>
           <div className="space-y-2">
-            {options.map((option, index) => {
+            {allOptions.map((option, index) => {
+              const isExisting = option.isExisting;
               const isDuplicate = isOptionDuplicate(index);
+
               return (
                 <div key={index} className="flex items-start gap-2 mb-1">
                   <div className="flex-1">
                     <Input
                       placeholder={`Option ${index + 1}`}
-                      value={option}
-                      onChange={(e) =>
-                        handleOptionChange(index, e.target.value)
+                      value={option.name}
+                      onChange={
+                        isExisting
+                          ? null
+                          : (e) =>
+                              handleNewOptionChange(
+                                index - (vote ? vote.options.length : 0),
+                                e.target.value
+                              )
                       }
                       className={`bg-gray-50 ${
                         isDuplicate ? "border-red-500" : ""
                       }`}
+                      disabled={isExisting}
                     />
                     {isDuplicate && (
                       <div className="text-xs text-red-500 mt-1 text-left ml-2">
@@ -197,10 +239,14 @@ export default function VoteModal({
                       </div>
                     )}
                   </div>
-                  {options.length > 2 && (
+                  {!isExisting && allOptions.length > 2 && (
                     <div className="mt-2">
                       <button
-                        onClick={() => removeOption(index)}
+                        onClick={() =>
+                          removeNewOption(
+                            index - (vote ? vote.options.length : 0)
+                          )
+                        }
                         className="p-1 text-gray-500 hover:text-gray-700"
                       >
                         <X size={16} />
@@ -213,7 +259,7 @@ export default function VoteModal({
           </div>
 
           {/* Add Option Button */}
-          {options.length < 10 && (
+          {allOptions.length < 10 && (
             <button
               onClick={addOption}
               className="flex items-center gap-1 mt-2 text-sm text-blue-600 hover:text-blue-800"
@@ -290,7 +336,7 @@ export default function VoteModal({
                 onClick={handleSubmit}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={
-                  !content.trim() || options.some((opt) => opt.trim() === "")
+                  newOptions.length < 1 || newOptions.some((opt) => opt.trim() === "") || duplicateGroups.length > 0
                 }
               >
                 Save
@@ -299,8 +345,11 @@ export default function VoteModal({
               <Button
                 onClick={handleSubmit}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
+                // content not empty,  at least 2 options and no duplicate options
                 disabled={
-                  !content.trim() || options.some((opt) => opt.trim() === "")
+                  content.trim() === "" ||
+                  allOptionsCombined.filter((opt) => opt.trim() !== "").length < 2 ||
+                  duplicateGroups.length > 0
                 }
               >
                 Create
