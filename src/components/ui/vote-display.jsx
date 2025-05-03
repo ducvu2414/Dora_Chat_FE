@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { Button } from "./button";
+import { Settings } from "lucide-react";
+import VoteModal from "@/components/ui/vote-modal";
 
 export default function VoteDisplay({
   vote,
@@ -28,6 +30,7 @@ export default function VoteDisplay({
     ...currentUserVoteIds,
   ]);
   const [viewingResults, setViewingResults] = useState(showResults);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Thêm hàm kiểm tra xem selectedOptions có khác với giá trị ban đầu không
   const hasSelectionChanged = () => {
@@ -160,6 +163,18 @@ export default function VoteDisplay({
 
       {/* Action Buttons */}
       <div className="flex justify-between items-center">
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
+        >
+          <Settings size={16} />
+        </button>
+        <VoteModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          vote={vote}
+        />
+
         <div className="text-sm text-gray-500">
           {totalVotes} {totalVotes === 0 || totalVotes === 1 ? "vote" : "votes"}
           {vote.isAnonymous && " • Anonymous"}

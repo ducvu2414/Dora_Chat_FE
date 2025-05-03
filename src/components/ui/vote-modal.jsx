@@ -6,9 +6,11 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Plus, Settings, X } from "lucide-react";
 
-export default function VoteModal({ isOpen, onClose, onSubmit }) {
-  const [content, setContent] = useState("");
-  const [options, setOptions] = useState(["", ""]);
+export default function VoteModal({ isOpen, onClose, onSubmit, vote }) {
+  const [content, setContent] = useState(vote ? vote.content : "");
+  const [options, setOptions] = useState(
+    vote ? vote.options.map((option) => option.name) : ["", ""]
+  );
   const [showSettings, setShowSettings] = useState(false);
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -16,14 +18,14 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
 
   // Reset form when modal is opened
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !vote) {
       setContent("");
       setOptions(["", ""]);
       setShowSettings(false);
       setIsMultipleChoice(false);
       setIsAnonymous(false);
     }
-  }, [isOpen]);
+  }, [isOpen, vote]);
 
   const handleContentChange = (e) => {
     const value = e.target.value;
@@ -122,12 +124,22 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
             Poll Topic
           </label>
           <div className="relative">
-            <Textarea
-              placeholder="Enter your poll topic here..."
-              value={content}
-              onChange={handleContentChange}
-              className="resize-none bg-gray-50 min-h-[80px]"
-            />
+            {vote ? (
+              <Textarea
+                placeholder={vote.content}
+                // font size="sm"
+                className="resize-none bg-gray-50 min-h-[80px] !text-lg"
+                disabled
+              />
+            ) : (
+              <Textarea
+                placeholder="Enter your poll topic here..."
+                value={content}
+                onChange={handleContentChange}
+                className="resize-none bg-gray-50 min-h-[80px]"
+              />
+            )}
+
             <div className="absolute bottom-2 right-2 text-xs text-gray-500">
               {content.length}/200
             </div>
@@ -142,7 +154,6 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
           <div className="space-y-2">
             {options.map((option, index) => {
               const isDuplicate = isOptionDuplicate(index);
-
               return (
                 <div key={index} className="flex items-start gap-2 mb-1">
                   <div className="flex-1">
@@ -188,44 +199,46 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
         </div>
 
         {/* Settings */}
-        <div className="pt-2">
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
-          >
-            <Settings size={16} />
-            Poll settings
-          </button>
+        {!vote && (
+          <div className="pt-2">
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
+            >
+              <Settings size={16} />
+              Poll settings
+            </button>
 
-          {showSettings && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-md">
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  id="multipleChoice"
-                  checked={isMultipleChoice}
-                  onChange={() => setIsMultipleChoice(!isMultipleChoice)}
-                  className="rounded text-blue-600"
-                />
-                <label htmlFor="multipleChoice" className="text-sm">
-                  Allow multiple choices
-                </label>
+            {showSettings && (
+              <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    id="multipleChoice"
+                    checked={isMultipleChoice}
+                    onChange={() => setIsMultipleChoice(!isMultipleChoice)}
+                    className="rounded text-blue-600"
+                  />
+                  <label htmlFor="multipleChoice" className="text-sm">
+                    Allow multiple choices
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onChange={() => setIsAnonymous(!isAnonymous)}
+                    className="rounded text-blue-600"
+                  />
+                  <label htmlFor="anonymous" className="text-sm">
+                    Anonymous voting
+                  </label>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="anonymous"
-                  checked={isAnonymous}
-                  onChange={() => setIsAnonymous(!isAnonymous)}
-                  className="rounded text-blue-600"
-                />
-                <label htmlFor="anonymous" className="text-sm">
-                  Anonymous voting
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-2">
@@ -236,15 +249,27 @@ export default function VoteModal({ isOpen, onClose, onSubmit }) {
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={
-              !content.trim() || options.some((opt) => opt.trim() === "")
-            }
-          >
-            Create Vote
-          </Button>
+          {vote ? (
+            <Button
+              onClick={handleSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={
+                !content.trim() || options.some((opt) => opt.trim() === "")
+              }
+            >
+              Save
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={
+                !content.trim() || options.some((opt) => opt.trim() === "")
+              }
+            >
+              Create
+            </Button>
+          )}
         </div>
       </div>
     </Modal>
