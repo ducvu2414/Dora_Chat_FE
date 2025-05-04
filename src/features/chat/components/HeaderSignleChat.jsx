@@ -6,7 +6,6 @@ import Avatar from "@assets/chat/avatar.png";
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,7 +14,7 @@ export default function HeaderSignleChat({
   activeTab,
   handleDetail,
   conversation,
-  setActiveChannel,
+  onChannelChange,
 }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -26,8 +25,8 @@ export default function HeaderSignleChat({
       return member.userId !== user._id;
     });
 
-  const avatarMessage = conversation.avatar || partner?.avatar;
-  const name = conversation.name || partner?.name || partner?.username;
+  // const avatarMessage = conversation.avatar || partner?.avatar;
+  // const name = conversation.name || partner?.name || partner?.username;
 
   const peerId = uuidv4();
   const handleCall = (type) => {
@@ -58,10 +57,6 @@ export default function HeaderSignleChat({
       },
     });
   };
-
-  useEffect(() => {
-    setActiveChannel(activeTab);
-  }, [activeTab]);
 
   return (
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
@@ -106,7 +101,7 @@ export default function HeaderSignleChat({
         <ChannelTab
           tabs={channelTabs}
           activeTab={activeTab}
-          onTabChange={setActiveChannel}
+          onTabChange={onChannelChange}
           className="fixed top-0 left-0 right-0"
         />
       )}

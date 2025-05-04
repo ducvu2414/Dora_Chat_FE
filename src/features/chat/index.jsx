@@ -45,10 +45,17 @@ export default function ChatSingle() {
         dispatch(setActiveConversation(conversationId));
 
         let res = null;
-        let channels = [];
+        let channelsRes = [];
 
         try {
           res = await conversationApi.getConversationById(conversationId);
+          channelsRes = await channelApi.getAllChannelByConversationId(
+            conversationId
+          );
+          const mappedChannels = channelsRes.map((channel) => ({
+            id: channel._id,
+            label: channel.name,
+          }));
 
           setMember(
             await memberApi.getByConversationIdAndUserId(
@@ -57,13 +64,6 @@ export default function ChatSingle() {
             )
           );
 
-          channels = await channelApi.getAllChannelByConversationId(
-            conversationId
-          );
-          const mappedChannels = channels.map((channel) => ({
-            id: channel._id,
-            label: channel.name,
-          }));
 
           const isMember = (
             await memberApi.isMember(
@@ -77,31 +77,22 @@ export default function ChatSingle() {
           );
 
           dispatch(setPinMessages(pinMessages));
-
           setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
-          setActiveChannel(channels[0]?._id || null);
+          setActiveChannel(prev => prev || channelsRes[0]?._id || null);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
 
         if (res) {
           if (!res.type) {
+            // single chat
             try {
               const messages = await messageApi.fetchMessages(conversationId);
               dispatch(setMessages({ conversationId, messages }));
             } catch (error) {
               console.error("Error fetching messages:", error);
-            }
-          } else {
-            try {
-              const messages = await messageApi.fetchMessagesByChannelId(
-                channels[0]?._id
-              );
-              dispatch(setMessages({ conversationId, messages }));
-            } catch (error) {
-              console.error("Error fetching messages by channel:", error);
             }
           }
         }
@@ -116,6 +107,21 @@ export default function ChatSingle() {
 
     fetchData();
   }, [conversationId, dispatch, unread]);
+
+  useEffect(() => {
+    if (!activeChannel || !conversationId || !conversation?.type) return;
+    
+    const fetchChannelMessages = async () => {
+      try {
+        const messages = await messageApi.fetchMessagesByChannelId(activeChannel);
+        dispatch(setMessages({ conversationId, messages }));
+      } catch (error) {
+        console.error("Error fetching messages by channel:", error);
+      }
+    };
+    
+    fetchChannelMessages();
+  }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   useEffect(() => {
     // filter type message is image, video in array conversationMessages
@@ -188,8 +194,8 @@ export default function ChatSingle() {
       (oldOption) => !newOptions.includes(oldOption)
     );
 
-    const deletedOptionIds = deletedOptions.map((option) =>
-      vote.oldOptions.options.find((opt) => opt.name === option)._id
+    const deletedOptionIds = deletedOptions.map(
+      (option) => vote.oldOptions.options.find((opt) => opt.name === option)._id
     );
 
     updatedOptions.forEach(async (option) => {
@@ -265,12 +271,9 @@ export default function ChatSingle() {
   };
 
   const handleLockVote = async (vote) => {
-    const resLockVote = await voteApi.lockVote(
-      vote._id,
-      member.data._id
-    );
+    const resLockVote = await voteApi.lockVote(vote._id, member.data._id);
     console.log("Updated poll with votes:", resLockVote);
-  }
+  };
 
   return (
     <>
@@ -299,7 +302,7 @@ export default function ChatSingle() {
                 activeTab={activeChannel}
                 handleDetail={setShowDetail}
                 conversation={conversation}
-                setActiveChannel={setActiveChannel}
+                onChannelChange={setActiveChannel}
               />
               <ChatBox
                 messages={conversationMessages}
