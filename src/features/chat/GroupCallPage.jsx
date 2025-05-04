@@ -12,6 +12,8 @@ export default function GroupCallComponent() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const API = import.meta.env.VITE_BACKEND_URL;
 
+    const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
+
     const meetingRef = useRef(null);
     const hasStartedRef = useRef(false);
 
@@ -33,7 +35,14 @@ export default function GroupCallComponent() {
         if (hasStartedRef.current) return;
         hasStartedRef.current = true;
 
+
         async function startGroupCall() {
+            if (currentGroupCall) {
+                alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+                return;
+            }
+
+
             try {
                 if (meetingRef.current) {
                     meetingRef.current.removeAllListeners();
@@ -97,11 +106,20 @@ export default function GroupCallComponent() {
                 setMeetingInfo(info);
                 setMeetingJoined(true);
 
+                const callInfo = {
+                    conversationId: conversation._id,
+                    channelId,
+                    roomUrl: roomURL
+                };
+                localStorage.setItem("currentGroupCall", JSON.stringify(callInfo));
+
                 socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, {
                     conversationId: conversation._id,
                     channelId,
                     roomUrl: roomURL
                 });
+
+
             } catch (err) {
                 console.error("Error starting group call:", err);
                 setMeetingEnded(true);
@@ -109,12 +127,28 @@ export default function GroupCallComponent() {
         }
 
         startGroupCall();
+
+
     }, [API, channelId, conversation._id, navigate, user.name]);
 
 
     useEffect(() => {
         const onInvite = async ({ conversationId, roomUrl }) => {
             if (conversationId !== conversation._id) return;
+            // console.log(currentGroupCall);
+            // if (
+            //     currentGroupCall &&
+            //     (currentGroupCall.conversationId !== conversationId ||
+            //         currentGroupCall.channelId !== invitedChannel)
+            // ) {
+            //     if (meetingRef.current) {
+            //         meetingRef.current.removeAllListeners();
+            //         await meetingRef.current.leaveMeeting();
+            //         meetingRef.current = null;
+            //     }
+            //     dispatch(endGroupCall());
+            // }
+
             if (!meetingRef.current || meetingJoined) return;
 
             try {
@@ -136,15 +170,15 @@ export default function GroupCallComponent() {
     }, [conversation._id, user.name, socket]);
 
 
-    useEffect(() => {
-        const onGroupEnded = () => {
-            setMeetingEnded(true);
-        };
-        socket.on(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
-        return () => {
-            socket.off(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
-        };
-    }, []);
+    // useEffect(() => {
+    //     const onGroupEnded = () => {
+    //         setMeetingEnded(true);
+    //     };
+    //     socket.on(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
+    //     return () => {
+    //         socket.off(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
+    //     };
+    // }, []);
 
 
     // 4️⃣ Các nút điều khiển
@@ -190,12 +224,8 @@ export default function GroupCallComponent() {
             await meetingRef.current.leaveMeeting();
             meetingRef.current = null;
         }
-        if (conversation.leaderId === user._id) {
-            socket.emit(SOCKET_EVENTS.GROUP_CALL_ENDED, {
-                conversationId: conversation._id
-            });
-        }
         setMeetingEnded(true);
+        localStorage.removeItem("currentGroupCall");
         navigate("/home");
     };
 

@@ -5,6 +5,7 @@ export const endCall = createAction("call/end");
 const initialState = {
     currentCall: null,
     incomingCall: null,
+    currentGroupCall: null,
 };
 
 const callSlice = createSlice({
@@ -20,11 +21,19 @@ const callSlice = createSlice({
         clearIncomingCall: (state) => {
             state.incomingCall = null;
         },
+        setGroupCallStarted: (state, action) => {
+            state.currentGroupCall = action.payload;
+
+        },
+        endGroupCall: (state) => {
+            state.currentGroupCall = null;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(endCall, (state) => {
             state.currentCall = null;
             state.incomingCall = null;
+            state.currentGroupCall = null;
         });
     },
 });
@@ -32,7 +41,9 @@ const callSlice = createSlice({
 export const {
     setCallStarted,
     setIncomingCall,
-    clearIncomingCall
+    clearIncomingCall,
+    setGroupCallStarted,
+    endGroupCall
 } = callSlice.actions;
 
 export default callSlice.reducer;

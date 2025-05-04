@@ -209,6 +209,18 @@ export default function AudioCallComponent() {
         navigate('/home');
     };
 
+    useEffect(() => {
+        // const onRejected = ({ userId, reason }) => {
+        //     console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
+        //     dispatch(endCall());
+        //     navigate("/home");
+        // };
+        console.log("handleEndCall");
+        const onEnded = () => handleEndCall();
+
+        socket.on(SOCKET_EVENTS.CALL_REJECTED, onEnded);
+        return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onEnded);
+    }, []);
 
     const toggleMute = () => {
         const muted = peerService.toggleAudio();

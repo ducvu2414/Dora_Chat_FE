@@ -370,16 +370,16 @@ const MainLayout = () => {
     };
   }, [conversations, dispatch, location.pathname, navigate]);
 
-  useEffect(() => {
-    const onRejected = ({ userId, reason }) => {
-      console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
-      dispatch(endCall());
-      navigate("/home");
-    };
+  // useEffect(() => {
+  //   const onRejected = ({ userId, reason }) => {
+  //     console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
+  //     dispatch(endCall());
+  //     navigate("/home");
+  //   };
 
-    socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
-    return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
-  }, []);
+  //   socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+  //   return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
+  // }, []);
 
   useEffect(() => {
     if (!socket || !user?._id) return;

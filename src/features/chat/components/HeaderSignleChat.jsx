@@ -8,6 +8,7 @@ import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { v4 as uuidv4 } from "uuid";
 
 export default function HeaderSignleChat({
@@ -28,6 +29,7 @@ export default function HeaderSignleChat({
 
   const avatarMessage = conversation.avatar || partner?.avatar;
   const name = conversation.name || partner?.name || partner?.username;
+  const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
 
 
   const handleCall = (type) => {
@@ -36,16 +38,10 @@ export default function HeaderSignleChat({
 
     if (isGroup) {
       const channelId = activeTab;
-      const payload = {
-        conversationId: conversation._id,
-        callerId: userId,
-        channelId,
-        type,
-      };
-
-      console.log("🚀 Group Call payload", payload);
-
-      socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, payload);
+      if (currentGroupCall) {
+        alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+        return;
+      }
 
       navigate(`/group-call/${conversation._id}_${channelId}`, {
         state: {
