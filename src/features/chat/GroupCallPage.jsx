@@ -5,6 +5,9 @@ import { socket } from "../../utils/socketClient";
 import { SOCKET_EVENTS } from "../../utils/constant";
 import Meeting from "./components/Meeting";
 import MeetingEnded from "./components/MeetingEnded";
+import { useDispatch, useSelector } from "react-redux";
+import { setCallStarted, endCall } from "../../features/chat/callSlice";
+
 
 export default function GroupCallComponent() {
     const navigate = useNavigate();
@@ -12,7 +15,10 @@ export default function GroupCallComponent() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const API = import.meta.env.VITE_BACKEND_URL;
 
-    const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
+    // const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
+    const dispatch = useDispatch();
+    const currentCall = useSelector(state => state.call.currentCall);
+
 
     const meetingRef = useRef(null);
     const hasStartedRef = useRef(false);
@@ -37,8 +43,10 @@ export default function GroupCallComponent() {
 
 
         async function startGroupCall() {
-            if (currentGroupCall) {
+            if (currentCall) {
+                console.log("currentCall " + JSON.stringify(currentCall));
                 alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+                navigate("/home");
                 return;
             }
 
@@ -106,12 +114,19 @@ export default function GroupCallComponent() {
                 setMeetingInfo(info);
                 setMeetingJoined(true);
 
-                const callInfo = {
+                // const callInfo = {
+                //     conversationId: conversation._id,
+                //     channelId,
+                //     roomUrl: roomURL
+                // };
+                // localStorage.setItem("currentGroupCall", JSON.stringify(callInfo));
+                dispatch(setCallStarted({
+                    type: "group",
                     conversationId: conversation._id,
                     channelId,
-                    roomUrl: roomURL
-                };
-                localStorage.setItem("currentGroupCall", JSON.stringify(callInfo));
+                    roomUrl: roomURL,
+                    initiator: true,
+                }));
 
                 socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, {
                     conversationId: conversation._id,
@@ -137,23 +152,17 @@ export default function GroupCallComponent() {
             if (meetingRef.current) {
                 meetingRef.current.leaveMeeting();
             }
-            localStorage.removeItem("currentGroupCall");
+            dispatch(endCall());
         };
 
-        // 👉 F5 hoặc đóng tab
         window.addEventListener("beforeunload", handleUnload);
 
-        // 👉 Khi rời khỏi GroupCallPage (component unmount)
         return () => {
-            // if (meetingRef.current) {
-            //     meetingRef.current.removeAllListeners();
-            //     meetingRef.current.leaveMeeting();
-            //     meetingRef.current = null;
-            // }
-            localStorage.removeItem("currentGroupCall");
+            dispatch(endCall());
             window.removeEventListener("beforeunload", handleUnload);
         };
-    }, []);
+    }, [dispatch]);
+
 
 
     useEffect(() => {
@@ -243,19 +252,18 @@ export default function GroupCallComponent() {
     };
 
     const handleLeaveBtn = async () => {
+        console.log("handleLeaveBtn");
         if (meetingRef.current) {
             meetingRef.current.removeAllListeners();
             await meetingRef.current.leaveMeeting();
             meetingRef.current = null;
         }
         setMeetingEnded(true);
-        localStorage.removeItem("currentGroupCall");
+        // localStorage.removeItem("currentGroupCall");
+        dispatch(endCall());
         navigate("/home");
     };
 
-
-    // 5️⃣ Render UI
-    if (meetingEnded) return <MeetingEnded />;
     if (!meetingJoined) {
         return (
             <div className="flex items-center justify-center h-screen">

@@ -12,7 +12,7 @@ export default function CallPage() {
     const type = searchParams.get("type");
     const dispatch = useDispatch();
     const currentCall = useSelector((state) => state.call.currentCall);
-    const hasStartedRef = useRef(false); // 👈 Dùng để đảm bảo chỉ gọi 1 lần
+    const hasStartedRef = useRef(false);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -20,7 +20,7 @@ export default function CallPage() {
             const peerId = uuidv4();
             console.log("📞 Initializing call with peerId:", peerId);
 
-            hasStartedRef.current = true; // Đánh dấu đã gọi rồi
+            hasStartedRef.current = true;
             dispatch(
                 setCallStarted({
                     type,

@@ -1,5 +1,5 @@
 import { SideBar } from "@/components/ui/side-bar";
-import { memo, Suspense, useEffect, useState, useTransition } from "react";
+import { memo, Suspense, useEffect, useState, useTransition, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
@@ -16,10 +16,9 @@ import {
   leaveConverSation,
 } from "../../features/chat/chatSlice";
 import {
-  setIncomingCall,
-  clearIncomingCall,
   setCallStarted,
-  endCall,
+  setIncomingCall,
+  clearIncomingCall
 } from "../../features/chat/callSlice";
 
 import {
@@ -37,6 +36,7 @@ import {
 import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
+import callChannel from "../../utils/callChannel";
 
 const requests = [];
 
@@ -49,13 +49,14 @@ const MainLayout = () => {
   };
   const [socketInitialized, setSocketInitialized] = useState(false);
   const { conversations } = useSelector((state) => state.chat);
-  const currentCall = useSelector((state) => state.call.currentCall);
 
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("user") || "{}")
   );
   const userId = user?.current?._id || user?._id;
+
+  const { currentCall, incomingCall } = useSelector((state) => state.call);
 
   // Lấy conversations khi tải trang
   useEffect(() => {
@@ -97,6 +98,13 @@ const MainLayout = () => {
       }
     };
   }, [socketInitialized]);
+
+  const currentCallRef = useRef(currentCall);
+  useEffect(() => {
+    currentCallRef.current = currentCall;
+  }, [currentCall]);
+
+
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
     if (!socket) return;
@@ -271,7 +279,7 @@ const MainLayout = () => {
         initiator,
       });
       if (currentCall) {
-        console.log("📵 Bỏ qua NEW_USER_CALL vì đang trong cuộc gọi");
+        console.log("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
         return;
       }
       const base = `/call/${conversationId}`;
@@ -329,25 +337,30 @@ const MainLayout = () => {
       type,
       peerId,
     }) => {
-      console.log("⚡️ CALL_USER", {
-        callerId,
-        fromName,
-        conversationId,
-        type,
-        peerId,
-      });
       const base = `/call/${conversationId}`;
       if (location.pathname.startsWith(base)) return;
+
+      if (currentCallRef.current) {
+        console.log("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
+
+        socket.emit(SOCKET_EVENTS.REJECT_CALL, {
+          conversationId: conversationId,
+          userId: user._id,
+          reason: " Đang trong cuộc gọi khác, từ chối cuộc gọi mới",
+        });
+        return;
+      }
+
       const conv = conversations.find((c) => c._id === conversationId);
-      console.log("handleCallUser", {
+      console.log("📞 handleCallUser - nhận cuộc gọi", {
         type,
         conversationId,
         callerId,
         fromName,
         peerId,
-        remotePeerId: null,
         conversation: conv,
       });
+
       dispatch(
         setIncomingCall({
           type,
@@ -614,7 +627,7 @@ const MainLayout = () => {
             }
           >
             <Outlet />
-            <IncomingCallModal />
+            {!currentCall && incomingCall && <IncomingCallModal />}
           </Suspense>
         )}
       </div>

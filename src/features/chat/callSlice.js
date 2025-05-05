@@ -1,11 +1,9 @@
-import { createSlice, createAction } from "@reduxjs/toolkit";
-
-export const endCall = createAction("call/end");
+import { createSlice } from "@reduxjs/toolkit";
+import callChannel from "../../utils/callChannel";
 
 const initialState = {
     currentCall: null,
     incomingCall: null,
-    currentGroupCall: null,
 };
 
 const callSlice = createSlice({
@@ -14,6 +12,12 @@ const callSlice = createSlice({
     reducers: {
         setCallStarted: (state, action) => {
             state.currentCall = action.payload;
+            callChannel.postMessage({ type: "START_CALL", payload: action.payload });
+        },
+        endCall: (state) => {
+            state.currentCall = null;
+            state.incomingCall = null;
+            callChannel.postMessage({ type: "END_CALL" });
         },
         setIncomingCall: (state, action) => {
             state.incomingCall = action.payload;
@@ -21,29 +25,8 @@ const callSlice = createSlice({
         clearIncomingCall: (state) => {
             state.incomingCall = null;
         },
-        setGroupCallStarted: (state, action) => {
-            state.currentGroupCall = action.payload;
-
-        },
-        endGroupCall: (state) => {
-            state.currentGroupCall = null;
-        },
-    },
-    extraReducers: (builder) => {
-        builder.addCase(endCall, (state) => {
-            state.currentCall = null;
-            state.incomingCall = null;
-            state.currentGroupCall = null;
-        });
-    },
+    }
 });
 
-export const {
-    setCallStarted,
-    setIncomingCall,
-    clearIncomingCall,
-    setGroupCallStarted,
-    endGroupCall
-} = callSlice.actions;
-
+export const { setCallStarted, endCall, setIncomingCall, clearIncomingCall } = callSlice.actions;
 export default callSlice.reducer;

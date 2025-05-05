@@ -159,7 +159,16 @@ export default function AudioCallComponent() {
         };
 
         startCall();
+
+        const timeout = setTimeout(() => {
+            if (isConnecting) {
+                console.warn("⏳ Timeout: Không kết nối được sau 30s, kết thúc cuộc gọi.");
+                handleEndCall();
+            }
+        }, 30 * 1000);
+
         return () => {
+            clearTimeout(timeout);
             if (localStreamRef.current) {
                 localStreamRef.current.getTracks().forEach(track => track.stop());
             }
@@ -215,7 +224,6 @@ export default function AudioCallComponent() {
         //     dispatch(endCall());
         //     navigate("/home");
         // };
-        console.log("handleEndCall");
         const onEnded = () => handleEndCall();
 
         socket.on(SOCKET_EVENTS.CALL_REJECTED, onEnded);
