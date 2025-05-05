@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, UserPlus, MessageCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -25,15 +25,27 @@ export function AddFriendModal({ isOpen, onClose }) {
   const [searchResult, setSearchResult] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [searchType, setSearchType] = useState("phone");
-  const [enableSentRequest, setEnableSentRequest] = useState(true);
   const userLogin = JSON.parse(localStorage.getItem("user"));
   const [hasSentRequest, setHasSentRequest] = useState(false);
+  const [resMyFriendRequest, setResMyFriendRequest] = useState([]);
   const resetModalState = () => {
     setSearchValue("");
     setSearchResult(null);
     setSearchType("phone");
     setHasSentRequest(false);
   };
+
+  useEffect(() => {
+    const fetchMyFriendRequest = async () => {
+      try {
+        const response = await friendApi.fetchMyRequestFriend();
+        setResMyFriendRequest(response);
+      } catch (error) {
+        console.error("Error fetching friend requests:", error);
+      }
+    };
+    fetchMyFriendRequest();
+  }, []);
 
   const handleSearch = async () => {
     try {
@@ -64,7 +76,6 @@ export function AddFriendModal({ isOpen, onClose }) {
           });
         }
       }
-      setEnableSentRequest(true);
     } catch (error) {
       setSearchResult(null);
       AlertMessage({ type: "error", message: "User not found" });
@@ -74,9 +85,22 @@ export function AddFriendModal({ isOpen, onClose }) {
 
   const handleSendFriendRequest = async () => {
     try {
+      
+      if (
+        resMyFriendRequest.some((friend) => friend._id === searchResult._id)
+      ) {
+        AlertMessage({
+          type: "error",
+          message: "You have sent a friend request to this user",
+        });
+        return;
+      }
       await friendApi.sendRequestFriend(searchResult._id);
       setHasSentRequest(true);
-      AlertMessage({ type: "success", message: "Send friend request successfully" });
+      AlertMessage({
+        type: "success",
+        message: "Send friend request successfully",
+      });
     } catch (error) {
       console.error("Error sending friend request:", error);
       AlertMessage({ type: "error", message: error.response.data.message });
@@ -197,20 +221,14 @@ export function AddFriendModal({ isOpen, onClose }) {
                 </div>
               </div>
               <div className="flex gap-2">
-                {isFriend ? (
-                  <></>
-                ) : (
+                {!isFriend && (
                   <Button
                     size="icon"
                     className="bg-blue-600 rounded-full hover:bg-blue-700 disabled:opacity-50"
-                    disabled={hasSentRequest}
+                    disabled={hasSentRequest || resMyFriendRequest.some((friend) => friend._id === searchResult._id)}
                     onClick={handleSendFriendRequest}
                   >
-                    {hasSentRequest ? (
-                      <span className="text-xs font-semibold px-2">Sent</span>
-                    ) : (
-                      <UserPlus className="w-4 h-4" />
-                    )}
+                    <UserPlus className="w-4 h-4" />
                   </Button>
                 )}
 
