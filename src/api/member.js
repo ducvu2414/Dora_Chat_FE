@@ -22,8 +22,8 @@ const memberApi = {
         return axios.get(`api/members/member/${memberId}`);
     },
 
-    updateName: (memberId, name) => {
-        return axios.patch(`api/members/${memberId}`, { name });
+    updateName: (conversationId, memberId, name) => {
+        return axios.patch(`api/members/${conversationId}/${memberId}`, { name });
     },
 }
 

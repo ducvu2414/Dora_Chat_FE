@@ -202,6 +202,7 @@ export default function MainDetail({
         setName(responseName.name);
       } else {
         const responseName = await memberApi.updateName(
+          conversation._id,
           conversation.members?.find(
             (member) =>
               member.userId !== JSON.parse(localStorage.getItem("user"))._id

@@ -45,6 +45,20 @@ const chatSlice = createSlice({
         state.conversations[index].name = name;
       }
     },
+    updateMemberName: (state, action) => {
+      const { conversationId, memberId, name } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        const memberIndex = conversation.members.findIndex(
+          (member) => member._id === memberId
+        );
+        if (memberIndex !== -1) {
+          conversation.members[memberIndex].name = name;
+        }
+      }
+    },
     setMessages: (state, action) => {
       const { conversationId, messages } = action.payload;
       state.messages[conversationId] = messages;
@@ -229,5 +243,6 @@ export const {
   leaveConverSation,
   setClassifies,
   updateNameConversation,
+  updateMemberName,
 } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -21,6 +21,7 @@ import {
   updateVote,
   lockVote,
   updateNameConversation,
+  updateMemberName,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -689,6 +690,25 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
       socket.off(SOCKET_EVENTS.VOTE_LOCKED, handleLockVote);
     };
+  }, [socket, dispatch]);
+
+  // Lắng nghe socket cho member
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleUpdateNamePersonalConversation = (data) => {
+      if (data) {
+        dispatch(
+          updateMemberName({
+            conversationId: data.conversationId,
+            memberId: data._id,
+            name: data.name,
+          })
+        );
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.UPDATE_MEMBER_NAME, handleUpdateNamePersonalConversation);
   }, [socket, dispatch]);
 
   const handleConversationClick = (id) => {
