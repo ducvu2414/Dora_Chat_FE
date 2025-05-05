@@ -24,7 +24,7 @@ import VoteModal from "@/components/ui/vote-modal";
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread, pinMessages } = useSelector((state) => state.chat);
+  const { messages, unread, pinMessages, conversations } = useSelector((state) => state.chat);
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
@@ -301,7 +301,7 @@ export default function ChatSingle() {
                 channelTabs={channels}
                 activeTab={activeChannel}
                 handleDetail={setShowDetail}
-                conversation={conversation}
+                conversation={conversations.filter((conv) => conv._id === conversationId)[0]}
                 onChannelChange={setActiveChannel}
               />
               <ChatBox
@@ -316,7 +316,7 @@ export default function ChatSingle() {
                 onSend={handleSendMessage}
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
-                isGroup={conversation.type}
+                isGroup={conversations.filter((conv) => conv._id === conversationId)[0].type}
               />
             </div>
 
@@ -329,7 +329,7 @@ export default function ChatSingle() {
               {/* log messages */}
               {showDetail && (
                 <DetailChat
-                  conversation={conversation}
+                  conversation={conversations.filter((conv) => conv._id === conversationId)[0]}
                   imagesVideos={photosVideos}
                   files={files}
                   links={links}

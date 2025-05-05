@@ -36,6 +36,15 @@ const chatSlice = createSlice({
         ];
       }
     },
+    updateNameConversation: (state, action) => {
+      const { conversationId, name } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations[index].name = name;
+      }
+    },
     setMessages: (state, action) => {
       const { conversationId, messages } = action.payload;
       state.messages[conversationId] = messages;
@@ -219,5 +228,6 @@ export const {
   deletePinMessage,
   leaveConverSation,
   setClassifies,
+  updateNameConversation,
 } = chatSlice.actions;
 export default chatSlice.reducer;

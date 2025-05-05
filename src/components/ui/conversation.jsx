@@ -42,13 +42,11 @@
 //   )
 // }
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 import Avatar from "@assets/chat/avatar.png";
-import { SOCKET_EVENTS } from "../../utils/constant";
-import { socket } from "../../utils/socketClient";
 
 export function Conversation({
   onClick,
@@ -64,7 +62,6 @@ export function Conversation({
   unread,
   type,
 }) {
-  const [nameState, setNameState] = useState(name);
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -77,14 +74,6 @@ export function Conversation({
       setIsConversationHovered(true);
     });
   };
-
-  useEffect(() => {
-    socket.on(SOCKET_EVENTS.UPDATE_NAME_CONVERSATION, (name) => {
-      if (name) {
-        setNameState(name);
-      }
-    });
-  }, []);
 
   const handleConversationLeave = () => {
     setTimeout(() => {
@@ -134,11 +123,11 @@ export function Conversation({
     }
   };
   const partner =
-    nameState ? nameState : name ||
+    name ||
     members?.filter((member) => {
       return member.userId !== idUser;
     });
-  const avatarMessage = avatar || partner?.[0].avatar;
+  // const avatarMessage = avatar || partner?.[0].avatar;
   // console.log("members", members);
   // console.log("partner", partner);
   // console.log("avata", avatarMessage);
@@ -154,13 +143,13 @@ export function Conversation({
       >
         <img
           src={Avatar}
-          alt={nameState ? nameState : name}
+          alt={name}
           className="object-cover rounded-full w-14 h-14"
         />
         <div className="flex-1 min-w-0 pl-3">
           <div className="relative flex items-center justify-between">
             <h3 className="text-sm font-medium text-left truncate">
-              {type ? (nameState ? nameState : name) : (nameState ? nameState : partner[0].name)}
+              {type ? name : partner[0].name}
             </h3>
             {unread > 0 && (
               <span className="absolute top-0 -left-10 ml-2 min-w-[20px] h-[20px] px-1 flex items-center justify-center text-xs font-semibold text-white bg-red-500 rounded-full shadow">

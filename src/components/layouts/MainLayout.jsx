@@ -20,6 +20,7 @@ import {
   setClassifies,
   updateVote,
   lockVote,
+  updateNameConversation,
 } from "../../features/chat/chatSlice";
 import {
   setIncomingCall,
@@ -111,7 +112,6 @@ const MainLayout = () => {
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
     if (!socket) return;
-    console.log(socket.connected);
     if (conversations.length > 0) {
       const conversationIds = conversations.map((conv) => conv._id);
       socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationIds);
@@ -245,6 +245,7 @@ const MainLayout = () => {
     };
   }, [dispatch, conversations]);
 
+  // Lắng nghe socket cho user connection
   useEffect(() => {
     if (!socket || !userId) return;
 
@@ -267,6 +268,7 @@ const MainLayout = () => {
     };
   }, [socket, userId, conversations]);
 
+  // Lắng nghe socket cho cuộc gọi
   useEffect(() => {
     const handleNewUserCall = ({
       conversationId,
@@ -393,6 +395,7 @@ const MainLayout = () => {
     return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
   }, []);
 
+  // Lắng nghe socket cho chức năng kết bạn
   useEffect(() => {
     if (!socket || !user?._id) return;
 
@@ -556,6 +559,15 @@ const MainLayout = () => {
       });
     };
 
+    const handleUpdateNameConversation = (data) => {
+      dispatch(
+        updateNameConversation({
+          conversationId: data.conversationId,
+          name: data.name,
+        })
+      );
+    };
+
     // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -572,6 +584,10 @@ const MainLayout = () => {
     socket.on(
       SOCKET_EVENTS.CONVERSATION_DISBANDED,
       handleDisbandedConversation
+    );
+    socket.on(
+      SOCKET_EVENTS.UPDATE_NAME_CONVERSATION,
+      handleUpdateNameConversation
     );
 
     return () => {
