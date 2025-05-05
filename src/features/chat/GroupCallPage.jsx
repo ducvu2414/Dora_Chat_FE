@@ -133,6 +133,30 @@ export default function GroupCallComponent() {
 
 
     useEffect(() => {
+        const handleUnload = () => {
+            if (meetingRef.current) {
+                meetingRef.current.leaveMeeting();
+            }
+            localStorage.removeItem("currentGroupCall");
+        };
+
+        // 👉 F5 hoặc đóng tab
+        window.addEventListener("beforeunload", handleUnload);
+
+        // 👉 Khi rời khỏi GroupCallPage (component unmount)
+        return () => {
+            // if (meetingRef.current) {
+            //     meetingRef.current.removeAllListeners();
+            //     meetingRef.current.leaveMeeting();
+            //     meetingRef.current = null;
+            // }
+            localStorage.removeItem("currentGroupCall");
+            window.removeEventListener("beforeunload", handleUnload);
+        };
+    }, []);
+
+
+    useEffect(() => {
         const onInvite = async ({ conversationId, roomUrl }) => {
             if (conversationId !== conversation._id) return;
             // console.log(currentGroupCall);
