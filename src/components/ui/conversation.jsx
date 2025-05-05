@@ -53,7 +53,6 @@ export function Conversation({
   idUser,
   isActive,
   activeTab,
-  avatar,
   members,
   name,
   lastMessageId,
@@ -130,7 +129,7 @@ export function Conversation({
   // const avatarMessage = avatar || partner?.[0].avatar;
   // console.log("members", members);
   // console.log("partner", partner);
-  // console.log("avata", avatarMessage);
+  // console.log("avatar", avatarMessage);
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div

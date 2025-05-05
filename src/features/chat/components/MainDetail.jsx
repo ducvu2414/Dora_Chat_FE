@@ -57,12 +57,14 @@ export default function MainDetail({
   // Set name of conversation
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
-    else
+    else {
       setName(
         conversation.members?.find(
-          (member) => member.userId !== conversation._id
+          (member) =>
+            member.userId !== JSON.parse(localStorage.getItem("user"))._id
         )?.name || ""
       );
+    }
   }, [
     conversation.name,
     conversation.members,
@@ -192,11 +194,22 @@ export default function MainDetail({
   const handleSaveClick = async () => {
     try {
       setIsEditing(false);
-      const responseName = await conversationApi.updateGroupName(
-        conversation._id,
-        name
-      );
-      setName(responseName.name);
+      if (conversation.type) {
+        const responseName = await conversationApi.updateGroupName(
+          conversation._id,
+          name
+        );
+        setName(responseName.name);
+      } else {
+        const responseName = await memberApi.updateName(
+          conversation.members?.find(
+            (member) =>
+              member.userId !== JSON.parse(localStorage.getItem("user"))._id
+          )?._id,
+          name
+        );
+        setName(responseName.data.name);
+      }
     } catch {
       alert("You do not have permission to change the group name");
       setName(conversation.name);
@@ -396,7 +409,9 @@ export default function MainDetail({
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={MarkChat} />
           </div>
-          <p className="text-[#086DC0] ml-2">Pin messages ({pinMessages.length})</p>
+          <p className="text-[#086DC0] ml-2">
+            Pin messages ({pinMessages.length})
+          </p>
           <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
             <img src={ArrowRight} />
           </div>

@@ -21,6 +21,10 @@ const memberApi = {
     getByMemberId: (memberId) => {
         return axios.get(`api/members/member/${memberId}`);
     },
+
+    updateName: (memberId, name) => {
+        return axios.patch(`api/members/${memberId}`, { name });
+    },
 }
 
 export default memberApi;
