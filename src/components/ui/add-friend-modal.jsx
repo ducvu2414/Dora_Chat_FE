@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import { Search, UserPlus, MessageCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
@@ -17,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
   const navigate = useNavigate();
 
@@ -34,6 +34,10 @@ export function AddFriendModal({ isOpen, onClose }) {
     setSearchType("phone");
     setHasSentRequest(false);
   };
+
+  const myFriendRequests = resMyFriendRequest.some(
+    (friend) => friend._id === searchResult?._id
+  );
 
   useEffect(() => {
     const fetchMyFriendRequest = async () => {
@@ -85,10 +89,7 @@ export function AddFriendModal({ isOpen, onClose }) {
 
   const handleSendFriendRequest = async () => {
     try {
-      
-      if (
-        resMyFriendRequest.some((friend) => friend._id === searchResult._id)
-      ) {
+      if (myFriendRequests) {
         AlertMessage({
           type: "error",
           message: "You have sent a friend request to this user",
@@ -202,16 +203,55 @@ export function AddFriendModal({ isOpen, onClose }) {
           {searchResult && userLogin._id !== searchResult._id ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img
-                  src={searchResult.avatar}
-                  alt={searchResult.name}
-                  className="object-cover w-12 h-12 rounded-full cursor-pointer"
-                  onClick={() => navigate("/other-people-information")}
-                />
+                {searchResult.avatar ? (
+                  <img
+                    src={searchResult.avatar}
+                    alt={searchResult.name}
+                    className="object-cover w-12 h-12 rounded-full cursor-pointer"
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                          isFriend: isFriend,
+                        },
+                      });
+                      onClose();
+                    }}
+                  />
+                ) : (
+                  <div
+                    alt={searchResult.name}
+                    className="object-cover w-12 h-12 rounded-full cursor-pointer"
+                    style={{
+                      backgroundColor: searchResult.avatarColor || "#ccc",
+                    }}
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                          isFriend: isFriend,
+                        },
+                      });
+                      onClose();
+                    }}
+                  />
+                )}
+
                 <div className="text-left">
                   <h4
                     className="text-sm font-medium cursor-pointer"
-                    onClick={() => navigate("/other-people-information")}
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                          isFriend: isFriend,
+                        },
+                      });
+                      onClose();
+                    }}
                   >
                     {searchResult.name}
                   </h4>
@@ -225,7 +265,7 @@ export function AddFriendModal({ isOpen, onClose }) {
                   <Button
                     size="icon"
                     className="bg-blue-600 rounded-full hover:bg-blue-700 disabled:opacity-50"
-                    disabled={hasSentRequest || resMyFriendRequest.some((friend) => friend._id === searchResult._id)}
+                    disabled={hasSentRequest || myFriendRequests}
                     onClick={handleSendFriendRequest}
                   >
                     <UserPlus className="w-4 h-4" />
