@@ -213,7 +213,6 @@ export function AddFriendModal({ isOpen, onClose }) {
                         state: {
                           userData: searchResult,
                           isSentRequest: myFriendRequests ? true : false,
-                          isFriend: isFriend,
                         },
                       });
                       onClose();
@@ -231,7 +230,6 @@ export function AddFriendModal({ isOpen, onClose }) {
                         state: {
                           userData: searchResult,
                           isSentRequest: myFriendRequests ? true : false,
-                          isFriend: isFriend,
                         },
                       });
                       onClose();
@@ -247,7 +245,6 @@ export function AddFriendModal({ isOpen, onClose }) {
                         state: {
                           userData: searchResult,
                           isSentRequest: myFriendRequests ? true : false,
-                          isFriend: isFriend,
                         },
                       });
                       onClose();

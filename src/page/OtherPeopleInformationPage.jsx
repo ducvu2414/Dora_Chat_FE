@@ -1,26 +1,65 @@
 /* eslint-disable react/prop-types */
 import { Button } from "@/components/ui/button";
 import { useLocation } from "react-router-dom";
-import { MessageCircle, UserRoundPlus } from "lucide-react";
+import { MessageCircle, UserRoundPlus, UserRoundMinus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { updateFriend, updateFriendChat } from "../features/friend/friendSlice";
 import BannerImage from "@/assets/banner-user-info.png";
 import CatIllustration from "@/assets/other-people-information.png";
-
-function getLastName(fullName) {
-  if (!fullName || typeof fullName !== "string") {
-    return "";
-  }
-
-  const parts = fullName.trim().split(" ");
-  const lastName = parts[parts.length - 1]; // Lấy phần tử cuối cùng
-
-  return lastName || "";
-}
+import friendApi from "../api/friend";
 
 export default function OtherPeopleInformation() {
   const { state } = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { friends } = useSelector((state) => state.friend);
+  const { conversations } = useSelector((state) => state.chat);
   const userData = state?.userData;
   const isSentRequest = state?.isSentRequest;
-  const isFriend = state?.isFriend;
+  const [isFriend, setIsFriend] = useState(
+    friends?.some((friend) => friend._id === userData?._id) ?? false
+  );
+
+  const userLogin = JSON.parse(localStorage.getItem("user"));
+  const conversation = conversations?.filter((conversation) => {
+    const members = conversation.members.map((member) => member.userId);
+    return members.includes(userLogin._id) && members.includes(userData._id);
+  });  
+
+  const getLastName = (fullName) => {
+    if (!fullName || typeof fullName !== "string") {
+      return "";
+    }
+
+    const parts = fullName.trim().split(" ");
+    const lastName = parts[parts.length - 1]; // Lấy phần tử cuối cùng
+
+    return lastName || "";
+  };
+
+  const handleSendFriendRequest = async () => {
+    try {
+      await friendApi.sendRequestFriend(userData._id);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  const handleDeleteFriend = async () => {
+    try {
+      if (confirm("Are you sure you want to unfriend?")) {
+        await friendApi.deleteFriend(userData._id);
+        dispatch(updateFriend(userData._id));
+        dispatch(updateFriendChat(userData._id));
+        setIsFriend(false);
+      }
+    } catch (error) {
+      console.error("Error deleting friend:", error);
+    }
+  };
 
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
@@ -67,17 +106,37 @@ export default function OtherPeopleInformation() {
 
               {/* Action Buttons */}
               <div className="flex gap-4 mb-8">
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    navigate("/chat/" + conversation[0]?._id);
+                  }}
+                >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Send message
                 </Button>
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={isSentRequest || isFriend}
-                >
-                  <UserRoundPlus className="w-4 h-4 mr-2" />
-                  Add friend
-                </Button>
+                {isFriend ? (
+                  <Button
+                    className="bg-red-600 hover:bg-red-700 border-none"
+                    onClick={handleDeleteFriend}
+                    disabled={isSentRequest}
+                  >
+                    <UserRoundMinus className="w-4 h-4 mr-2" />
+                    Unfriend
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    disabled={isSentRequest}
+                    onClick={() => {
+                      setIsFriend(true);
+                      handleSendFriendRequest();
+                    }}
+                  >
+                    <UserRoundPlus className="w-4 h-4 mr-2" />
+                    Add friend
+                  </Button>
+                )}
               </div>
 
               {/* Message */}
