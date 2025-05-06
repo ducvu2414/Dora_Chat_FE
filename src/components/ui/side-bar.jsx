@@ -10,7 +10,6 @@ import ClassifyManagerModal from "@/components/ui/classify/ClassifyManagerModal"
 export function SideBar({
   messages,
   groups,
-  requests,
   onConversationClick,
   user,
 }) {

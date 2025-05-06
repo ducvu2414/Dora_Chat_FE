@@ -126,10 +126,7 @@ export function Conversation({
     members?.filter((member) => {
       return member.userId !== idUser;
     });
-  // const avatarMessage = avatar || partner?.[0].avatar;
-  // console.log("members", members);
-  // console.log("partner", partner);
-  // console.log("avatar", avatarMessage);
+
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
@@ -168,7 +165,7 @@ export function Conversation({
             onMouseEnter={handleDropdownEnter}
             onMouseLeave={handleDropdownLeave}
           >
-            {activeTab === "messages" || activeTab === "requests" ? (
+            {activeTab === "messages" ? (
               <ContactCardDropdown
                 onViewInfo={handleViewInfo}
                 onCategoryChange={(category) =>

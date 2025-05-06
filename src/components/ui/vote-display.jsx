@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "./button";
 import { Settings } from "lucide-react";
+import { createPortal } from "react-dom";
 import VoteModal from "@/components/ui/vote-modal";
 
 export default function VoteDisplay({
@@ -32,6 +33,14 @@ export default function VoteDisplay({
   ]);
   const [viewingResults, setViewingResults] = useState(showResults);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
     if (vote.lockedVote.lockedStatus) {
@@ -74,6 +83,43 @@ export default function VoteDisplay({
     return Math.round((votes / totalVotes) * 100);
   };
 
+  // Function to handle tooltip display
+  const showTooltip = (memberId, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      top: rect.top - 10, // Position above the avatar
+      left: rect.left + rect.width / 2, // Center horizontally
+    });
+    setActiveTooltip(memberId);
+  };
+
+  const hideTooltip = () => {
+    setActiveTooltip(null);
+  };
+
+  // Maximum number of avatars to display before showing "+X more"
+  const MAX_AVATARS = 5;
+
+  const Tooltip = ({ voter }) => {
+    if (!activeTooltip || activeTooltip !== voter.memberId || !isMounted)
+      return null;
+
+    return createPortal(
+      <div
+        className="fixed px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-[9999] pointer-events-none mt-2"
+        style={{
+          top: `${tooltipPosition.top - 30}px`,
+          left: `${tooltipPosition.left}px`,
+          transform: "translateX(-50%)",
+        }}
+      >
+        {voter.name || "Unknown member"}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+      </div>,
+      document.body
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border w-72">
       {/* vote Content */}
@@ -90,7 +136,7 @@ export default function VoteDisplay({
             <div key={option._id || index} className="relative">
               {viewingResults ? (
                 // Results view
-                <div className="rounded-lg border overflow-hidden">
+                <div className="rounded-lg border">
                   <div className="flex items-center p-3 relative z-10">
                     <div className="flex-1">
                       <div className="flex justify-between">
@@ -109,11 +155,45 @@ export default function VoteDisplay({
                       <div className="text-xs text-gray-500 mt-1">
                         {optionVotes} {optionVotes === 1 ? "vote" : "votes"}
                       </div>
+
+                      {/* Member Avatars */}
+                      {option.members && option.members.length > 0 && (
+                        <div className="flex justify-end flex-wrap mt-2">
+                          {option.members.slice(0, MAX_AVATARS).map((voter) => (
+                            <div
+                              key={voter.memberId}
+                              className="relative -mr-2 first:ml-0"
+                              onMouseEnter={(e) =>
+                                showTooltip(voter.memberId, e)
+                              }
+                              onMouseLeave={hideTooltip}
+                            >
+                              <img
+                                src={
+                                  voter.avatar ||
+                                  "/placeholder.svg?height=32&width=32"
+                                }
+                                alt={voter.name || "Member"}
+                                className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                              />
+
+                              {/* Tooltip */}
+                              <Tooltip voter={voter} />
+                            </div>
+                          ))}
+
+                          {option.members.length > MAX_AVATARS && (
+                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
+                              +{option.members.length - MAX_AVATARS}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {/* Progress bar */}
                   <div
-                    className="absolute top-0 left-0 h-full bg-blue-100"
+                    className="absolute top-0 left-0 h-full bg-blue-100 z-0"
                     style={{
                       width: `${percentage}%`,
                       transition: "width 0.5s ease-in-out",
