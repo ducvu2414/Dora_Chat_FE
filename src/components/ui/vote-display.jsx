@@ -157,7 +157,7 @@ export default function VoteDisplay({
                       </div>
 
                       {/* Member Avatars */}
-                      {option.members && option.members.length > 0 && (
+                      {option.members && option.members.length > 0 && !vote.isAnonymous && (
                         <div className="flex justify-end flex-wrap mt-2">
                           {option.members.slice(0, MAX_AVATARS).map((voter) => (
                             <div
