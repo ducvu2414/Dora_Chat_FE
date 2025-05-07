@@ -121,7 +121,7 @@ export default function VoteDisplay({
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border w-72">
+    <div className="bg-white rounded-lg p-4 shadow-sm border w-72 w-full">
       {/* vote Content */}
       <h3 className="font-medium text-lg mb-3">{vote.content}</h3>
 
@@ -157,38 +157,42 @@ export default function VoteDisplay({
                       </div>
 
                       {/* Member Avatars */}
-                      {option.members && option.members.length > 0 && !vote.isAnonymous && (
-                        <div className="flex justify-end flex-wrap mt-2">
-                          {option.members.slice(0, MAX_AVATARS).map((voter) => (
-                            <div
-                              key={voter.memberId}
-                              className="relative -mr-2 first:ml-0"
-                              onMouseEnter={(e) =>
-                                showTooltip(voter.memberId, e)
-                              }
-                              onMouseLeave={hideTooltip}
-                            >
-                              <img
-                                src={
-                                  voter.avatar ||
-                                  "/placeholder.svg?height=32&width=32"
-                                }
-                                alt={voter.name || "Member"}
-                                className="w-6 h-6 rounded-full border-2 border-white object-cover"
-                              />
+                      {option.members &&
+                        option.members.length > 0 &&
+                        !vote.isAnonymous && (
+                          <div className="flex justify-end flex-wrap mt-2">
+                            {option.members
+                              .slice(0, MAX_AVATARS)
+                              .map((voter) => (
+                                <div
+                                  key={voter.memberId}
+                                  className="relative -mr-2 first:ml-0"
+                                  onMouseEnter={(e) =>
+                                    showTooltip(voter.memberId, e)
+                                  }
+                                  onMouseLeave={hideTooltip}
+                                >
+                                  <img
+                                    src={
+                                      voter.avatar ||
+                                      "/placeholder.svg?height=32&width=32"
+                                    }
+                                    alt={voter.name || "Member"}
+                                    className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                  />
 
-                              {/* Tooltip */}
-                              <Tooltip voter={voter} />
-                            </div>
-                          ))}
+                                  {/* Tooltip */}
+                                  <Tooltip voter={voter} />
+                                </div>
+                              ))}
 
-                          {option.members.length > MAX_AVATARS && (
-                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
-                              +{option.members.length - MAX_AVATARS}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            {option.members.length > MAX_AVATARS && (
+                              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
+                                +{option.members.length - MAX_AVATARS}
+                              </div>
+                            )}
+                          </div>
+                        )}
                     </div>
                   </div>
                   {/* Progress bar */}
@@ -240,6 +244,43 @@ export default function VoteDisplay({
                     </div>
                     {option.name}
                   </div>
+                  {/* Hiển thị avatars của người đã chọn (chỉ khi không phải vote ẩn danh) */}
+                  {!vote.isAnonymous &&
+                    option.members &&
+                    option.members.length > 0 && (
+                      <div className="flex justify-end items-center">
+                        <div className="text-xs text-gray-500 mr-2">
+                          {option.members.length}
+                        </div>
+                        <div className="flex -space-x-2">
+                          {option.members.slice(0, 3).map((voter) => (
+                            <div
+                              key={voter.memberId}
+                              className="relative"
+                              onMouseEnter={(e) =>
+                                showTooltip(voter.memberId, e)
+                              }
+                              onMouseLeave={hideTooltip}
+                            >
+                              <img
+                                src={
+                                  voter.avatar ||
+                                  "/placeholder.svg?height=32&width=32"
+                                }
+                                alt={voter.name || "Member"}
+                                className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                              />
+                              <Tooltip voter={voter} />
+                            </div>
+                          ))}
+                          {option.members.length > 3 && (
+                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
+                              +{option.members.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                 </button>
               )}
             </div>

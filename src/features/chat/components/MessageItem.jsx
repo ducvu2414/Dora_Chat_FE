@@ -293,7 +293,7 @@ export default function MessageItem({
                 </span>
               </div>
             ) : isVote ? (
-              <div className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000]">
+              <div className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000] w-[430px]">
                 <div className="mt-4">
                   <VoteDisplay
                     vote={msg}
