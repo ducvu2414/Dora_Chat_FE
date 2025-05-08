@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, UserMinus } from "lucide-react";
 import BannerImage from "@/assets/banner-user-info.png";
 import CatIllustration from "@/assets/friend-information.png";
+
 const hobbies = [
   { icon: "🏸", label: "Bamintion" },
   { icon: "⚽", label: "Football" },

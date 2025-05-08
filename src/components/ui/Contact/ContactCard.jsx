@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 import ContactCardDropdown from '@/components/ui/Contact/ContactCardDropdown';
+import { useNavigate } from 'react-router-dom';
 
 export function ContactCard({ contact, onDeleteFriend }) {
-    console.log('ContactCard props:', contact);
+    const navigate = useNavigate();
+
     function onViewInfo() {
-        console.log('View info');
-        window.location.href = "/friend-information";
+        navigate("/friend-information");
     }
 
     function onCategoryChange(category) {
@@ -89,15 +90,3 @@ export function ContactCard({ contact, onDeleteFriend }) {
         </div>
     );
 }
-
-const getCategoryColor = (categoryId) => {
-    const colorMap = {
-        'customer': 'bg-red-500',
-        'family': 'bg-pink-500',
-        'work': 'bg-orange-500',
-        'friends': 'bg-yellow-500',
-        'reply-later': 'bg-green-500',
-        'study': 'bg-blue-500'
-    };
-    return colorMap[categoryId] || 'bg-gray-500';
-};

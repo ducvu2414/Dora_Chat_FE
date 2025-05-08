@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import { Search, UserPlus, MessageCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// eslint-disable-next-line react/prop-types
 export function AddFriendModal({ isOpen, onClose }) {
   const navigate = useNavigate();
 
@@ -25,15 +25,31 @@ export function AddFriendModal({ isOpen, onClose }) {
   const [searchResult, setSearchResult] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [searchType, setSearchType] = useState("phone");
-  const [enableSentRequest, setEnableSentRequest] = useState(true);
   const userLogin = JSON.parse(localStorage.getItem("user"));
   const [hasSentRequest, setHasSentRequest] = useState(false);
+  const [resMyFriendRequest, setResMyFriendRequest] = useState([]);
   const resetModalState = () => {
     setSearchValue("");
     setSearchResult(null);
     setSearchType("phone");
     setHasSentRequest(false);
   };
+
+  const myFriendRequests = resMyFriendRequest.some(
+    (friend) => friend._id === searchResult?._id
+  );
+
+  useEffect(() => {
+    const fetchMyFriendRequest = async () => {
+      try {
+        const response = await friendApi.fetchMyRequestFriend();
+        setResMyFriendRequest(response);
+      } catch (error) {
+        console.error("Error fetching friend requests:", error);
+      }
+    };
+    fetchMyFriendRequest();
+  }, []);
 
   const handleSearch = async () => {
     try {
@@ -64,19 +80,28 @@ export function AddFriendModal({ isOpen, onClose }) {
           });
         }
       }
-      setEnableSentRequest(true);
     } catch (error) {
       setSearchResult(null);
-      AlertMessage({ type: "error", message: "Không tìm thấy người dùng" });
+      AlertMessage({ type: "error", message: "User not found" });
       console.error("Error searching for user:", error);
     }
   };
 
   const handleSendFriendRequest = async () => {
     try {
+      if (myFriendRequests) {
+        AlertMessage({
+          type: "error",
+          message: "You have sent a friend request to this user",
+        });
+        return;
+      }
       await friendApi.sendRequestFriend(searchResult._id);
       setHasSentRequest(true);
-      AlertMessage({ type: "success", message: "Send friend request successfully" });
+      AlertMessage({
+        type: "success",
+        message: "Send friend request successfully",
+      });
     } catch (error) {
       console.error("Error sending friend request:", error);
       AlertMessage({ type: "error", message: error.response.data.message });
@@ -178,16 +203,52 @@ export function AddFriendModal({ isOpen, onClose }) {
           {searchResult && userLogin._id !== searchResult._id ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img
-                  src={searchResult.avatar}
-                  alt={searchResult.name}
-                  className="object-cover w-12 h-12 rounded-full cursor-pointer"
-                  onClick={() => navigate("/other-people-information")}
-                />
+                {searchResult.avatar ? (
+                  <img
+                    src={searchResult.avatar}
+                    alt={searchResult.name}
+                    className="object-cover w-12 h-12 rounded-full cursor-pointer"
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                        },
+                      });
+                      onClose();
+                    }}
+                  />
+                ) : (
+                  <div
+                    alt={searchResult.name}
+                    className="object-cover w-12 h-12 rounded-full cursor-pointer"
+                    style={{
+                      backgroundColor: searchResult.avatarColor || "#ccc",
+                    }}
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                        },
+                      });
+                      onClose();
+                    }}
+                  />
+                )}
+
                 <div className="text-left">
                   <h4
                     className="text-sm font-medium cursor-pointer"
-                    onClick={() => navigate("/other-people-information")}
+                    onClick={() => {
+                      navigate("/other-people-information", {
+                        state: {
+                          userData: searchResult,
+                          isSentRequest: myFriendRequests ? true : false,
+                        },
+                      });
+                      onClose();
+                    }}
                   >
                     {searchResult.name}
                   </h4>
@@ -197,20 +258,14 @@ export function AddFriendModal({ isOpen, onClose }) {
                 </div>
               </div>
               <div className="flex gap-2">
-                {isFriend ? (
-                  <></>
-                ) : (
+                {!isFriend && (
                   <Button
                     size="icon"
                     className="bg-blue-600 rounded-full hover:bg-blue-700 disabled:opacity-50"
-                    disabled={hasSentRequest}
+                    disabled={hasSentRequest || myFriendRequests}
                     onClick={handleSendFriendRequest}
                   >
-                    {hasSentRequest ? (
-                      <span className="text-xs font-semibold px-2">Sent</span>
-                    ) : (
-                      <UserPlus className="w-4 h-4" />
-                    )}
+                    <UserPlus className="w-4 h-4" />
                   </Button>
                 )}
 

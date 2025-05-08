@@ -1,16 +1,15 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
 import { Conversation } from "@/components/ui/conversation";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
-import { useSelector } from "react-redux";
+import ClassifyManagerModal from "@/components/ui/classify/ClassifyManagerModal";
 
-// Sử dụng memo để tránh render lại khi props không thay đổi
 export function SideBar({
   messages,
   groups,
-  requests,
   onConversationClick,
   user,
 }) {
@@ -18,21 +17,37 @@ export function SideBar({
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { unread } = useSelector((state) => state.chat);
-  
+
+  const classifies = useSelector((state) => state.chat.classifies || []);
+  const [selectedClassifyIds, setSelectedClassifyIds] = useState([]);
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
+
   const getConversations = () => {
+    let sourceList = [];
+
     switch (activeTab) {
       case "messages":
-        return messages;
+        sourceList = messages;
+        break;
       case "group":
-        return groups;
-      case "requests":
-        return requests;
+        sourceList = groups;
+        break;
       default:
-        return [];
+        sourceList = [];
     }
+
+    if (selectedClassifyIds.length === 0) return sourceList;
+
+    const matchedConversationIds = classifies
+      .filter((cls) => selectedClassifyIds.includes(cls._id))
+      .flatMap((cls) => cls.conversationIds);
+
+    return sourceList.filter((conv) =>
+      matchedConversationIds.includes(conv._id)
+    );
   };
 
-  const conversations = getConversations();
+  const filteredConversations = getConversations();
 
   const handleConversationClick = (index, conversation) => {
     setActiveConversation(conversation._id || index);
@@ -52,21 +67,29 @@ export function SideBar({
       <TabConversation
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        requestCount={requests.length}
+        selectedClassifyIds={selectedClassifyIds}
+        onSelectClassifies={setSelectedClassifyIds}
+        onOpenManager={() => setIsManagerOpen(true)}
       />
 
       <div className="relative z-10 flex-1 px-2 overflow-y-auto scrollbar-hide">
-        {conversations.map((conv, i) => (
-          <Conversation
-            key={i}
-            {...conv}
-            isActive={activeConversation === conv._id}
-            onClick={() => handleConversationClick(i, conv)}
-            activeTab={activeTab}
-            idUser={user._id}
-            unread={unread[conv._id] || 0}
-          />
-        ))}
+        {filteredConversations.length > 0 ? (
+          filteredConversations.map((conv, i) => (
+            <Conversation
+              key={conv._id || i}
+              {...conv}
+              isActive={activeConversation === conv._id}
+              onClick={() => handleConversationClick(i, conv)}
+              activeTab={activeTab}
+              idUser={user._id}
+              unread={unread[conv._id] || 0}
+            />
+          ))
+        ) : (
+          <div className="text-sm text-gray-500 text-center py-8">
+            There are no conversations.
+          </div>
+        )}
       </div>
 
       <div className="relative flex items-center justify-between p-4 bg-white border-t">
@@ -119,6 +142,10 @@ export function SideBar({
           />
         </div>
       </div>
+
+      {isManagerOpen && (
+        <ClassifyManagerModal onClose={() => setIsManagerOpen(false)} />
+      )}
     </div>
   );
 }

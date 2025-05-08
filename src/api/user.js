@@ -9,7 +9,12 @@ const userApi = {
     getUserByEmail: (email) => {
         const url = `api/users/search/username/${email}`;
         return axios.get(url);
-    }
+    },
+
+    getByMemberId: (memberId) => {
+        const url = `api/users/member/${memberId}`;
+        return axios.get(url);
+    },
 }
 
 export default userApi;

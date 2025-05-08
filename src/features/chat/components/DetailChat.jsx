@@ -4,8 +4,15 @@ import { useState } from "react";
 import MainDetail from "./MainDetail";
 import MediaDetail from "./detail_chat/MediaDetail";
 import MemberList from "./detail_chat/MemberList";
-export default function DetailChat({ conversation, imagesVideos, files, links }) {
-  
+import PinList from "./detail_chat/PinList";
+export default function DetailChat({
+  conversation,
+  imagesVideos,
+  files,
+  links,
+  pinMessages,
+  onScrollToMessage,
+}) {
   const [activeTab, setActiveTab] = useState({
     tab: "detail",
   });
@@ -24,6 +31,7 @@ export default function DetailChat({ conversation, imagesVideos, files, links })
           imagesVideos={imagesVideos}
           files={files}
           links={links}
+          pinMessages={pinMessages}
         />
       )}
       {activeTab.tab === "members" && (
@@ -37,6 +45,18 @@ export default function DetailChat({ conversation, imagesVideos, files, links })
           conversationId={conversation._id}
           managers={conversation?.managerIds}
           leader={conversation?.leaderId}
+        />
+      )}
+      {activeTab.tab === "pins" && (
+        <PinList
+          onBack={() =>
+            setActiveTab((prev) => ({
+              ...prev,
+              tab: "detail",
+            }))
+          }
+          pinMessages={pinMessages}
+          onScrollToMessage={onScrollToMessage}
         />
       )}
       {activeTab.tab === "media" && (

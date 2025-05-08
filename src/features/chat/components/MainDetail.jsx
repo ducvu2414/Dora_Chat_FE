@@ -28,7 +28,14 @@ import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
 
-export default function MainDetail({ handleSetActiveTab, conversation, imagesVideos, files, links }) {
+export default function MainDetail({
+  handleSetActiveTab,
+  conversation,
+  imagesVideos,
+  files,
+  links,
+  pinMessages,
+}) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [isOpenManager, setIsOpenManager] = useState(false);
@@ -50,12 +57,15 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
   // Set name of conversation
   useEffect(() => {
     if (conversation.type) setName(conversation.name);
-    else
+    else {
       setName(
         conversation.members?.find(
-          (member) => member.userId !== conversation._id
+          (member) =>
+            member.userId !== JSON.parse(localStorage.getItem("user"))._id
         )?.name || ""
       );
+    }
+    setIsEditing(false);
   }, [
     conversation.name,
     conversation.members,
@@ -185,11 +195,23 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
   const handleSaveClick = async () => {
     try {
       setIsEditing(false);
-      const responseName = await conversationApi.updateGroupName(
-        conversation._id,
-        name
-      );
-      setName(responseName.name);
+      if (conversation.type) {
+        const responseName = await conversationApi.updateGroupName(
+          conversation._id,
+          name
+        );
+        setName(responseName.name);
+      } else {
+        const responseName = await memberApi.updateName(
+          conversation._id,
+          conversation.members?.find(
+            (member) =>
+              member.userId !== JSON.parse(localStorage.getItem("user"))._id
+          )?._id,
+          name
+        );
+        setName(responseName.data.name);
+      }
     } catch {
       alert("You do not have permission to change the group name");
       setName(conversation.name);
@@ -225,8 +247,8 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
         isOpen={isOpenOk}
         onClose={() => setIsOpenOk(false)}
         onConfirm={() => setIsOpenOk(false)}
-        title="Cảnh báo"
-        message="Vui lòng chọn người thay thế trưởng nhóm trước khi rời khỏi nhóm"
+        title="Warning"
+        message="Please choose a replacement leader before leaving the group"
         isSingleButton={true}
         confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
       />
@@ -236,15 +258,15 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
         onConfirm={async () => {
           await conversationApi.leaveConversation(conversation._id);
         }}
-        title="Cảnh báo"
-        message="Bạn chắn chắn muốn rời khỏi nhóm này?"
+        title="Warning"
+        message="Are you sure you want to leave this group?"
       />
       <ChooseModal
         isOpen={isOpenDelete}
         onClose={() => setIsOpenDelete(false)}
         onConfirm={handleDeleteChat}
-        title="Cảnh báo"
-        message="Bạn chắc chắn muốn xóa cuộc trò chuyện này bên phía mình?"
+        title="Warning"
+        message="Are you sure you want to delete this conversation on your side?"
       />
       <Modal
         isOpen={isOpenAddUser}
@@ -328,7 +350,7 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-32"
+              className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-full text-center"
             />
           ) : (
             <p className="text-xl font-semibold text-[#086DC0]">{name}</p>
@@ -374,7 +396,7 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Member} />
             </div>
-            <p className="text-[#086DC0] ml-2">Member ({quantityMember})</p>
+            <p className="text-[#086DC0] ml-2">Members ({quantityMember})</p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
@@ -382,6 +404,20 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
         ) : (
           <></>
         )}
+        <div
+          className="flex items-center w-full mt-3 cursor-pointer"
+          onClick={() => handleSetActiveTab({ tab: "pins" })}
+        >
+          <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+            <img src={MarkChat} />
+          </div>
+          <p className="text-[#086DC0] ml-2">
+            Pin messages ({pinMessages.length})
+          </p>
+          <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+            <img src={ArrowRight} />
+          </div>
+        </div>
         <div className="w-full mt-3">
           <div
             className="flex items-center cursor-pointer"
@@ -395,7 +431,9 @@ export default function MainDetail({ handleSetActiveTab, conversation, imagesVid
             <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
               <img src={Picture} />
             </div>
-            <p className="text-[#086DC0] ml-2">Photo/videos ({imagesVideos.length})</p>
+            <p className="text-[#086DC0] ml-2">
+              Photos/videos ({imagesVideos.length})
+            </p>
             <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
               <img src={ArrowRight} />
             </div>
