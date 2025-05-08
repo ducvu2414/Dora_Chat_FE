@@ -148,8 +148,10 @@ export default function MessageItem({
           }  mb-4`}
         >
           {showAvatar ? (
+            console.log("content", msg.content),
+            console.log("msg", msg),            
             <img
-              src={Avatar}
+              src={msg.memberId?.avatar || Avatar}
               alt="avatar"
               className="ml-1 self-start w-10 h-10 rounded-full"
             />
