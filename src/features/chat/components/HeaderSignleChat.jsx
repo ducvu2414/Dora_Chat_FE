@@ -7,7 +7,7 @@ import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
 import { useNavigate } from "react-router-dom";
-
+import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -39,14 +39,13 @@ export default function HeaderSignleChat({
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
     const isGroup = conversation.type;
+    if (currentCall) {
+      alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+      return;
+    }
 
     if (isGroup) {
       const channelId = activeTab;
-      if (currentCall) {
-        alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
-        return;
-      }
-
       navigate(`/group-call/${conversation._id}_${channelId}`, {
         state: {
           channelId,
@@ -82,7 +81,7 @@ export default function HeaderSignleChat({
 
 
   useEffect(() => {
-    setActiveChannel(activeTab);
+    onChannelChange(activeTab);
   }, [activeTab]);
 
 
