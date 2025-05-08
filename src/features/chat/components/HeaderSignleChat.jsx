@@ -6,7 +6,6 @@ import Avatar from "@assets/chat/avatar.png";
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
