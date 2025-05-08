@@ -6,7 +6,7 @@ import { Spinner } from "@/page/Spinner";
 import PinItem from "./PinItem";
 import pinMessageApi from "@/api/pinMessage";
 
-export default function PinList({ onBack, pinMessages }) {
+export default function PinList({ onBack, pinMessages, onScrollToMessage }) {
   const [pinMessagesState, setPinMessages] = useState(pinMessages);
 
   useEffect(() => {
@@ -49,6 +49,7 @@ export default function PinList({ onBack, pinMessages }) {
         <PinItem
           pinMessages={pinMessagesState}
           onRemove={handleRemovePinMessage}
+          onScrollToMessage={onScrollToMessage}
         />
       </div>
     </div>

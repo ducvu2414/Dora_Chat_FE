@@ -155,7 +155,7 @@ export default function MessageItem({
       ) : (
         <div
           key={msg._id}
-          className={`flex items-end gap-2 ${
+          className={`flex items-end gap-2 pt-1 pb-1 ${
             isMe ? "flex-row-reverse" : "justify-start"
           }  mb-4`}
         >
@@ -163,7 +163,7 @@ export default function MessageItem({
             <img
               src={Avatar}
               alt="avatar"
-              className="self-start w-10 h-10 rounded-full"
+              className="ml-1 self-start w-10 h-10 rounded-full"
             />
           ) : (
             <div className="w-10 h-10 rounded-full" />

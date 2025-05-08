@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Spinner } from "@/page/Spinner";
@@ -36,6 +36,8 @@ export default function ChatSingle() {
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [member, setMember] = useState(null);
+
+  const chatBoxRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -275,6 +277,15 @@ export default function ChatSingle() {
     console.log("Updated poll with votes:", resLockVote);
   };
 
+  const handleScrollToMessage = useCallback((messageId) => {
+    console.log("Scrolling to message:", messageId);
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollToMessage(messageId);
+    } else {
+      console.log("ChatBox ref is null");
+    }
+  }, []);
+  
   return (
     <>
       <VoteModal
@@ -310,8 +321,8 @@ export default function ChatSingle() {
                 member={member.data}
                 onSave={handleUpdateVote}
                 onLock={handleLockVote}
+                ref={chatBoxRef}
               />
-
               <MessageInput
                 onSend={handleSendMessage}
                 isMember={isMember}
@@ -334,6 +345,7 @@ export default function ChatSingle() {
                   files={files}
                   links={links}
                   pinMessages={pinMessages}
+                  onScrollToMessage={handleScrollToMessage}
                 />
               )}
             </div>

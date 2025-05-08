@@ -11,6 +11,7 @@ export default function DetailChat({
   files,
   links,
   pinMessages,
+  onScrollToMessage,
 }) {
   const [activeTab, setActiveTab] = useState({
     tab: "detail",
@@ -55,6 +56,7 @@ export default function DetailChat({
             }))
           }
           pinMessages={pinMessages}
+          onScrollToMessage={onScrollToMessage}
         />
       )}
       {activeTab.tab === "media" && (

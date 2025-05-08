@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { MoreVertical, Trash2, Paperclip } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
 
-export default function PinItem({ pinMessages, onRemove }) {
+export default function PinItem({ pinMessages, onRemove, onScrollToMessage }) {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownPositions, setDropdownPositions] = useState({});
   const dropdownRefs = useRef({});
@@ -49,7 +49,11 @@ export default function PinItem({ pinMessages, onRemove }) {
         <div
           key={pinMessage._id}
           ref={(el) => setRef(pinMessage._id, el)}
-          onClick={() => console.log(pinMessage._id)}
+          onClick={() => {
+            if (onScrollToMessage && pinMessage.messageId) {
+              onScrollToMessage(pinMessage.messageId);
+            }
+          }}
           className="relative flex items-center justify-between gap-3 p-3 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px] transition-colors duration-200"
         >
           {/* Main content */}
