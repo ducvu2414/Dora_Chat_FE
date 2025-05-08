@@ -55,6 +55,7 @@ export function Conversation({
   activeTab,
   members,
   name,
+  avatar,
   lastMessageId,
   time,
   id, // Add id parameter to support proper routing
@@ -138,7 +139,7 @@ export function Conversation({
         onMouseLeave={handleConversationLeave}
       >
         <img
-          src={Avatar}
+          src={avatar || Avatar}
           alt={name}
           className="object-cover rounded-full w-14 h-14"
         />

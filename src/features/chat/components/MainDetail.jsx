@@ -343,7 +343,7 @@ export default function MainDetail({
         </div>
       </div>
       <div className="flex flex-col items-center mt-4 overflow-y-auto h-[calc(100%-3rem)]">
-        <img src={Avatar} className="w-16 h-16 rounded-full" alt="Avatar" />
+        <img src={conversation.avatar || Avatar} className="w-16 h-16 rounded-full" alt="Avatar" />
         <div className="flex items-center gap-2 mt-1">
           {isEditing ? (
             <input

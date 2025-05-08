@@ -9,7 +9,7 @@ import VideoCall from "@assets/chat/video_call.svg";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function HeaderSignleChat({
   channelTabs,
@@ -30,8 +30,6 @@ export default function HeaderSignleChat({
   const avatarMessage = conversation.avatar || partner?.avatar;
   const name = conversation.name || partner?.name || partner?.username;
   const { currentCall, incomingCall } = useSelector((state) => state.call);
-
-
 
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
@@ -81,18 +79,15 @@ export default function HeaderSignleChat({
     }
   };
 
-
   useEffect(() => {
     onChannelChange(activeTab);
   }, [activeTab]);
-
-
 
   return (
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
-          src={Avatar}
+          src={ conversation.avatar || Avatar}
           className="w-[70px] h-[70px] object-cover rounded-full"
         />
         <div className="ml-3">
