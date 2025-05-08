@@ -295,6 +295,8 @@ const MainLayout = () => {
       });
       if (currentCall) {
         console.log("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
+        alert("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
+        navigate("/home");
         return;
       }
       const base = `/call/${conversationId}`;
@@ -409,7 +411,35 @@ const MainLayout = () => {
   //   return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
   // }, []);
 
-  // Lắng nghe socket cho chức năng kết bạn
+
+  useEffect(() => {
+    const handleCallBroadcast = (event) => {
+      const { type, payload } = event.data;
+
+      switch (type) {
+        case "START_CALL":
+          console.log("📢 Nhận START_CALL từ tab khác:", payload);
+          if (!currentCallRef.current) {
+            dispatch(setCallStarted(payload));
+          }
+          break;
+        case "END_CALL":
+          console.log("📢 Nhận END_CALL từ tab khác");
+          dispatch(clearIncomingCall());
+          break;
+        default:
+          break;
+      }
+    };
+
+    callChannel.addEventListener("message", handleCallBroadcast);
+
+    return () => {
+      callChannel.removeEventListener("message", handleCallBroadcast);
+    };
+  }, [dispatch]);
+
+
   useEffect(() => {
     if (!socket || !user?._id) return;
 

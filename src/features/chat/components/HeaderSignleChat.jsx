@@ -6,8 +6,9 @@ import Avatar from "@assets/chat/avatar.png";
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -29,23 +30,20 @@ export default function HeaderSignleChat({
 
   const avatarMessage = conversation.avatar || partner?.avatar;
   const name = conversation.name || partner?.name || partner?.username;
-  const dispatch = useDispatch();
-  const currentCall = useSelector(state => state.call.currentCall);
+  const { currentCall, incomingCall } = useSelector((state) => state.call);
 
-  // const avatarMessage = conversation.avatar || partner?.avatar;
-  // const name = conversation.name || partner?.name || partner?.username;
 
 
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
+    if (currentCall) {
+      alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+      return;
+    }
     const isGroup = conversation.type;
 
     if (isGroup) {
       const channelId = activeTab;
-      if (currentCall) {
-        alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
-        return;
-      }
 
       navigate(`/group-call/${conversation._id}_${channelId}`, {
         state: {
