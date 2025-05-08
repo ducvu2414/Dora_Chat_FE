@@ -115,7 +115,7 @@ export default function MessageActionsMenu({
         setAudioUrl(null);
         setTimeout(() => {
           setAudioUrl(res.url);
-        }, 100);
+        }, 1000);
         setIsOpen(false);
       } else {
         throw new Error("TTS API không trả về URL");
