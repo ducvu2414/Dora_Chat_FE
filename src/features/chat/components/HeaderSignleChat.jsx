@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { v4 as uuidv4 } from "uuid";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function HeaderSignleChat({
   channelTabs,
@@ -29,7 +30,8 @@ export default function HeaderSignleChat({
 
   const avatarMessage = conversation.avatar || partner?.avatar;
   const name = conversation.name || partner?.name || partner?.username;
-  const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
+  const dispatch = useDispatch();
+  const currentCall = useSelector(state => state.call.currentCall);
 
 
   const handleCall = (type) => {
@@ -38,7 +40,7 @@ export default function HeaderSignleChat({
 
     if (isGroup) {
       const channelId = activeTab;
-      if (currentGroupCall) {
+      if (currentCall) {
         alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
         return;
       }
