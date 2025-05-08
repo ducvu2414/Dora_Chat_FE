@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import messageApi from "@/api/message";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Spinner } from "@/page/Spinner";
@@ -8,6 +7,7 @@ import {
   markRead,
   setActiveConversation,
   setMessages,
+  setPinMessages,
 } from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
@@ -16,71 +16,100 @@ import MessageInput from "./components/MessageInput";
 import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
-import { SOCKET_EVENTS } from "../../utils/constant";
-import { socket } from "../../utils/socketClient";
+import messageApi from "@/api/message";
+import pinMessageApi from "@/api/pinMessage";
+import voteApi from "@/api/vote";
+import VoteModal from "@/components/ui/vote-modal";
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread } = useSelector((state) => state.chat);
+  const { messages, unread, pinMessages, conversations } = useSelector(
+    (state) => state.chat
+  );
   const conversationMessages = messages[conversationId] || [];
-  const [conversation, setConversation] = useState(null);
-  const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
+  const [conversation, setConversation] = useState(null);
+  const [channels, setChannels] = useState([]);
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
+  const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [member, setMember] = useState(null);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  const chatBoxRef = useRef(null);
 
   useEffect(() => {
+    const resetState = () => {
+      setConversation(null);
+      setChannels([]);
+      setActiveChannel(null);
+      setPhotosVideos([]);
+      setFiles([]);
+      setLinks([]);
+      setIsLoadingMessages(true);
+    };
+
     const fetchData = async () => {
       if (!conversationId) return;
 
+      resetState();
+      
       try {
+        setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
 
         let res = null;
-        let channels = [];
+        let channelsRes = [];
 
         try {
           res = await conversationApi.getConversationById(conversationId);
-          channels = await channelApi.getAllChannelByConversationId(
+          channelsRes = await channelApi.getAllChannelByConversationId(
             conversationId
           );
+          const mappedChannels = channelsRes.map((channel) => ({
+            id: channel._id,
+            label: channel.name,
+          }));
+
+          setMember(
+            await memberApi.getByConversationIdAndUserId(
+              conversationId,
+              JSON.parse(localStorage.getItem("user"))._id
+            )
+          );
+
           const isMember = (
             await memberApi.isMember(
               conversationId,
               JSON.parse(localStorage.getItem("user"))._id
             )
           ).data;
-          const mappedChannels = channels.map((channel) => ({
-            id: channel._id,
-            label: channel.name,
-          }));
+
+          const pinMessages = await pinMessageApi.getAllByConversationId(
+            conversationId
+          );
+
+          dispatch(setPinMessages(pinMessages));
           setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
-          setActiveChannel(channels[0]?._id || null);
+          setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
 
         if (res) {
           if (!res.type) {
+            // single chat
             try {
               const messages = await messageApi.fetchMessages(conversationId);
               dispatch(setMessages({ conversationId, messages }));
             } catch (error) {
               console.error("Error fetching messages:", error);
-            }
-          } else {
-            try {
-              const messages = await messageApi.fetchMessagesByChannelId(
-                channels[0]?._id
-              );
-              dispatch(setMessages({ conversationId, messages }));
-            } catch (error) {
-              console.error("Error fetching messages by channel:", error);
             }
           }
         }
@@ -90,11 +119,30 @@ export default function ChatSingle() {
         }
       } catch (error) {
         console.error("Error in useEffect:", error);
+      } finally {
+        setIsLoadingMessages(false);
       }
     };
 
     fetchData();
   }, [conversationId, dispatch, unread]);
+
+  useEffect(() => {
+    if (!activeChannel || !conversationId || !conversation?.type) return;
+
+    const fetchChannelMessages = async () => {
+      try {
+        const messages = await messageApi.fetchMessagesByChannelId(
+          activeChannel
+        );
+        dispatch(setMessages({ conversationId, messages }));
+      } catch (error) {
+        console.error("Error fetching messages by channel:", error);
+      }
+    };
+
+    fetchChannelMessages();
+  }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   useEffect(() => {
     // filter type message is image, video in array conversationMessages
@@ -113,16 +161,7 @@ export default function ChatSingle() {
     setPhotosVideos(photosVideos);
     setFiles(files);
     setLinks(links);
-
   }, [conversationMessages.length]);
-
-  useEffect(() => {
-    socket.on(SOCKET_EVENTS.UPDATE_NAME_CONVERSATION, (name) => {
-      if (name) {
-        setConversation((prev) => ({ ...prev, name }));
-      }
-    });
-  });
 
   const handleSendMessage = async ({ content, type, files }) => {
     const channelId = activeChannel;
@@ -145,33 +184,172 @@ export default function ChatSingle() {
       throw error;
     }
   };
-  const [showDetail, setShowDetail] = useState(false);
-  console.log("channels", activeChannel);
+
+  const handleCreateVote = async (vote) => {
+    const newVote = {
+      memberId: member.data._id,
+      conversationId: conversationId,
+      channelId: channels[0]?.id,
+      content: vote.content,
+      isMultipleChoice: vote.isMultipleChoice,
+      isAnonymous: vote.isAnonymous,
+      options: vote.options.map((option) => ({
+        name: option,
+        members: [],
+      })),
+    };
+
+    const resCreateVote = await voteApi.createVote(newVote);
+    console.log("Created poll:", resCreateVote);
+  };
+
+  const handleUpdateVote = async (vote) => {
+    const oldOptions = vote.oldOptions.options.map((option) => option.name);
+    const newOptions = vote.options;
+
+    const updatedOptions = newOptions.filter(
+      (newOption) => !oldOptions.includes(newOption)
+    );
+
+    const deletedOptions = oldOptions.filter(
+      (oldOption) => !newOptions.includes(oldOption)
+    );
+
+    const deletedOptionIds = deletedOptions.map(
+      (option) => vote.oldOptions.options.find((opt) => opt.name === option)._id
+    );
+
+    updatedOptions.forEach(async (option) => {
+      const resAddVoteOption = await voteApi.addVoteOption(
+        vote.oldOptions._id,
+        member.data._id,
+        option
+      );
+      console.log("Updated poll with new options:", resAddVoteOption);
+    });
+
+    deletedOptionIds.forEach(async (optionId) => {
+      const resDeleteVoteOption = await voteApi.deleteVoteOption(
+        vote.oldOptions._id,
+        member.data._id,
+        optionId
+      );
+      console.log("Updated poll with deleted options:", resDeleteVoteOption);
+    });
+
+    console.log("vote", vote);
+  };
+
+  const onSelected = (optionIds, vote) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const reqSelectVoteOption = {
+      memberId: member.data._id,
+      memberInfo: {
+        name: user.name,
+        avatar: user.avatar,
+        avatarColor: "black",
+      },
+    };
+
+    // array of optionIds selected by memberId in vote.options (optionIds in dbs by memberId)
+    const selectedOptionIds = vote.options.reduce((acc, option) => {
+      const userVote = option.members?.find(
+        (memberTemp) => memberTemp.memberId === member.data._id
+      );
+      if (userVote) {
+        acc.push(option._id);
+      }
+      return acc;
+    }, []);
+
+    // array of optionIds of selectedOptionIds that optionIds does not have (deselected)
+    const optionIdsNotHave = selectedOptionIds.filter(
+      (optionId) => !optionIds.includes(optionId)
+    );
+
+    // array of optionIds of optionIds that selectedOptionIds does not have (selected)
+    const optionIdsHave = optionIds.filter(
+      (optionId) => !selectedOptionIds.includes(optionId)
+    );
+
+    optionIdsHave.forEach(async (optionId) => {
+      const resSelectVoteOption = await voteApi.selectVoteOption(
+        vote._id,
+        optionId,
+        reqSelectVoteOption
+      );
+      console.log("Updated poll with votes:", resSelectVoteOption);
+    });
+
+    optionIdsNotHave.forEach(async (optionId) => {
+      const resDeselectVoteOption = await voteApi.deselectVoteOption(
+        vote._id,
+        optionId,
+        member.data._id
+      );
+      console.log("Updated poll with deselected votes:", resDeselectVoteOption);
+    });
+  };
+
+  const handleLockVote = async (vote) => {
+    const resLockVote = await voteApi.lockVote(vote._id, member.data._id);
+    console.log("Updated poll with votes:", resLockVote);
+  };
+
+  const handleScrollToMessage = useCallback((messageId) => {
+    console.log("Scrolling to message:", messageId);
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollToMessage(messageId);
+    } else {
+      console.log("ChatBox ref is null");
+    }
+  }, []);
+
   return (
     <>
-      {console.log(
-        conversation,
-        conversation?.type ? channels.length === 0 : false
-      )}
-      {!conversation ? (
+      <VoteModal
+        isOpen={isVoteModalOpen}
+        onClose={() => setIsVoteModalOpen(false)}
+        onSubmit={handleCreateVote}
+      />
+
+      {!conversation || isLoadingMessages || !messages[conversationId] ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
           <Spinner />
         </div>
       ) : (
         <div className="flex w-full h-screen">
           {/* Main Content */}
-          <div className="flex flex-1 overflow-sauto ">
+          <div className="flex flex-1 overflow-auto">
             {/* ChatBox  */}
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
               <HeaderSignleChat
                 channelTabs={channels}
                 activeTab={activeChannel}
                 handleDetail={setShowDetail}
-                conversation={conversation}
-                setActiveChannel={setActiveChannel}
+                conversation={
+                  conversations.filter((conv) => conv._id === conversationId)[0]
+                }
+                onChannelChange={setActiveChannel}
               />
-              <ChatBox messages={conversationMessages} />
-              <MessageInput onSend={handleSendMessage} isMember={isMember} />
+              <ChatBox
+                key={conversationId}
+                messages={messages[conversationId]}
+                onSelected={onSelected}
+                member={member?.data}
+                onSave={handleUpdateVote}
+                onLock={handleLockVote}
+                ref={chatBoxRef}
+              />
+              <MessageInput
+                onSend={handleSendMessage}
+                isMember={isMember}
+                setIsVoteModalOpen={setIsVoteModalOpen}
+                isGroup={
+                  conversations.filter((conv) => conv._id === conversationId)[0]
+                    .type
+                }
+              />
             </div>
 
             {/* DetailChat*/}
@@ -180,7 +358,20 @@ export default function ChatSingle() {
                 }`}
             >
               {/* log messages */}
-              {showDetail && <DetailChat conversation={conversation} imagesVideos={photosVideos} files={files} links={links} />}
+              {showDetail && (
+                <DetailChat
+                  conversation={
+                    conversations.filter(
+                      (conv) => conv._id === conversationId
+                    )[0]
+                  }
+                  imagesVideos={photosVideos}
+                  files={files}
+                  links={links}
+                  pinMessages={pinMessages}
+                  onScrollToMessage={handleScrollToMessage}
+                />
+              )}
             </div>
           </div>
         </div>

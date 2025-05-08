@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { Search, UserRoundPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddDropdown } from "@/components/ui/add-dropdown";
@@ -27,7 +27,7 @@ export function SearchBar() {
           className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
-          <Plus className="!h-6 !w-6" />
+          <UserRoundPlus className=" !h-5 !w-5" />
         </Button>
         <AddDropdown
           isOpen={isDropdownOpen}

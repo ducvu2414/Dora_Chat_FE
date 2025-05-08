@@ -1,23 +1,24 @@
 import { TabGroup } from "@/components/ui/tab-group";
+import { ClassifyDropdown } from "@/components/ui/classify/ClassifyDropdown";
 
-// eslint-disable-next-line react/prop-types
-export function TabConversation({ activeTab, onTabChange, requestCount }) {
+export function TabConversation({
+  activeTab,
+  onTabChange,
+  selectedClassifyIds,
+  onSelectClassifies,
+  onOpenManager,
+}) {
   const tabs = [
     { id: "messages", label: "Messages" },
     { id: "group", label: "Group" },
   ];
 
-  const handleRequestClick = () => {
-    onTabChange("requests");
-  };
-
   const rightContent = (
-    <span
-      className="text-regal-blue text-sm hover:underline cursor-pointer"
-      onClick={handleRequestClick}
-    >
-      Request ({requestCount})
-    </span>
+    <ClassifyDropdown
+      selectedIds={selectedClassifyIds}
+      onSelect={onSelectClassifies}
+      onManage={onOpenManager}
+    />
   );
 
   return (

@@ -65,4 +65,19 @@ export const SOCKET_EVENTS = {
   // Last view tracking
   CONVERSATION_LAST_VIEW: "conversation-last-view",
   USER_LAST_VIEW: "user-last-view",
+
+  // Pin message
+  PIN_MESSAGE: "pin-message",
+  UNPIN_MESSAGE: "unpin-message",
+
+  // Vote
+  CREATE_VOTE: "create-vote",
+  VOTE_OPTION_SELECTED: "vote-option-selected",
+  VOTE_OPTION_DESELECTED: "vote-option-deselected",
+  ADD_VOTE_OPTION: "add-vote-option",
+  DELETE_VOTE_OPTION: "delete-vote-option",
+  VOTE_LOCKED: "vote-locked",
+
+  // Member
+  UPDATE_MEMBER_NAME: "update-member-name",
 };

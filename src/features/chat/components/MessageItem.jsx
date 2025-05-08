@@ -3,11 +3,20 @@ import Avatar from "@assets/chat/avatar.png";
 import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
+import VoteDisplay from "@/components/ui/vote-display";
 
-export default function MessageItem({ msg, showAvatar, showTime }) {
+export default function MessageItem({
+  msg,
+  showAvatar,
+  showTime,
+  onSelected,
+  member,
+  onSave,
+  onLock,
+}) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [previewImage, setPreviewImage] = useState(null);
@@ -18,14 +27,18 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
   const [isClicked, setIsClicked] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [hoverVideoUrl, setHoverVideoUrl] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const timeoutRef = useRef(null);
+
   const MAX_TEXT_LENGTH = 350;
 
+  const isMe = msg.memberId?.userId === undefined ? (msg.userId === userId) : (msg.memberId?.userId === userId);
   const isImage = msg.type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isVideo = msg.type === "VIDEO";
-  const isMe = msg.memberId?.userId === userId;
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
+  const isVote = msg.type === "VOTE";
 
   useEffect(() => {
     if (!msg?.content) {
@@ -36,23 +49,11 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     }
 
     try {
-      // Kiểm tra xem URL có phải là Cloudinary video không
-      const isCloudinaryVideo =
-        msg.content.includes("res.cloudinary.com") &&
-        msg.content.includes("/video/upload/");
-
-      if (!isCloudinaryVideo) {
-        throw new Error("Not a Cloudinary video URL");
-      }
-
+      
       // Tách public ID từ URL
       const uploadIndex = msg.content.indexOf("/upload/") + "/upload/".length;
       const publicIdWithExt = msg.content.slice(uploadIndex);
       const publicId = publicIdWithExt.split(".")[0];
-
-      if (!publicId) {
-        throw new Error("Could not extract public ID from URL");
-      }
 
       const baseUrl = msg.content.split("/upload/")[0] + "/upload/";
       const generatedThumbnailUrl = `${baseUrl}so_1.0,f_jpg,w_500/${publicId}.jpg`;
@@ -66,6 +67,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       setHoverVideoUrl(msg.content);
     }
   }, [msg?.content]);
+
   const handleVideoLoad = () => {
     setVideoLoaded(true);
     setVideoError(false);
@@ -99,6 +101,20 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
     window.open(`/preview?url=${url}&name=${name}`, "_blank");
   };
 
+  const handleHover = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleNonHover = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 300);
+  };
+
   return (
     <>
       {previewImage && (
@@ -127,7 +143,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
       ) : (
         <div
           key={msg._id}
-          className={`flex items-end gap-2 ${
+          className={`flex items-end gap-2 pt-1 pb-1 ${
             isMe ? "flex-row-reverse" : "justify-start"
           }  mb-4`}
         >
@@ -135,7 +151,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
             <img
               src={Avatar}
               alt="avatar"
-              className="self-start w-10 h-10 rounded-full"
+              className="ml-1 self-start w-10 h-10 rounded-full"
             />
           ) : (
             <div className="w-10 h-10 rounded-full" />
@@ -144,28 +160,34 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
           <div
             className="flex flex-col max-w-[468px] text-start relative
           group"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleNonHover}
           >
             <div
               className={`absolute top-3 ${
                 isMe ? "left-[-30px]" : "right-[-30px]"
-              } opacity-0 group-hover:opacity-100 transition-opacity `}
+              }`}
             >
-              {!msg.isDeleted && (
+              {!msg.isDeleted && (isHovered || menuOpen) && (
                 <MessageActionsMenu
                   isMe={isMe}
                   messageId={msg._id.toString()}
                   conversationId={msg.conversationId.toString()}
                   messageContent={msg.content}
                   type={msg.type}
+                  isOpen={menuOpen}
+                  setIsOpen={setMenuOpen}
                 />
               )}
             </div>
+
             {/* Message sender name (if not showing avatar and not from current user) */}
             {showAvatar && !isMe && (
               <span className="mb-1 ml-1 text-xs font-medium text-gray-500 ">
                 {msg.memberId?.name || "User"}
               </span>
             )}
+
             {/* Message content */}
             {isImage ? (
               <img
@@ -178,7 +200,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
               <div className="relative">
                 {!videoLoaded && !videoError && (
                   <div className="bg-gray-100 rounded-lg flex items-center justify-center w-[300px] h-[200px]">
-                    <div className="animate-pulse">Đang tải video...</div>
+                    <div className="animate-pulse">Loading video...</div>
                   </div>
                 )}
 
@@ -186,7 +208,7 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                   <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
                     <MdError size={32} className="mb-2 text-red-500" />
                     <p className="text-sm text-center text-gray-600">
-                      Không thể tải video
+                      Video could not be loaded
                     </p>
                   </div>
                 )}
@@ -194,8 +216,8 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                 {/* Container video */}
                 <div
                   className="relative"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
+                  onMouseEnter={handleHover}
+                  onMouseLeave={handleNonHover}
                   onClick={() => setIsClicked(true)}
                 >
                   {/* Hiển thị thumbnail khi không hover và chưa click */}
@@ -246,17 +268,29 @@ export default function MessageItem({ msg, showAvatar, showTime }) {
                   className="flex items-center text-[#086DC0] text-sm hover:underline"
                 >
                   <AiOutlinePaperClip size={20} className="mr-1" />
-                  {"file" + msg.fileName || "Tải xuống file"}
+                  {msg.fileName || "Download file"}
                 </a>
                 <span className="text-xs text-gray-500">
-                  Loại: {getFileTypeLabel(msg.content)}
+                  Type: {getFileTypeLabel(msg.content)}
                 </span>
                 <span
                   onClick={handleOpenInNewTab}
                   className="text-xs text-[#086DC0] hover:underline cursor-pointer"
                 >
-                  Xem trước
+                  Preview
                 </span>
+              </div>
+            ) : isVote ? (
+              <div className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000] w-[430px]">
+                <div className="mt-4">
+                  <VoteDisplay
+                    vote={msg}
+                    onSelected={onSelected}
+                    member={member}
+                    onSave={onSave}
+                    onLock={onLock}
+                  />
+                </div>
               </div>
             ) : (
               <p

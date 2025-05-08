@@ -121,7 +121,7 @@ export default function MemberItem({
                 Nhắn tin
               </DropdownItem> */}
               <DropdownItem icon={Trash2} onClick={() => onRemove(member)}>
-                Xóa khỏi nhóm
+                Remove from group
               </DropdownItem>
             </Dropdown>
           </div>
