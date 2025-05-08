@@ -90,7 +90,7 @@ export default function UserSelectionModal({
           ))
         ) : (
           <div className="flex items-center justify-center h-32 text-gray-500">
-            Không tìm thấy người dùng nào
+            No users found
           </div>
         )}
       </div>

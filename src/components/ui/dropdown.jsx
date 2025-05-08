@@ -30,7 +30,7 @@ export function Dropdown({
       />
 
       <div
-        className={`absolute ${getAlignment()} w-48 rounded-lg border bg-white shadow-lg z-50`}
+        className={`absolute ${getAlignment()} w-48 rounded-lg border bg-white shadow-lg z-[150]`}
       >
         <div className="p-1">{children}</div>
       </div>

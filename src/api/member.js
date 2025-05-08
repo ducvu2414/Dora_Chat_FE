@@ -17,6 +17,14 @@ const memberApi = {
     getByConversationIdAndUserId: (conversationId, userId) => {
         return axios.get(`api/members/${conversationId}/${userId}`);
     },
+
+    getByMemberId: (memberId) => {
+        return axios.get(`api/members/member/${memberId}`);
+    },
+
+    updateName: (conversationId, memberId, name) => {
+        return axios.patch(`api/members/${conversationId}/${memberId}`, { name });
+    },
 }
 
 export default memberApi;

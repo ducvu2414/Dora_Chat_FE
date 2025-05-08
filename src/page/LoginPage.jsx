@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const handleLogin = async ({ username, password }) => {
     if (!username || !password) {
-      AlertMessage({ type: "error", message: "Vui lòng điền đầy đủ thông tin" });
+      AlertMessage({ type: "error", message: "Please fill in all information" });
       return;
     }
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
           type: "error",
           message:
             response?.data?.message ||
-            "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
+            "Login failed. Please check your information again.",
         });
         return;
       }
@@ -48,13 +48,13 @@ export default function LoginPage() {
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
 
-      AlertMessage({ type: "success", message: "Đăng nhập thành công!" });
+      AlertMessage({ type: "success", message: "Log in successfully!" });
       navigate("/home");
     } catch (error) {
       console.error("Login failed:", error);
       AlertMessage({
         type: "error",
-        message: "Đăng nhập thất bại. Vui lòng thử lại.",
+        message: "Login failed. Please try again.",
       });
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-else-if */
 import { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
 import { ContactList } from "@/components/ui/Contact/ContactList";
@@ -62,15 +63,15 @@ export default function ContactsPage() {
         }
         dispatch(setFriends(friendsData));
       } else {
-        setError("Không thể tải danh sách bạn bè");
+        setError("Unable to load friends list");
         AlertMessage({
           type: "error",
-          message: "Không thể tải danh sách bạn bè",
+          message: "Unable to load friends list",
         });
       }
     } catch (err) {
       console.error("Error fetching friends:", err);
-      setError("Đã xảy ra lỗi khi tải danh sách bạn bè");
+      setError("An error occurred while loading the friends list");
     } finally {
       setIsLoading(false);
     }
@@ -83,11 +84,11 @@ export default function ContactsPage() {
       if (response && !response.error) {
         dispatch(setRequestFriends(response || []));
       } else {
-        setError("Không thể tải danh sách lời mời kết bạn");
+        setError("Unable to load friend request list");
       }
     } catch (err) {
       console.error("Error fetching friend requests:", err);
-      setError("Đã xảy ra lỗi khi tải danh sách lời mời kết bạn");
+      setError("An error occurred while loading the friend request list");
     } finally {
       setIsLoading(false);
     }
@@ -101,19 +102,19 @@ export default function ContactsPage() {
         fetchFriends();
         AlertMessage({
           type: "success",
-          message: "Đã chấp nhận lời mời kết bạn",
+          message: "Friend request accepted",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể chấp nhận lời mời kết bạn",
+          message: "Cannot accept friend request",
         });
       }
     } catch (err) {
       console.error("Error accepting friend request:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi chấp nhận lời mời kết bạn",
+        message: "An error occurred while accepting the friend request",
       });
     }
   };
@@ -125,19 +126,19 @@ export default function ContactsPage() {
         dispatch(updateRequestFriends(userId));
         AlertMessage({
           type: "success",
-          message: "Đã từ chối lời mời kết bạn",
+          message: "Friend request declined",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể từ chối lời mời kết bạn",
+          message: "Cannot decline friend request",
         });
       }
     } catch (err) {
       console.error("Error rejecting friend request:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi từ chối lời mời kết bạn",
+        message: "An error occurred while declining the friend request",
       });
     }
   };
@@ -149,19 +150,19 @@ export default function ContactsPage() {
         dispatch(updateFriend(userId));
         AlertMessage({
           type: "success",
-          message: "Đã xóa bạn bè thành công",
+          message: "Friends deleted successfully",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể xóa bạn bè",
+          message: "Cannot delete friends",
         });
       }
     } catch (err) {
       console.error("Error deleting friend:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi xóa bạn bè",
+        message: "An error occurred while deleting friends",
       });
     }
   };
@@ -173,11 +174,11 @@ export default function ContactsPage() {
       if (response && !response.error) {
         dispatch(setMyRequestFriends(response || []));
       } else {
-        setError("Không thể tải danh sách lời mời kết bạn đã gửi");
+        setError("Unable to load sent friend request list");
       }
     } catch (err) {
       console.error("Error fetching sent friend requests:", err);
-      setError("Đã xảy ra lỗi khi tải danh sách lời mời kết bạn đã gửi");
+      setError("An error occurred while loading the list of sent friend requests");
     } finally {
       setIsLoading(false);
     }
@@ -191,19 +192,19 @@ export default function ContactsPage() {
         dispatch(updateMyRequestFriend(userId));
         AlertMessage({
           type: "success",
-          message: "Đã hủy lời mời kết bạn",
+          message: "Friend request canceled",
         });
       } else {
         AlertMessage({
           type: "error",
-          message: "Không thể hủy lời mời kết bạn",
+          message: "Cannot cancel friend request",
         });
       }
     } catch (err) {
       console.error("Error canceling friend request:", err);
       AlertMessage({
         type: "error",
-        message: "Đã xảy ra lỗi khi hủy lời mời kết bạn",
+        message: "An error occurred while canceling the friend request",
       });
     }
   };
@@ -269,7 +270,7 @@ export default function ContactsPage() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center h-64">Đang tải...</div>
+        <div className="flex items-center justify-center h-64">Loading...</div>
       );
     }
 
