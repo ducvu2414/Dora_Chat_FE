@@ -73,8 +73,8 @@ export default function VoteDisplay({
     setViewingResults(true);
   };
 
-  const handleCancelVote = () => {
-    setSelectedOptions([]);
+  const handleCancel = () => {
+    setSelectedOptions(currentUserVoteIds);
     setViewingResults(false);
   };
 
@@ -123,7 +123,16 @@ export default function VoteDisplay({
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border w-72 w-full">
       {/* vote Content */}
-      <h3 className="font-medium text-lg mb-3">{vote.content}</h3>
+      <h3
+        className="font-medium text-lg mb-3 cursor-pointer select-none"
+        onClick={() => {
+          if (!vote.lockedVote.lockedStatus) {
+            setViewingResults(!viewingResults);
+          }
+        }}
+      >
+        {vote.content}
+      </h3>
 
       {/* vote Options */}
       <div className="space-y-3 mb-4">
@@ -315,20 +324,28 @@ export default function VoteDisplay({
         </div>
 
         {!viewingResults ? (
-          <Button
-            onClick={handleVote}
-            disabled={!hasSelectionChanged()}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Vote
-          </Button>
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={handleCancel}
+              disabled={!hasSelectionChanged()}
+              className="bg-gray-500 hover:bg-gray-400 text-white border-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleVote}
+              disabled={!hasSelectionChanged()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Vote
+            </Button>
+          </div>
         ) : (
           !vote.lockedVote.lockedStatus && (
             <Button
               variant="outline"
               onClick={() => {
                 setViewingResults(false);
-                handleCancelVote();
               }}
               className="text-blue-600 border-blue-600 hover:bg-blue-50"
             >

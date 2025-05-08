@@ -57,7 +57,7 @@ export default function ChatSingle() {
       if (!conversationId) return;
 
       resetState();
-
+      
       try {
         setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
