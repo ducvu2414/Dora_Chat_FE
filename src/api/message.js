@@ -62,6 +62,18 @@ const messageApi = {
     console.log("res", res.data);
     return res.data;
   },
+
+  convertTextToSpeech: async (text, speaker_id = 1, speed = 1.0) => {
+    const res = await axios.post(`/api/messages/tts`, {
+      text,
+      speaker_id,
+      speed,
+    });
+    console.log(res);
+    return res;
+  },
+
+
 };
 
 export default messageApi;

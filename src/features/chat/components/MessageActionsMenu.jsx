@@ -17,6 +17,8 @@ export default function MessageActionsMenu({
 }) {
   const [showAbove, setShowAbove] = useState(false);
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
+
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -56,7 +58,6 @@ export default function MessageActionsMenu({
     return () => document.removeEventListener("click", handleClickOutside);
   }, [isOpen, setIsOpen]);
 
-  // Các hàm xử lý khác giữ nguyên
   const handleRecallMessage = async () => {
     try {
       await messageApi.recallMessage(messageId, conversationId);
@@ -101,14 +102,36 @@ export default function MessageActionsMenu({
     }
   };
 
+
+
+  const handleSpeakMessage = async () => {
+    try {
+      const res = await messageApi.convertTextToSpeech(
+        messageContent,
+        1,
+        1.0
+      );
+      if (res.success && res.url) {
+        setAudioUrl(null);
+        setTimeout(() => {
+          setAudioUrl(res.url);
+        }, 100);
+        setIsOpen(false);
+      } else {
+        throw new Error("TTS API không trả về URL");
+      }
+    } catch (error) {
+      console.error("Lỗi TTS:", error);
+    }
+  };
+
   return (
     <>
       <div className="relative">
         {/* Button với cả hover và click */}
         <button
-          className={`p-1 rounded-full transition-colors duration-200 ${
-            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
-          }`}
+          className={`p-1 rounded-full transition-colors duration-200 ${isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+            }`}
           onClick={toggleMenu}
           ref={buttonRef}
           aria-label="Message actions"
@@ -119,9 +142,8 @@ export default function MessageActionsMenu({
         {/* Menu dropdown */}
         {isOpen && (
           <div
-            className={`absolute ${
-              showAbove ? "bottom-full mb-1" : "top-full mt-1"
-            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
+            className={`absolute ${showAbove ? "bottom-full mb-1" : "top-full mt-1"
+              } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
             ref={menuRef}
           >
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
@@ -153,9 +175,29 @@ export default function MessageActionsMenu({
             >
               Pin
             </button>
+
+            {type === "TEXT" && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
+                onClick={handleSpeakMessage}
+              >
+                Speak Message
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {audioUrl && (
+        <audio
+          key={audioUrl}
+          src={audioUrl}
+          autoPlay
+          onEnded={() => setAudioUrl(null)}
+          style={{ display: "block" }}
+        />
+      )}
+
 
       {showForwardModal && (
         <ForwardMessageModal
