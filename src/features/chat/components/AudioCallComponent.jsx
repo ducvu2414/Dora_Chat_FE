@@ -25,6 +25,13 @@ export default function AudioCallComponent() {
     const [duration, setDuration] = useState(0);
 
     const conversation = conversations.find(c => c._id === currentCall?.conversationId) || {};
+
+    const partner =
+        conversation.name ||
+        conversation.members?.filter((member) => {
+            return member.userId !== user._id;
+        });
+
     const participants = conversation.members || [];
 
     const didInitRef = useRef(false);
@@ -152,25 +159,23 @@ export default function AudioCallComponent() {
         };
 
         startCall();
+
+        const timeout = setTimeout(() => {
+            if (isConnecting) {
+                console.warn("⏳ Timeout: Không kết nối được sau 30s, kết thúc cuộc gọi.");
+                handleEndCall();
+            }
+        }, 30 * 1000);
+
         return () => {
+            clearTimeout(timeout);
             if (localStreamRef.current) {
                 localStreamRef.current.getTracks().forEach(track => track.stop());
             }
             peerService.endCall();
         };
-    }, [selectedDevice]);
+    }, []);
 
-    // Change audio device
-    const changeAudioDevice = async (deviceId) => {
-        // Clean up existing stream
-        if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => track.stop());
-        }
-
-        setSelectedDevice(deviceId);
-        // The useEffect will handle reconnection with the new device
-        didInitRef.current = false;
-    };
 
     // track duration
     useEffect(() => {
@@ -189,10 +194,22 @@ export default function AudioCallComponent() {
     }, [currentCall]);
 
     const handleEndCall = async () => {
+        // Dừng stream xử lý gốc
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => track.stop());
+            localStreamRef.current = null;
         }
+
+        // Dừng cả audio context nếu có
+        if (window.audioContextInstance && typeof window.audioContextInstance.close === 'function') {
+            await window.audioContextInstance.close();
+            window.audioContextInstance = null;
+        }
+
+        // Dọn dẹp peer
         await peerService.endCall();
+
+        // Reset UI & state
         didInitRef.current = false;
         if (localAudioRef.current) localAudioRef.current.srcObject = null;
         setRemoteStreams({});
@@ -200,6 +217,18 @@ export default function AudioCallComponent() {
         dispatch(endCallAction());
         navigate('/home');
     };
+
+    useEffect(() => {
+        // const onRejected = ({ userId, reason }) => {
+        //     console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
+        //     dispatch(endCall());
+        //     navigate("/home");
+        // };
+        const onEnded = () => handleEndCall();
+
+        socket.on(SOCKET_EVENTS.CALL_REJECTED, onEnded);
+        return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onEnded);
+    }, []);
 
     const toggleMute = () => {
         const muted = peerService.toggleAudio();
@@ -220,64 +249,38 @@ export default function AudioCallComponent() {
             {/* Local audio muting */}
             <audio ref={localAudioRef} autoPlay muted />
 
-            {/* Remote streams grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 w-full">
-                {Object.entries(remoteStreams).map(([peerId, stream]) => {
-                    const member = participants.find(m => m.peerId === peerId) || {};
-                    return (
-                        <div key={peerId} className="flex flex-col items-center bg-gray-800 p-2 rounded">
-                            <div className="w-16 h-16 rounded-full overflow-hidden mb-2">
-                                {member.avatar
-                                    ? <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
-                                    : <div className="w-full h-full bg-blue-600 flex items-center justify-center">
-                                        <span className="text-white text-xl">{member.name?.charAt(0)}</span>
-                                    </div>}
-                            </div>
-                            <p className="text-sm mb-2 truncate">{member.name || 'Người dùng'}</p>
-                            <audio
-                                autoPlay
-                                ref={el => el && (el.srcObject = stream)}
-                            />
-                        </div>
-                    );
-                })}
-            </div>
 
-            {/* Settings panel */}
-            {showSettings && (
-                <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg">
-                    <h3 className="text-lg font-medium mb-2">Cài đặt âm thanh</h3>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">Chọn microphone:</label>
-                        <select
-                            value={selectedDevice}
-                            onChange={(e) => changeAudioDevice(e.target.value)}
-                            className="w-full bg-gray-700 rounded px-3 py-2 text-sm"
-                        >
-                            {audioDevices.map(device => (
-                                <option key={device.deviceId} value={device.deviceId}>
-                                    {device.label || `Microphone ${device.deviceId.slice(0, 5)}...`}
-                                </option>
-                            ))}
-                        </select>
+            {/* Single full-screen remote stream */}
+            {Object.entries(remoteStreams).length > 0 && (() => {
+                const [peerId, stream] = Object.entries(remoteStreams)[0];
+                const member = participants.find(m => m.peerId === peerId) || {};
+                // console.log(partner)
+                return (
+                    <div className="flex flex-col items-center justify-center flex-1">
+                        <audio autoPlay ref={el => el && (el.srcObject = stream)} />
+                        <div className="mt-4 text-center">
+                            <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
+                                {partner[0].avatar ? (
+                                    <img src={partner[0].avatar} alt={partner[0].name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+                                        <span className="text-white text-2xl">{partner[0].name?.charAt(0)}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-xl font-semibold">{partner[0].name || "Người dùng"}</p>
+                        </div>
                     </div>
-                    <button
-                        onClick={() => setShowSettings(false)}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded"
-                    >
-                        Đóng
-                    </button>
-                </div>
-            )}
+                );
+            })()}
+
 
             {/* Call controls */}
             <div className="mt-auto p-4 flex items-center space-x-6">
                 <button onClick={toggleMute} className="p-4 rounded-full bg-gray-700">
                     {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                 </button>
-                <button onClick={() => setShowSettings(!showSettings)} className="p-4 rounded-full bg-gray-700">
-                    <Settings className="w-6 h-6" />
-                </button>
+
                 <button onClick={handleEndCall} className="p-4 rounded-full bg-red-600">
                     <PhoneOff className="w-6 h-6 text-white" />
                 </button>

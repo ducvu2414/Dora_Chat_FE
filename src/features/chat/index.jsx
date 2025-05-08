@@ -354,9 +354,8 @@ export default function ChatSingle() {
 
             {/* DetailChat*/}
             <div
-              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
-                showDetail ? "w-[385px]" : "w-0"
-              }`}
+              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"
+                }`}
             >
               {/* log messages */}
               {showDetail && (
