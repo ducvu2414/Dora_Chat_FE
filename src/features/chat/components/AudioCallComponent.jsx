@@ -153,7 +153,9 @@ export default function AudioCallComponent() {
                 });
             } catch (err) {
                 console.error("❌ Error accessing audio stream", err);
+                // alert("Không thể truy cập vào microphone. Vui lòng kiểm tra quyền truy cập microphone của trình duyệt.");
                 alert("Unable to access microphone. Please check your browser's microphone access permissions");
+
                 handleEndCall();
             }
         };

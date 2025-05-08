@@ -17,7 +17,7 @@ export default function GroupCallComponent() {
 
     // const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
     const dispatch = useDispatch();
-    const currentCall = useSelector(state => state.call.currentCall);
+    const { currentCall, incomingCall } = useSelector((state) => state.call);
 
 
     const meetingRef = useRef(null);
