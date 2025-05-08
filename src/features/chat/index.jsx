@@ -24,7 +24,9 @@ import VoteModal from "@/components/ui/vote-modal";
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread, pinMessages, conversations } = useSelector((state) => state.chat);
+  const { messages, unread, pinMessages, conversations } = useSelector(
+    (state) => state.chat
+  );
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
@@ -36,14 +38,28 @@ export default function ChatSingle() {
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [member, setMember] = useState(null);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const chatBoxRef = useRef(null);
 
   useEffect(() => {
+    const resetState = () => {
+      setConversation(null);
+      setChannels([]);
+      setActiveChannel(null);
+      setPhotosVideos([]);
+      setFiles([]);
+      setLinks([]);
+      setIsLoadingMessages(true);
+    };
+
     const fetchData = async () => {
       if (!conversationId) return;
 
+      resetState();
+
       try {
+        setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
 
         let res = null;
@@ -66,7 +82,6 @@ export default function ChatSingle() {
             )
           );
 
-
           const isMember = (
             await memberApi.isMember(
               conversationId,
@@ -82,7 +97,7 @@ export default function ChatSingle() {
           setIsMember(isMember);
           setChannels(mappedChannels);
           setConversation(res);
-          setActiveChannel(prev => prev || channelsRes[0]?._id || null);
+          setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
@@ -104,6 +119,8 @@ export default function ChatSingle() {
         }
       } catch (error) {
         console.error("Error in useEffect:", error);
+      } finally {
+        setIsLoadingMessages(false);
       }
     };
 
@@ -112,16 +129,18 @@ export default function ChatSingle() {
 
   useEffect(() => {
     if (!activeChannel || !conversationId || !conversation?.type) return;
-    
+
     const fetchChannelMessages = async () => {
       try {
-        const messages = await messageApi.fetchMessagesByChannelId(activeChannel);
+        const messages = await messageApi.fetchMessagesByChannelId(
+          activeChannel
+        );
         dispatch(setMessages({ conversationId, messages }));
       } catch (error) {
         console.error("Error fetching messages by channel:", error);
       }
     };
-    
+
     fetchChannelMessages();
   }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
@@ -285,7 +304,7 @@ export default function ChatSingle() {
       console.log("ChatBox ref is null");
     }
   }, []);
-  
+
   return (
     <>
       <VoteModal
@@ -294,7 +313,7 @@ export default function ChatSingle() {
         onSubmit={handleCreateVote}
       />
 
-      {!conversation ? (
+      {!conversation || isLoadingMessages || !messages[conversationId] ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
           <Spinner />
         </div>
@@ -308,14 +327,16 @@ export default function ChatSingle() {
                 channelTabs={channels}
                 activeTab={activeChannel}
                 handleDetail={setShowDetail}
-                conversation={conversations.filter((conv) => conv._id === conversationId)[0]}
+                conversation={
+                  conversations.filter((conv) => conv._id === conversationId)[0]
+                }
                 onChannelChange={setActiveChannel}
               />
-              {/* {console.log("conversationMessages", conversationMessages)} */}
               <ChatBox
-                messages={conversationMessages}
+                key={conversationId}
+                messages={messages[conversationId]}
                 onSelected={onSelected}
-                member={member.data}
+                member={member?.data}
                 onSave={handleUpdateVote}
                 onLock={handleLockVote}
                 ref={chatBoxRef}
@@ -324,7 +345,10 @@ export default function ChatSingle() {
                 onSend={handleSendMessage}
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
-                isGroup={conversations.filter((conv) => conv._id === conversationId)[0].type}
+                isGroup={
+                  conversations.filter((conv) => conv._id === conversationId)[0]
+                    .type
+                }
               />
             </div>
 
@@ -337,7 +361,11 @@ export default function ChatSingle() {
               {/* log messages */}
               {showDetail && (
                 <DetailChat
-                  conversation={conversations.filter((conv) => conv._id === conversationId)[0]}
+                  conversation={
+                    conversations.filter(
+                      (conv) => conv._id === conversationId
+                    )[0]
+                  }
                   imagesVideos={photosVideos}
                   files={files}
                   links={links}
