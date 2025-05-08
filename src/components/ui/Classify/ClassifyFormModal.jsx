@@ -28,7 +28,10 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
                 const res = await colorsApi.getAll();
                 if (res && Array.isArray(res)) {
                     setColors(res);
-                    if (!colorId && res.length > 0) {
+
+                    if (isEditing && (initialData.colorId?._id || initialData.colorId)) {
+                        setColorId(initialData.colorId?._id || initialData.colorId);
+                    } else if (!colorId && res.length > 0) {
                         setColorId(res[0]._id);
                     }
                 } else {
@@ -44,13 +47,14 @@ export default function ClassifyFormModal({ onClose, onSubmit, initialData = {} 
         fetchColors();
     }, []);
 
-    useEffect(() => {
-        if (isEditing) {
-            setName(initialData.name || "");
-            setColorId(initialData.colorId?._id || initialData.colorId);
-            setSelectedConversations(initialData.conversationIds || []);
-        }
-    }, [initialData, isEditing]);
+
+    // useEffect(() => {
+    //     if (isEditing) {
+    //         setName(initialData.name || "");
+    //         setColorId(initialData.colorId?._id || initialData.colorId);
+    //         setSelectedConversations(initialData.conversationIds || []);
+    //     }
+    // }, [initialData, isEditing]);
 
     const handleSubmit = async () => {
         if (!name.trim()) {
