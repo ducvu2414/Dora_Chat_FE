@@ -294,10 +294,6 @@ export default function ChatSingle() {
         onSubmit={handleCreateVote}
       />
 
-      {console.log(
-        conversation,
-        conversation?.type ? channels.length === 0 : false
-      )}
       {!conversation ? (
         <div className="flex items-center justify-center w-full h-screen bg-white">
           <Spinner />
@@ -315,6 +311,7 @@ export default function ChatSingle() {
                 conversation={conversations.filter((conv) => conv._id === conversationId)[0]}
                 onChannelChange={setActiveChannel}
               />
+              {/* {console.log("conversationMessages", conversationMessages)} */}
               <ChatBox
                 messages={conversationMessages}
                 onSelected={onSelected}
