@@ -65,6 +65,7 @@ export default function MainDetail({
         )?.name || ""
       );
     }
+    setIsEditing(false);
   }, [
     conversation.name,
     conversation.members,
@@ -349,7 +350,7 @@ export default function MainDetail({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-32"
+              className="px-2 py-1 bg-transparent outline-none border-b border-[#086DC0] text-[#959595F3] w-full text-center"
             />
           ) : (
             <p className="text-xl font-semibold text-[#086DC0]">{name}</p>
