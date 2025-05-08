@@ -138,11 +138,19 @@ export function Conversation({
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
       >
-        <img
-          src={avatar || Avatar}
-          alt={name}
-          className="object-cover rounded-full w-14 h-14"
-        />
+        {type ? (
+          <img
+            src={avatar || Avatar}
+            alt={name}
+            className="object-cover rounded-full w-14 h-14"
+          />
+        ) : (
+          <img
+            src={partner[0].avatar || Avatar}
+            alt={name}
+            className="object-cover rounded-full w-14 h-14"
+          />
+        )}
         <div className="flex-1 min-w-0 pl-3">
           <div className="relative flex items-center justify-between">
             <h3 className="text-sm font-medium text-left truncate">

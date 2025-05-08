@@ -2,7 +2,6 @@ import axios from "./axiosClient";
 
 const friendApi = {
   fetchFriends: (id, name) => {
-    console.log(id, name);
     return axios.get(`/api/friends`, {
       params: {
         _id: id,
