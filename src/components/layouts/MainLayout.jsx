@@ -3,6 +3,7 @@ import { memo, Suspense, useEffect, useState, useTransition, useRef } from "reac
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
+import classifiesApi from "../../api/classifies";
 import {
   setConversations,
   addMessage,
@@ -14,6 +15,13 @@ import {
   deleteAllMessages,
   updateLeader,
   leaveConverSation,
+  addPinMessage,
+  deletePinMessage,
+  setClassifies,
+  updateVote,
+  lockVote,
+  updateNameConversation,
+  updateMemberName,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -62,14 +70,19 @@ const MainLayout = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await conversationApi.fetchConversations();
-        dispatch(setConversations(response));
+        const [convs, classifies] = await Promise.all([
+          conversationApi.fetchConversations(),
+          classifiesApi.getAllByUserId(),
+        ]);
+        dispatch(setConversations(convs));
+        dispatch(setClassifies(classifies));
       } catch (error) {
-        console.error("Error fetching conversations:", error);
+        console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, [dispatch]);
+
   // Lọc messages và groups
   const messages = conversations.filter((conv) => !conv.type); // Cá nhân
   const groups = conversations.filter((conv) => conv.type); // Nhóm
@@ -97,13 +110,13 @@ const MainLayout = () => {
         setSocketInitialized(false);
       }
     };
+//   }, []);
   }, [socketInitialized]);
 
   const currentCallRef = useRef(currentCall);
   useEffect(() => {
     currentCallRef.current = currentCall;
   }, [currentCall]);
-
 
   // Lắng nghe socket cho tin nhắn mới
   useEffect(() => {
@@ -241,6 +254,7 @@ const MainLayout = () => {
     };
   }, [dispatch, conversations]);
 
+  // Lắng nghe socket cho user connection
   useEffect(() => {
     if (!socket || !userId) return;
 
@@ -263,6 +277,7 @@ const MainLayout = () => {
     };
   }, [socket, userId, conversations]);
 
+  // Lắng nghe socket cho cuộc gọi
   useEffect(() => {
     const handleNewUserCall = ({
       conversationId,
@@ -588,6 +603,15 @@ const MainLayout = () => {
       });
     };
 
+    const handleUpdateNameConversation = (data) => {
+      dispatch(
+        updateNameConversation({
+          conversationId: data.conversationId,
+          name: data.name,
+        })
+      );
+    };
+
     // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -604,6 +628,10 @@ const MainLayout = () => {
     socket.on(
       SOCKET_EVENTS.CONVERSATION_DISBANDED,
       handleDisbandedConversation
+    );
+    socket.on(
+      SOCKET_EVENTS.UPDATE_NAME_CONVERSATION,
+      handleUpdateNameConversation
     );
 
     return () => {
@@ -628,6 +656,103 @@ const MainLayout = () => {
       );
     };
   }, [socket]);
+
+  // Lắng nghe socket cho tin nhắn ghim và bỏ ghim
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handlePinMessage = (pinMessage) => {
+      console.log("test socket listen unpin message", pinMessage);
+      if (pinMessage) {
+        dispatch(addPinMessage(pinMessage));
+      }
+    };
+
+    const handleUnpinMessage = (pinMessage) => {
+      console.log("test socket listen unpin message", pinMessage);
+      if (pinMessage) {
+        dispatch(deletePinMessage(pinMessage));
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.PIN_MESSAGE, handlePinMessage);
+    socket.on(SOCKET_EVENTS.UNPIN_MESSAGE, handleUnpinMessage);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.PIN_MESSAGE, handlePinMessage);
+      socket.off(SOCKET_EVENTS.UNPIN_MESSAGE, handleUnpinMessage);
+    };
+  }, [socket, dispatch]);
+
+  // Lắng nghe socket cho tính năng vote
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleCreateVote = (vote) => {
+      if (vote) {
+        dispatch(
+          addMessage({ conversationId: vote.conversationId, message: vote })
+        );
+        dispatch(
+          updateConversation({
+            conversationId: vote.conversationId,
+            lastMessage: vote,
+          })
+        );
+      }
+    };
+
+    const handleUpdateOption = (vote) => {
+      if (vote) {
+        dispatch(
+          updateVote({ conversationId: vote.conversationId, message: vote })
+        );
+      }
+    };
+
+    const handleLockVote = (vote) => {
+      if (vote) {
+        dispatch(
+          lockVote({ conversationId: vote.conversationId, message: vote })
+        );
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
+    socket.on(SOCKET_EVENTS.VOTE_LOCKED, handleLockVote);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.CREATE_VOTE, handleCreateVote);
+      socket.off(SOCKET_EVENTS.VOTE_OPTION_SELECTED, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.VOTE_OPTION_DESELECTED, handleUpdateOption);
+      socket.on(SOCKET_EVENTS.ADD_VOTE_OPTION, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.DELETE_VOTE_OPTION, handleUpdateOption);
+      socket.off(SOCKET_EVENTS.VOTE_LOCKED, handleLockVote);
+    };
+  }, [socket, dispatch]);
+
+  // Lắng nghe socket cho member
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleUpdateNamePersonalConversation = (data) => {
+      if (data) {
+        dispatch(
+          updateMemberName({
+            conversationId: data.conversationId,
+            memberId: data._id,
+            name: data.name,
+          })
+        );
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.UPDATE_MEMBER_NAME, handleUpdateNamePersonalConversation);
+  }, [socket, dispatch]);
 
   const handleConversationClick = (id) => {
     startTransition(() => {

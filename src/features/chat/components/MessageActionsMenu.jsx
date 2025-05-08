@@ -2,66 +2,76 @@
 import { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import messageApi from "../../../api/message";
+import pinMessageApi from "../../../api/pinMessage";
+import memberApi from "../../../api/member";
 import ForwardMessageModal from "./ForwardMessageModal";
+
 export default function MessageActionsMenu({
   isMe,
   messageId,
   conversationId,
   messageContent,
   type,
+  isOpen,
+  setIsOpen,
 }) {
-  const [open, setOpen] = useState(false);
   const [showAbove, setShowAbove] = useState(false);
   const [showForwardModal, setShowForwardModal] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
-  const timeoutRef = useRef(null);
-  // Xử lý sự kiện khi di chuột vào
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
+
+  // Toggle menu bằng click
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    if (!isOpen) {
+      calculateMenuPosition();
     }
-    setOpen(true);
+    setIsOpen(!isOpen);
   };
 
-  // Xử lý sự kiện khi di chuột ra
-  const handleMouseLeave = () => {
-    // Tạo độ trễ khi rời khỏi để người dùng có thời gian di chuyển chuột
-    timeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 300); // 300ms để người dùng có thời gian di chuyển chuột
+  // Tính toán vị trí menu
+  const calculateMenuPosition = () => {
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const menuHeight = menuRef.current?.offsetHeight || 0;
+    const windowHeight = window.innerHeight;
+    const spaceBelow = windowHeight - buttonRect.bottom;
+    setShowAbove(spaceBelow < menuHeight + 100);
   };
 
-  // Kiểm tra vị trí và quyết định hiển thị menu phía trên hay phía dưới
+  // Đóng menu khi click ra ngoài
   useEffect(() => {
-    if (open && menuRef.current && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
-      const menuHeight = menuRef.current.offsetHeight;
-      const windowHeight = window.innerHeight;
-
-      // Nếu khoảng cách từ nút đến cuối màn hình nhỏ hơn chiều cao menu + 100px (margin)
-      const spaceBelow = windowHeight - buttonRect.bottom;
-      if (spaceBelow < menuHeight + 100) {
-        setShowAbove(true);
-      } else {
-        setShowAbove(false);
+    const handleClickOutside = (event) => {
+      if (
+        isOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
       }
-    }
-  }, [open]);
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [isOpen, setIsOpen]);
+
+  // Các hàm xử lý khác giữ nguyên
   const handleRecallMessage = async () => {
     try {
       await messageApi.recallMessage(messageId, conversationId);
-      setOpen(false);
+      setIsOpen(false);
     } catch (error) {
       console.error("Error recalling message:", error);
-      alert("Không thể thu hồi tin nhắn");
+      alert("Message cannot be recalled");
     }
   };
+
   const handleForwardMessage = () => {
-    setShowForwardModal((prev) => !prev);
-    setOpen(false);
+    setShowForwardModal(true);
+    setIsOpen(false);
   };
+
   const handleDeleteForMe = async () => {
     try {
       const res = await messageApi.deleteMessageForMe(
@@ -69,78 +79,84 @@ export default function MessageActionsMenu({
         conversationId
       );
       console.log("Deleted message for me:", res);
-      // dispatch(
-      //   deleteMessageForMe({
-      //     messageId,
-      //     conversationId,
-      //     deletedMemberIds: response.deletedMemberIds,
-      //   })
-      // );
-      setOpen(false);
+      setIsOpen(false);
     } catch (error) {
       console.error("Error deleting message for me:", error);
-      alert("Không thể xóa tin nhắn");
+      alert("Cannot delete message");
     }
   };
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+
+  const handlePinMessage = async () => {
+    try {
+      const res = await pinMessageApi.addPinMessage(
+        messageId,
+        conversationId,
+        await memberApi.getByConversationIdAndUserId(conversationId, JSON.parse(localStorage.getItem('user'))._id).then((res) => res.data._id)
+      );
+      console.log("Pinned message:", res);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error pin message:", error);
+      alert(error.response?.data?.message);
+    }
+  };
 
   return (
     <>
-      <div className="relative transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+      <div className="relative">
+        {/* Button với cả hover và click */}
         <button
-          className="p-1 bg-transparent rounded-full hover:bg-gray-200"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          className={`p-1 rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+          }`}
+          onClick={toggleMenu}
           ref={buttonRef}
+          aria-label="Message actions"
         >
           <HiOutlineDotsHorizontal size={18} />
         </button>
 
-        {/* Menu chọn hành động */}
-        {open && (
+        {/* Menu dropdown */}
+        {isOpen && (
           <div
             className={`absolute ${
               showAbove ? "bottom-full mb-1" : "top-full mt-1"
-            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px]`}
+            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
             ref={menuRef}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
           >
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-              Trả lời
+              Reply
             </button>
             <button
               className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
               onClick={handleForwardMessage}
             >
-              Chuyển tiếp
+              Forward
             </button>
             {isMe && (
               <button
                 className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
                 onClick={handleRecallMessage}
               >
-                Thu hồi
+                Retrieve
               </button>
             )}
             <button
               className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
               onClick={handleDeleteForMe}
             >
-              Xóa phía tôi
+              Delete my side
             </button>
-            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
-              Ghim
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={handlePinMessage}
+            >
+              Pin
             </button>
           </div>
         )}
       </div>
+
       {showForwardModal && (
         <ForwardMessageModal
           message={{

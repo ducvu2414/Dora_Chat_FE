@@ -1,12 +1,14 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
-import FileIcon from "@assets/chat/file_icon.svg";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PictureIcon from "@assets/chat/picture_icon.svg";
 import EmojiIcon from "@assets/chat/emoji_icon.svg";
 import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
+import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 
-export default function MessageInput({ onSend, isMember }) {
+export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isGroup }) {
   const [input, setInput] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFiles, setVideoFiles] = useState([]);
@@ -17,6 +19,7 @@ export default function MessageInput({ onSend, isMember }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isMemberState, setIsMember] = useState(isMember);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -77,8 +80,8 @@ export default function MessageInput({ onSend, isMember }) {
     }
   };
 
-  const handleFileSelect = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileSelect = (file) => {
+    const selectedFile = file[0];
     setFile(selectedFile);
   };
 
@@ -144,7 +147,7 @@ export default function MessageInput({ onSend, isMember }) {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Send message error:", error);
-      alert("Gửi tin nhắn thất bại!");
+      alert("Send message error!");
     } finally {
       setIsLoading(false);
     }
@@ -255,25 +258,35 @@ export default function MessageInput({ onSend, isMember }) {
       )}
 
       <div className="flex items-center p-3 border-t">
-        {isLoading || !isMemberState ? (
+        {!isMemberState ? (
           <></>
         ) : (
-          <label className="mr-2 cursor-pointer hover:opacity-70">
-            <img src={FileIcon} alt="File" />
-            <input
-              type="file"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-            />
-          </label>
+          // !isLoading && (
+            <>
+              <Button
+                size="icon"
+                className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none focus:outline-none mr-3"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <Plus className="!h-6 !w-6" />
+              </Button>
+              <MoreMessageDropdown
+                isOpen={isDropdownOpen}
+                onClose={() => setIsDropdownOpen(false)}
+                onFileSelect={handleFileSelect}
+                setIsVoteModalOpen={setIsVoteModalOpen}
+                isGroup={isGroup}
+              />
+            </>
+
+          // )
         )}
 
         <div
           className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4
            focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300"
         >
-          {isLoading || !isMemberState ? (
+          {!isMemberState ? (
             <input
               type="text"
               placeholder="You cannot message this conversation"
@@ -281,6 +294,7 @@ export default function MessageInput({ onSend, isMember }) {
               disabled={true}
             />
           ) : (
+            // !isLoading && (
             <>
               <input
                 ref={inputRef}
@@ -311,11 +325,13 @@ export default function MessageInput({ onSend, isMember }) {
                 <img src={EmojiIcon} alt="Emoji" />
               </button>
             </>
+            // )
           )}
         </div>
-        {isLoading || !isMemberState ? (
+        {!isMemberState ? (
           <></>
         ) : (
+          // !isLoading && (
           <div
             onClick={handleSend}
             className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
@@ -324,6 +340,7 @@ export default function MessageInput({ onSend, isMember }) {
           >
             <img src={SendIcon} alt="Send" />
           </div>
+          // )
         )}
       </div>
     </div>

@@ -7,6 +7,8 @@ const chatSlice = createSlice({
     unread: {}, // { conversationId: number }
     conversations: [], // Danh sách conversation
     activeConversationId: null, // Cuộc trò chuyện đang mở
+    pinMessages: [], // Danh sách tin nhắn đã ghim
+    classifies: [], // Mảng phân loại
   },
   reducers: {
     setConversations: (state, action) => {
@@ -34,10 +36,71 @@ const chatSlice = createSlice({
         ];
       }
     },
+    updateNameConversation: (state, action) => {
+      const { conversationId, name } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations[index].name = name;
+      }
+    },
+    updateMemberName: (state, action) => {
+      const { conversationId, memberId, name } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        const memberIndex = conversation.members.findIndex(
+          (member) => member._id === memberId
+        );
+        if (memberIndex !== -1) {
+          conversation.members[memberIndex].name = name;
+        }
+      }
+    },
     setMessages: (state, action) => {
       const { conversationId, messages } = action.payload;
       state.messages[conversationId] = messages;
       state.unread[conversationId] = 0;
+    },
+
+    updateVote: (state, action) => {
+      const { conversationId, message } = action.payload;
+
+      if (!state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+      const index = state.messages[conversationId].findIndex(
+        (m) => m._id === message._id
+      );
+      
+      if (index !== -1) {
+        state.messages[conversationId][index].options = message.options;
+      } else {
+        state.messages[conversationId].push(message);
+      }
+    },
+
+    lockVote: (state, action) => {
+      const { conversationId, message } = action.payload;
+
+      if (!state.messages[conversationId]) {
+        state.messages[conversationId] = [];
+      }
+      const index = state.messages[conversationId].findIndex(
+        (m) => m._id === message._id
+      );
+      
+      if (index !== -1) {
+        state.messages[conversationId][index].lockedVote = message.lockedVote;
+      } else {
+        state.messages[conversationId].push(message);
+      }
+    },
+
+    setClassifies: (state, action) => {
+      state.classifies = action.payload;
     },
     addMessage: (state, action) => {
       const { conversationId, message } = action.payload;
@@ -140,6 +203,22 @@ const chatSlice = createSlice({
         delete state.unread[conversationId];
       }
     },
+
+    setPinMessages: (state, action) => {
+      state.pinMessages = action.payload;
+    },
+
+    addPinMessage: (state, action) => {
+      const pinMessage = action.payload;
+      if (!state.pinMessages.some((msg) => msg._id === pinMessage._id)) {
+        state.pinMessages.push(pinMessage); 
+      }
+    },
+
+    deletePinMessage: (state, action) => {
+      const { _id } = action.payload;
+      state.pinMessages = state.pinMessages.filter((msg) => msg._id !== _id);
+    },
   },
 });
 
@@ -147,15 +226,23 @@ export const {
   setConversations,
   addConversation,
   updateConversation,
-  setMessages,
-  addMessage,
-  markRead,
   setActiveConversation,
+  disbandConversation,
+  setMessages,
+  updateVote,
+  lockVote,
+  addMessage,
   recallMessage,
   deleteMessageForMe,
-  disbandConversation,
   deleteAllMessages,
+  markRead,
   updateLeader,
+  setPinMessages,
+  addPinMessage,
+  deletePinMessage,
   leaveConverSation,
+  setClassifies,
+  updateNameConversation,
+  updateMemberName,
 } = chatSlice.actions;
 export default chatSlice.reducer;
