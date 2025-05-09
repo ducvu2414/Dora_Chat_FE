@@ -27,6 +27,7 @@ export function AddFriendModal({ isOpen, onClose }) {
   const [searchType, setSearchType] = useState("phone");
   const userLogin = JSON.parse(localStorage.getItem("user"));
   const [hasSentRequest, setHasSentRequest] = useState(false);
+  const [resFriendRequest, setResFriendRequest] = useState([]);
   const [resMyFriendRequest, setResMyFriendRequest] = useState([]);
   const resetModalState = () => {
     setSearchValue("");
@@ -36,6 +37,8 @@ export function AddFriendModal({ isOpen, onClose }) {
   };
 
   const myFriendRequests = resMyFriendRequest.some(
+    (friend) => friend._id === searchResult?._id
+  ) || resFriendRequest.some(
     (friend) => friend._id === searchResult?._id
   );
 
@@ -48,7 +51,16 @@ export function AddFriendModal({ isOpen, onClose }) {
         console.error("Error fetching friend requests:", error);
       }
     };
+    const fetchFriendRequest = async () => {
+      try {
+        const response = await friendApi.fetchListRequestFriend();
+        setResFriendRequest(response);
+      } catch (error) {
+        console.error("Error fetching friend requests:", error);
+      }
+    };
     fetchMyFriendRequest();
+    fetchFriendRequest();
   }, []);
 
   const handleSearch = async () => {

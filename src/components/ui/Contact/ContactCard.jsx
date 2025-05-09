@@ -9,10 +9,6 @@ export function ContactCard({ contact, onDeleteFriend }) {
         navigate("/friend-information");
     }
 
-    function onCategoryChange(category) {
-        console.log('Change category to', category);
-    }
-
     function onSetNickname() {
         console.log('Set nickname');
     }
@@ -82,7 +78,6 @@ export function ContactCard({ contact, onDeleteFriend }) {
                 </div>
                 <ContactCardDropdown
                     onViewInfo={onViewInfo}
-                    onCategoryChange={onCategoryChange}
                     onSetNickname={onSetNickname}
                     onDelete={onDelete}
                 />
