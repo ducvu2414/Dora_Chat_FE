@@ -305,6 +305,19 @@ export default function ChatSingle() {
     }
   }, []);
 
+  const handleDeleteChannel = async (channelId) => {
+    console.log("Deleting channel:", channelId);
+    try {
+      await channelApi.deleteChannel(channelId, member.data._id, conversationId);
+      setChannels((prev) => prev.filter((channel) => channel.id !== channelId));
+      setActiveChannel((prev) =>
+        prev === channelId ? channels[0]?.id || null : prev
+      );
+    } catch (error) {
+      console.error("Error deleting channel:", error.response.data.message);
+    }
+  };
+
   return (
     <>
       <VoteModal
@@ -331,6 +344,7 @@ export default function ChatSingle() {
                   conversations.filter((conv) => conv._id === conversationId)[0]
                 }
                 onChannelChange={setActiveChannel}
+                onDeleteChannel={handleDeleteChannel}
               />
               <ChatBox
                 key={conversationId}

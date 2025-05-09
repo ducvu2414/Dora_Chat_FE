@@ -2,8 +2,16 @@ import axios from "./axiosClient";
 
 const channelApi = {
   getAllChannelByConversationId: (conversationId) => {
-    const url = `api/channels/${conversationId}`;
-    return axios.get(url);
+    return axios.get(`api/channels/${conversationId}`);
+  },
+
+  deleteChannel: (channelId, memberId, conversationId) => {
+    return axios.delete(`api/channels/${channelId}`, {
+      data: {
+        memberId,
+        conversationId,
+      },
+    });
   },
 };
 
