@@ -27,6 +27,12 @@ export function ChannelTab({
   const tabsRef = useRef(null);
 
   useEffect(() => {
+    if (channels.length > 0 && !channels.some((channel) => channel._id === activeChannel)) {
+      onChannelChange(channels[0]._id);
+    }
+  }, [channels, activeChannel, onChannelChange]);
+
+  useEffect(() => {
     if (tabsRef.current) {
       const activeButton = tabsRef.current.querySelector(
         `[data-id="${activeChannel}"]`

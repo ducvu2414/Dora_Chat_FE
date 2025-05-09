@@ -9,6 +9,7 @@ import {
   setMessages,
   setPinMessages,
   setChannels,
+  deleteChannel,
 } from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
@@ -25,9 +26,8 @@ import VoteModal from "@/components/ui/vote-modal";
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread, pinMessages, conversations, channels } = useSelector(
-    (state) => state.chat
-  );
+  const { messages, unread, pinMessages, conversations, channels } =
+    useSelector((state) => state.chat);
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
@@ -41,6 +41,8 @@ export default function ChatSingle() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const chatBoxRef = useRef(null);
+
+  console.log("channels", channels);
 
   useEffect(() => {
     const resetState = () => {
@@ -69,6 +71,8 @@ export default function ChatSingle() {
           channelsRes = await channelApi.getAllChannelByConversationId(
             conversationId
           );
+
+          console.log("channelsRes", channelsRes);
 
           setMember(
             await memberApi.getByConversationIdAndUserId(
@@ -289,7 +293,9 @@ export default function ChatSingle() {
         member.data._id,
         conversationId
       );
-      setChannels((prev) => prev.filter((channel) => channel.id !== channelId));
+
+      dispatch(deleteChannel({ channelId }));
+
       setActiveChannel((prev) =>
         prev === channelId ? channels[0]?.id || null : prev
       );
@@ -306,24 +312,13 @@ export default function ChatSingle() {
           member.data._id,
           conversationId
         );
-        setChannels((prev) => [
-          ...prev,
-          { id: newChannel._id, name: channelData.name },
-        ]);
         setActiveChannel(newChannel._id);
       } else {
-        const resUpdate = await channelApi.updateChannel(
+        await channelApi.updateChannel(
           channelId,
           channelData.name,
           member.data._id,
           conversationId
-        );
-        setChannels((prev) =>
-          prev.map((channel) =>
-            channel.id === channelId
-              ? { ...channel, name: resUpdate.name }
-              : channel
-          )
         );
       }
     } catch (error) {

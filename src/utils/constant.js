@@ -83,4 +83,5 @@ export const SOCKET_EVENTS = {
 
   // Channel
   NEW_CHANNEL: "new-channel",
+  DELETE_CHANNEL: "delete-channel",
 };

@@ -30,6 +30,7 @@ import {
   updateNameConversation,
   updateMemberName,
   addChannel,
+  deleteChannel,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -753,7 +754,19 @@ const MainLayout = () => {
       }
     };
 
+    const handleDeleteChannel = (channel) => {
+      if (channel) {
+        dispatch(deleteChannel({_id: channel._id }));
+      }
+    };
+
     socket.on(SOCKET_EVENTS.NEW_CHANNEL, handleNewChannel);
+    socket.on(SOCKET_EVENTS.DELETE_CHANNEL, handleDeleteChannel);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NEW_CHANNEL, handleNewChannel);
+      socket.off(SOCKET_EVENTS.DELETE_CHANNEL, handleDeleteChannel);
+    };
   }, [socket, dispatch]);
 
   // Lắng nghe socket cho member

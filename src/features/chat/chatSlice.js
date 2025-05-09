@@ -231,6 +231,11 @@ const chatSlice = createSlice({
         state.channels.push(channel);
       }
     },
+
+    deleteChannel: (state, action) => {
+      const { _id } = action.payload;
+      state.channels = state.channels.filter((ch) => ch._id !== _id);
+    },
   },
 });
 
@@ -258,5 +263,6 @@ export const {
   updateMemberName,
   setChannels,
   addChannel,
+  deleteChannel,
 } = chatSlice.actions;
 export default chatSlice.reducer;
