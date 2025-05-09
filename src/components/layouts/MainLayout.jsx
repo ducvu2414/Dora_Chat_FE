@@ -31,6 +31,7 @@ import {
   updateMemberName,
   addChannel,
   deleteChannel,
+  updateChannel,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -55,6 +56,7 @@ import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 import callChannel from "../../utils/callChannel";
 import { AlertMessage } from "@/components/ui/alert-message";
+import { update } from "lodash";
 
 const requests = [];
 
@@ -756,16 +758,24 @@ const MainLayout = () => {
 
     const handleDeleteChannel = (channel) => {
       if (channel) {
-        dispatch(deleteChannel({_id: channel._id }));
+        dispatch(deleteChannel({ _id: channel._id }));
+      }
+    };
+
+    const handleUpdateChannel = (channel) => {
+      if (channel) {
+        dispatch(updateChannel(channel));
       }
     };
 
     socket.on(SOCKET_EVENTS.NEW_CHANNEL, handleNewChannel);
     socket.on(SOCKET_EVENTS.DELETE_CHANNEL, handleDeleteChannel);
+    socket.on(SOCKET_EVENTS.UPDATE_CHANNEL, handleUpdateChannel);
 
     return () => {
       socket.off(SOCKET_EVENTS.NEW_CHANNEL, handleNewChannel);
       socket.off(SOCKET_EVENTS.DELETE_CHANNEL, handleDeleteChannel);
+      socket.off(SOCKET_EVENTS.UPDATE_CHANNEL, handleUpdateChannel);
     };
   }, [socket, dispatch]);
 
