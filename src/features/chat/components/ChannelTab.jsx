@@ -158,8 +158,8 @@ export function ChannelTab({
           setEditingChannel(null);
         }}
         onAdd={handleAddAndUpdateChannel}
-        initialName={editingChannel?.channelName} 
-        isEditing={!!editingChannel} 
+        initialName={editingChannel?.channelName}
+        isEditing={!!editingChannel}
       />
     </div>
   );

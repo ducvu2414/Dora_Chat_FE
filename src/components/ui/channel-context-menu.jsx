@@ -2,18 +2,12 @@
 import { useRef } from "react";
 import { Trash2, Pencil } from "lucide-react";
 
-export function ChannelContextMenu({
-  x,
-  y,
-  channel,
-  onDelete,
-  onEdit,
-}) {
+export function ChannelContextMenu({ x, y, channel, onDelete, onEdit }) {
   const menuRef = useRef(null);
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-[160px] bg-white rounded-md shadow-lg border border-gray-200 py-1"
+      className="fixed min-w-[160px] bg-white rounded-md shadow-lg border border-gray-200 py-1"
       style={{ left: `${x}px`, top: `${y}px` }}
     >
       <button

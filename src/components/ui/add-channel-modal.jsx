@@ -44,8 +44,11 @@ export function AddChannelModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={isEditing ? "Edit Channel" : "Add New Channel"}
->
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditing ? "Edit Channel" : "Add New Channel"}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
