@@ -51,6 +51,11 @@ const conversationApi = {
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },
+  updateAvatarGroup: (conversationId, avatar) => {
+    return axios.patch(`api/conversations/${conversationId}/avatar`, {
+      avatar,
+    });
+  },
 };
 
 export default conversationApi;

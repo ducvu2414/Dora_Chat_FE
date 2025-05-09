@@ -2,7 +2,7 @@
 import { Modal } from "@/components/ui/modal";
 import { motion } from "framer-motion";
 import { Check, Pencil } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
@@ -25,8 +25,10 @@ import PictureList from "./detail_chat/PictureList";
 import UserSelectionModal from "./UserSelectionModal";
 import friendApi from "@/api/friend";
 import memberApi from "@/api/member";
+import cloudinaryApi from "@/api/cloudinary";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
+import { Button } from "@/components/ui/button";
 
 export default function MainDetail({
   handleSetActiveTab,
@@ -53,6 +55,9 @@ export default function MainDetail({
   const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [memberFilter, setMemberFilter] = useState([]);
+  const [isHoverAvatar, setIsHoverAvatar] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   // Set name of conversation
   useEffect(() => {
@@ -240,6 +245,36 @@ export default function MainDetail({
     }
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    console.log("e.target.files", e.target.files);
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra loại file (chỉ cho phép ảnh)
+    if (!file.type.match("image.*")) {
+      alert("Vui lòng chọn file ảnh (JPEG/PNG/WEBP)");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("id", conversation._id.toString());
+
+    const resAvatar = await cloudinaryApi.uploadImage(formData);
+    const url = resAvatar.image.url;
+    const resUpdateAvatar = await conversationApi.updateAvatarGroup(
+      conversation._id,
+      url
+    );
+    console.log("resUpdateAvatar", resUpdateAvatar);
+
+    e.target.value = "";
+  };
+
   return (
     <>
       {/* kha */}
@@ -343,7 +378,34 @@ export default function MainDetail({
         </div>
       </div>
       <div className="flex flex-col items-center mt-4 overflow-y-auto h-[calc(100%-3rem)]">
-        <img src={conversation.avatar || Avatar} className="w-16 h-16 rounded-full" alt="Avatar" />
+        <div
+          className="relative inline-block"
+          onMouseEnter={() => setIsHoverAvatar(true)}
+          onMouseLeave={() => setIsHoverAvatar(false)}
+        >
+          <img
+            src={conversation.avatar || Avatar}
+            className="w-16 h-16 rounded-full"
+            alt="Avatar"
+            onClick={handleButtonClick}
+          />
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          {isHoverAvatar && (
+            <Button
+              className="absolute bottom-0 right-0 text-white p-1 rounded-full hover:opacity-90 transition-colors h-16 w-16"
+              onClick={handleButtonClick}
+            >
+              <Pencil className="w-3 h-3" />
+            </Button>
+          )}
+        </div>
+
         <div className="flex items-center gap-2 mt-1">
           {isEditing ? (
             <input

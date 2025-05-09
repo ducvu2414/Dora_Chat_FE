@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useRef } from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, SquarePen } from "lucide-react";
 
 export function ChannelContextMenu({ x, y, channel, onDelete, onEdit }) {
   const menuRef = useRef(null);
@@ -14,7 +14,7 @@ export function ChannelContextMenu({ x, y, channel, onDelete, onEdit }) {
         className="w-full flex items-center px-4 py-2 text-sm text-regal-blue hover:bg-gray-100 border-b"
         onClick={onEdit}
       >
-        <Pencil className="mr-2 h-4 w-4" />
+        <SquarePen className="mr-2 h-4 w-4" />
         Rename
       </button>
       <button
