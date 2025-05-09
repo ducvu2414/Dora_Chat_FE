@@ -224,6 +224,13 @@ const chatSlice = createSlice({
     setChannels: (state, action) => {
       state.channels = action.payload;
     },
+
+    addChannel: (state, action) => {
+      const channel = action.payload;
+      if (!state.channels.some((ch) => ch._id === channel._id)) {
+        state.channels.push(channel);
+      }
+    },
   },
 });
 
@@ -250,5 +257,6 @@ export const {
   updateNameConversation,
   updateMemberName,
   setChannels,
+  addChannel,
 } = chatSlice.actions;
 export default chatSlice.reducer;

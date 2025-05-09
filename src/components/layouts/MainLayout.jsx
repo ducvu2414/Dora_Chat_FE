@@ -1,5 +1,12 @@
 import { SideBar } from "@/components/ui/side-bar";
-import { memo, Suspense, useEffect, useState, useTransition, useRef } from "react";
+import {
+  memo,
+  Suspense,
+  useEffect,
+  useState,
+  useTransition,
+  useRef,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
@@ -22,11 +29,12 @@ import {
   lockVote,
   updateNameConversation,
   updateMemberName,
+  addChannel,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
   setIncomingCall,
-  clearIncomingCall
+  clearIncomingCall,
 } from "../../features/chat/callSlice";
 
 import {
@@ -412,7 +420,6 @@ const MainLayout = () => {
   //   return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
   // }, []);
 
-
   useEffect(() => {
     const handleCallBroadcast = (event) => {
       const { type, payload } = event.data;
@@ -439,7 +446,6 @@ const MainLayout = () => {
       callChannel.removeEventListener("message", handleCallBroadcast);
     };
   }, [dispatch]);
-
 
   useEffect(() => {
     if (!socket || !user?._id) return;
@@ -737,6 +743,19 @@ const MainLayout = () => {
     };
   }, [socket, dispatch]);
 
+  // Lắng nghe socket cho kênh
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    const handleNewChannel = (newChannel) => {
+      if (newChannel) {
+        dispatch(addChannel(newChannel));
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.NEW_CHANNEL, handleNewChannel);
+  }, [socket, dispatch]);
+
   // Lắng nghe socket cho member
   useEffect(() => {
     if (!socket || !userId) return;
@@ -753,7 +772,10 @@ const MainLayout = () => {
       }
     };
 
-    socket.on(SOCKET_EVENTS.UPDATE_MEMBER_NAME, handleUpdateNamePersonalConversation);
+    socket.on(
+      SOCKET_EVENTS.UPDATE_MEMBER_NAME,
+      handleUpdateNamePersonalConversation
+    );
   }, [socket, dispatch]);
 
   const handleConversationClick = (id) => {
