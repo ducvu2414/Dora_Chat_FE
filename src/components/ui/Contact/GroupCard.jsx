@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import GroupCardDropdown from '@/components/ui/Contact/GroupCardDropdown';
 
-const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
+const GroupCard = ({ group, onLeaveGroup }) => {
     return (
         <div className="w-full focus:outline-none border-none p-0" onClick={() => console.log('View group')}>
             <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -29,28 +29,14 @@ const GroupCard = ({ group, onCategoryChange, onLeaveGroup }) => {
                         <h3 className="text-sm font-medium text-gray-900 truncate">{group.name}</h3>
                         <p className="text-sm text-gray-500 truncate">{group.members} members</p>
                     </div>
-                    {group.category && (
-                        <div className={`w-2 h-2 rounded-full ${getCategoryColor(group.category)}`} />
-                    )}
                 </div>
                 <div className="flex-shrink-0">
-                    <GroupCardDropdown onCategoryChange={onCategoryChange} onLeaveGroup={onLeaveGroup} />
+                    <GroupCardDropdown onLeaveGroup={onLeaveGroup} />
                 </div>
             </div>
         </div>
     );
 };
 
-const getCategoryColor = (categoryId) => {
-    const colorMap = {
-        'customer': 'bg-red-500',
-        'family': 'bg-pink-500',
-        'work': 'bg-orange-500',
-        'friends': 'bg-yellow-500',
-        'reply-later': 'bg-green-500',
-        'study': 'bg-blue-500'
-    };
-    return colorMap[categoryId] || 'bg-gray-500';
-};
 
 export default GroupCard;

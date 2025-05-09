@@ -45,6 +45,7 @@ import { codeRevokeRef, SOCKET_EVENTS } from "../../utils/constant";
 import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 import callChannel from "../../utils/callChannel";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 const requests = [];
 
@@ -110,7 +111,7 @@ const MainLayout = () => {
         setSocketInitialized(false);
       }
     };
-//   }, []);
+    //   }, []);
   }, [socketInitialized]);
 
   const currentCallRef = useRef(currentCall);
@@ -451,6 +452,7 @@ const MainLayout = () => {
     };
 
     const handleFriendInvite = (value) => {
+      console.log("handleFriendInvite " + JSON.stringify(value));
       startTransition(() => {
         dispatch(setNewRequestFriend(value));
         dispatch(setAmountNotify(amountNotify + 1));
@@ -782,8 +784,10 @@ const MainLayout = () => {
               </div>
             }
           >
-            <Outlet />
+            {/* <Outlet /> */}
+            <Outlet key={location.pathname} />
             {!currentCall && incomingCall && <IncomingCallModal />}
+            <AlertMessage />
           </Suspense>
         )}
       </div>
