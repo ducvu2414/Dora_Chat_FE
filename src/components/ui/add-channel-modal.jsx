@@ -1,12 +1,22 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal } from "./modal";
 import { Input } from "./input";
 import { Button } from "./button";
 
-export function AddChannelModal({ isOpen, onClose, onAdd }) {
-  const [channelName, setChannelName] = useState("");
+export function AddChannelModal({
+  isOpen,
+  onClose,
+  onAdd,
+  initialName = "",
+  isEditing = false,
+}) {
+  const [channelName, setChannelName] = useState(initialName);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setChannelName(initialName);
+  }, [initialName]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +44,8 @@ export function AddChannelModal({ isOpen, onClose, onAdd }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Channel">
+    <Modal isOpen={isOpen} onClose={handleClose} title={isEditing ? "Edit Channel" : "Add New Channel"}
+>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
@@ -64,7 +75,7 @@ export function AddChannelModal({ isOpen, onClose, onAdd }) {
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Create Channel
+            {isEditing ? "Save Changes" : "Create Channel"}
           </Button>
         </div>
       </form>

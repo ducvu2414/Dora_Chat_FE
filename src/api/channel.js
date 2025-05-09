@@ -13,6 +13,14 @@ const channelApi = {
     });
   },
 
+  updateChannel: (channelId, name, memberId, conversationId) => {
+    return axios.put(`api/channels/${channelId}`, {
+      name,
+      memberId,
+      conversationId,
+    });
+  },
+
   deleteChannel: (channelId, memberId, conversationId) => {
     return axios.delete(`api/channels/${channelId}`, {
       data: {

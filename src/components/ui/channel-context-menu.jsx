@@ -1,10 +1,15 @@
 /* eslint-disable react/prop-types */
-import { useRef } from "react"
-import { Trash2, Pencil } from "lucide-react"
+import { useRef } from "react";
+import { Trash2, Pencil } from "lucide-react";
 
-export function ChannelContextMenu({ x, y, channelId, onDelete }) {
-  const menuRef = useRef(null)
-
+export function ChannelContextMenu({
+  x,
+  y,
+  channel,
+  onDelete,
+  onEdit,
+}) {
+  const menuRef = useRef(null);
   return (
     <div
       ref={menuRef}
@@ -13,18 +18,18 @@ export function ChannelContextMenu({ x, y, channelId, onDelete }) {
     >
       <button
         className="w-full flex items-center px-4 py-2 text-sm text-regal-blue hover:bg-gray-100 border-b"
-        onClick={() => onDelete(channelId)}
+        onClick={onEdit}
       >
         <Pencil className="mr-2 h-4 w-4" />
         Rename
       </button>
       <button
         className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-b"
-        onClick={() => onDelete(channelId)}
+        onClick={() => onDelete(channel.channelId)}
       >
         <Trash2 className="mr-2 h-4 w-4" />
         Delete
       </button>
     </div>
-  )
+  );
 }

@@ -199,8 +199,7 @@ export default function ChatSingle() {
       })),
     };
 
-    const resCreateVote = await voteApi.createVote(newVote);
-    console.log("Created poll:", resCreateVote);
+    await voteApi.createVote(newVote);
   };
 
   const handleUpdateVote = async (vote) => {
@@ -220,21 +219,15 @@ export default function ChatSingle() {
     );
 
     updatedOptions.forEach(async (option) => {
-      const resAddVoteOption = await voteApi.addVoteOption(
-        vote.oldOptions._id,
-        member.data._id,
-        option
-      );
-      console.log("Updated poll with new options:", resAddVoteOption);
+      await voteApi.addVoteOption(vote.oldOptions._id, member.data._id, option);
     });
 
     deletedOptionIds.forEach(async (optionId) => {
-      const resDeleteVoteOption = await voteApi.deleteVoteOption(
+      await voteApi.deleteVoteOption(
         vote.oldOptions._id,
         member.data._id,
         optionId
       );
-      console.log("Updated poll with deleted options:", resDeleteVoteOption);
     });
 
     console.log("vote", vote);
@@ -273,27 +266,16 @@ export default function ChatSingle() {
     );
 
     optionIdsHave.forEach(async (optionId) => {
-      const resSelectVoteOption = await voteApi.selectVoteOption(
-        vote._id,
-        optionId,
-        reqSelectVoteOption
-      );
-      console.log("Updated poll with votes:", resSelectVoteOption);
+      await voteApi.selectVoteOption(vote._id, optionId, reqSelectVoteOption);
     });
 
     optionIdsNotHave.forEach(async (optionId) => {
-      const resDeselectVoteOption = await voteApi.deselectVoteOption(
-        vote._id,
-        optionId,
-        member.data._id
-      );
-      console.log("Updated poll with deselected votes:", resDeselectVoteOption);
+      await voteApi.deselectVoteOption(vote._id, optionId, member.data._id);
     });
   };
 
   const handleLockVote = async (vote) => {
-    const resLockVote = await voteApi.lockVote(vote._id, member.data._id);
-    console.log("Updated poll with votes:", resLockVote);
+    await voteApi.lockVote(vote._id, member.data._id);
   };
 
   const handleScrollToMessage = useCallback((messageId) => {
@@ -306,7 +288,6 @@ export default function ChatSingle() {
   }, []);
 
   const handleDeleteChannel = async (channelId) => {
-    console.log("Deleting channel:", channelId);
     try {
       await channelApi.deleteChannel(
         channelId,
@@ -322,19 +303,34 @@ export default function ChatSingle() {
     }
   };
 
-  const handleAddChannel = async (channelName) => {
-    console.log("Adding channel:", channelName);
+  const handleAddChannel = async (channelData, channelId) => {
     try {
-      const newChannel = await channelApi.createChannel(
-        channelName.name,
-        member.data._id,
-        conversationId
-      );
-      setChannels((prev) => [
-        ...prev,
-        { id: newChannel._id, name: channelName.name },
-      ]);
-      setActiveChannel(newChannel._id);
+      if (!channelId) {
+        const newChannel = await channelApi.createChannel(
+          channelData.name,
+          member.data._id,
+          conversationId
+        );
+        setChannels((prev) => [
+          ...prev,
+          { id: newChannel._id, name: channelData.name },
+        ]);
+        setActiveChannel(newChannel._id);
+      } else {
+        const resUpdate = await channelApi.updateChannel(
+          channelId,
+          channelData.name,
+          member.data._id,
+          conversationId
+        );
+        setChannels((prev) =>
+          prev.map((channel) =>
+            channel.id === channelId
+              ? { ...channel, name: resUpdate.name }
+              : channel
+          )
+        );
+      }
     } catch (error) {
       console.error("Error adding channel:", error.response.data.message);
     }

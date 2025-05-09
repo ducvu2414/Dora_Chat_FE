@@ -18,9 +18,12 @@ export function ChannelTab({
     x: 0,
     y: 0,
     channelId: null,
+    channelName: "",
   });
   const [isAddChannelOpen, setIsAddChannelOpen] = useState(false);
   const [underlineStyle, setUnderlineStyle] = useState({});
+  const [editingChannel, setEditingChannel] = useState(null);
+
   const tabsRef = useRef(null);
 
   useEffect(() => {
@@ -62,6 +65,7 @@ export function ChannelTab({
       x: tabRect.left,
       y: tabRect.bottom,
       channelId,
+      channelName: tabElement.innerText,
     });
     setTimeout(() => {
       setContextMenu((prev) => ({ ...prev, visible: true }));
@@ -76,12 +80,21 @@ export function ChannelTab({
     setContextMenu({ ...contextMenu, visible: false });
   };
 
-  // Handle add new channel
-  const handleAddChannel = (channelData) => {
+  const handleAddAndUpdateChannel = (channelData) => {
     if (onAddChannel) {
-      onAddChannel(channelData);
+      onAddChannel(channelData, editingChannel?.channelId);
     }
     setIsAddChannelOpen(false);
+    setEditingChannel(null);
+  };
+
+  const handleEditChannel = () => {
+    setEditingChannel({
+      channelId: contextMenu.channelId,
+      channelName: contextMenu.channelName,
+    });
+    setIsAddChannelOpen(true);
+    setContextMenu({ ...contextMenu, visible: false });
   };
 
   return (
@@ -131,16 +144,22 @@ export function ChannelTab({
         <ChannelContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          channelId={contextMenu.channelId}
+          channel={contextMenu}
           onDelete={handleDeleteChannel}
+          onEdit={handleEditChannel}
         />
       )}
 
       {/* Add Channel Modal */}
       <AddChannelModal
         isOpen={isAddChannelOpen}
-        onClose={() => setIsAddChannelOpen(false)}
-        onAdd={handleAddChannel}
+        onClose={() => {
+          setIsAddChannelOpen(false);
+          setEditingChannel(null);
+        }}
+        onAdd={handleAddAndUpdateChannel}
+        initialName={editingChannel?.channelName} 
+        isEditing={!!editingChannel} 
       />
     </div>
   );
