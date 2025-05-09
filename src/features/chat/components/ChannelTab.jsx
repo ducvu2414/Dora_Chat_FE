@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChannelContextMenu } from "@/components/ui/channel-context-menu";
 import { AddChannelModal } from "@/components/ui/add-channel-modal";
+import { motion } from "framer-motion";
 
 export function ChannelTab({
   channels = [],
@@ -19,7 +20,22 @@ export function ChannelTab({
     channelId: null,
   });
   const [isAddChannelOpen, setIsAddChannelOpen] = useState(false);
+  const [underlineStyle, setUnderlineStyle] = useState({});
   const tabsRef = useRef(null);
+
+  useEffect(() => {
+    if (tabsRef.current) {
+      const activeButton = tabsRef.current.querySelector(
+        `[data-id="${activeChannel}"]`
+      );
+      if (activeButton) {
+        setUnderlineStyle({
+          left: activeButton.offsetLeft,
+          width: activeButton.offsetWidth,
+        });
+      }
+    }
+  }, [activeChannel]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -78,6 +94,7 @@ export function ChannelTab({
           {channels.map((channel) => (
             <button
               key={channel.id}
+              data-id={channel.id}
               onClick={() => onChannelChange(channel.id)}
               onContextMenu={(e) => handleContextMenu(e, channel.id)}
               className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
@@ -89,6 +106,13 @@ export function ChannelTab({
               {channel.name}
             </button>
           ))}
+
+          {/* Thanh underline động */}
+          <motion.div
+            className="absolute bottom-0 h-0.5 bg-regal-blue rounded-full"
+            animate={underlineStyle}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
         </div>
       </div>
 
