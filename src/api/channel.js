@@ -5,6 +5,14 @@ const channelApi = {
     return axios.get(`api/channels/${conversationId}`);
   },
 
+  createChannel: (name, memberId, conversationId) => {
+    return axios.post("api/channels", {
+      name,
+      memberId,
+      conversationId,
+    });
+  },
+
   deleteChannel: (channelId, memberId, conversationId) => {
     return axios.delete(`api/channels/${channelId}`, {
       data: {

@@ -19,7 +19,6 @@ export function AddChannelModal({ isOpen, onClose, onAdd }) {
 
     // Create new channel
     onAdd({
-      id: Date.now().toString(), // Generate temporary ID
       name: channelName.trim(),
     });
 

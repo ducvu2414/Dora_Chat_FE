@@ -308,13 +308,35 @@ export default function ChatSingle() {
   const handleDeleteChannel = async (channelId) => {
     console.log("Deleting channel:", channelId);
     try {
-      await channelApi.deleteChannel(channelId, member.data._id, conversationId);
+      await channelApi.deleteChannel(
+        channelId,
+        member.data._id,
+        conversationId
+      );
       setChannels((prev) => prev.filter((channel) => channel.id !== channelId));
       setActiveChannel((prev) =>
         prev === channelId ? channels[0]?.id || null : prev
       );
     } catch (error) {
       console.error("Error deleting channel:", error.response.data.message);
+    }
+  };
+
+  const handleAddChannel = async (channelName) => {
+    console.log("Adding channel:", channelName);
+    try {
+      const newChannel = await channelApi.createChannel(
+        channelName.name,
+        member.data._id,
+        conversationId
+      );
+      setChannels((prev) => [
+        ...prev,
+        { id: newChannel._id, name: channelName.name },
+      ]);
+      setActiveChannel(newChannel._id);
+    } catch (error) {
+      console.error("Error adding channel:", error.response.data.message);
     }
   };
 
@@ -345,6 +367,7 @@ export default function ChatSingle() {
                 }
                 onChannelChange={setActiveChannel}
                 onDeleteChannel={handleDeleteChannel}
+                onAddChannel={handleAddChannel}
               />
               <ChatBox
                 key={conversationId}

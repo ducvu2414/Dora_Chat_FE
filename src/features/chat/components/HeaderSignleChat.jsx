@@ -18,6 +18,7 @@ export default function HeaderSignleChat({
   conversation,
   onChannelChange,
   onDeleteChannel,
+  onAddChannel,
 }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -133,6 +134,7 @@ export default function HeaderSignleChat({
           activeChannel={activeTab}
           onChannelChange={onChannelChange}
           onDeleteChannel={onDeleteChannel}
+          onAddChannel={onAddChannel}
         />
       )}
     </div>
