@@ -8,6 +8,7 @@ import {
   setActiveConversation,
   setMessages,
   setPinMessages,
+  setChannels,
 } from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
@@ -24,14 +25,13 @@ import VoteModal from "@/components/ui/vote-modal";
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
-  const { messages, unread, pinMessages, conversations } = useSelector(
+  const { messages, unread, pinMessages, conversations, channels } = useSelector(
     (state) => state.chat
   );
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
   const [conversation, setConversation] = useState(null);
-  const [channels, setChannels] = useState([]);
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
@@ -45,7 +45,6 @@ export default function ChatSingle() {
   useEffect(() => {
     const resetState = () => {
       setConversation(null);
-      setChannels([]);
       setActiveChannel(null);
       setPhotosVideos([]);
       setFiles([]);
@@ -70,10 +69,6 @@ export default function ChatSingle() {
           channelsRes = await channelApi.getAllChannelByConversationId(
             conversationId
           );
-          const mappedChannels = channelsRes.map((channel) => ({
-            id: channel._id,
-            name: channel.name,
-          }));
 
           setMember(
             await memberApi.getByConversationIdAndUserId(
@@ -94,8 +89,8 @@ export default function ChatSingle() {
           );
 
           dispatch(setPinMessages(pinMessages));
+          dispatch(setChannels(channelsRes));
           setIsMember(isMember);
-          setChannels(mappedChannels);
           setConversation(res);
           setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {

@@ -9,6 +9,7 @@ const chatSlice = createSlice({
     activeConversationId: null, // Cuộc trò chuyện đang mở
     pinMessages: [], // Danh sách tin nhắn đã ghim
     classifies: [], // Mảng phân loại
+    channels: [], // Danh sách kênh
   },
   reducers: {
     setConversations: (state, action) => {
@@ -219,6 +220,10 @@ const chatSlice = createSlice({
       const { _id } = action.payload;
       state.pinMessages = state.pinMessages.filter((msg) => msg._id !== _id);
     },
+
+    setChannels: (state, action) => {
+      state.channels = action.payload;
+    },
   },
 });
 
@@ -244,5 +249,6 @@ export const {
   setClassifies,
   updateNameConversation,
   updateMemberName,
+  setChannels,
 } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -106,12 +106,12 @@ export function ChannelTab({
         <div className="relative flex items-center gap-4 px-6 py-3 border-b border-gray-300">
           {channels.map((channel) => (
             <button
-              key={channel.id}
-              data-id={channel.id}
-              onClick={() => onChannelChange(channel.id)}
-              onContextMenu={(e) => handleContextMenu(e, channel.id)}
+              key={channel._id}
+              data-id={channel._id}
+              onClick={() => onChannelChange(channel._id)}
+              onContextMenu={(e) => handleContextMenu(e, channel._id)}
               className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
-                activeChannel === channel.id
+                activeChannel === channel._id
                   ? "text-regal-blue border-regal-blue"
                   : "text-gray-500 hover:text-regal-blue"
               }`}
