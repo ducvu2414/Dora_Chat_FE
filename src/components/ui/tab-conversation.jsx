@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { TabGroup } from "@/components/ui/tab-group";
 import { ClassifyDropdown } from "@/components/ui/classify/ClassifyDropdown";
 

@@ -57,7 +57,7 @@ export default function ChatSingle() {
       if (!conversationId) return;
 
       resetState();
-      
+
       try {
         setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
@@ -72,7 +72,7 @@ export default function ChatSingle() {
           );
           const mappedChannels = channelsRes.map((channel) => ({
             id: channel._id,
-            label: channel.name,
+            name: channel.name,
           }));
 
           setMember(
@@ -354,8 +354,9 @@ export default function ChatSingle() {
 
             {/* DetailChat*/}
             <div
-              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"
-                }`}
+              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
+                showDetail ? "w-[385px]" : "w-0"
+              }`}
             >
               {/* log messages */}
               {showDetail && (

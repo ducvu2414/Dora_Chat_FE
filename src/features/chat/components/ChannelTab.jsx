@@ -1,8 +1,123 @@
-import { TabGroup } from "@/components/ui/tab-group";
+/* eslint-disable react/prop-types */
+import { useState, useRef, useEffect } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChannelContextMenu } from "@/components/ui/channel-context-menu";
+import { AddChannelModal } from "@/components/ui/add-channel-modal";
 
-// eslint-disable-next-line react/prop-types
-export function ChannelTab({ tabs, activeTab, onTabChange }) {
+export function ChannelTab({
+  channels = [],
+  activeChannel,
+  onChannelChange,
+  onDeleteChannel,
+  onAddChannel,
+}) {
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    channelId: null,
+  });
+  const [isAddChannelOpen, setIsAddChannelOpen] = useState(false);
+  const tabsRef = useRef(null);
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu.visible) {
+        setContextMenu({ ...contextMenu, visible: false });
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [contextMenu]);
+
+  // Handle right click on channel tab
+  const handleContextMenu = (e, channelId) => {
+    e.preventDefault(); // Prevent default browser context menu
+
+    const tabElement = e.currentTarget;
+    const tabRect = tabElement.getBoundingClientRect();
+
+    // Use exact cursor position without adjustment
+    setContextMenu({
+      visible: true,
+      x: tabRect.left,
+      y: tabRect.bottom,
+      channelId,
+    });
+    setTimeout(() => {
+      setContextMenu((prev) => ({ ...prev, visible: true }));
+    }, 0); // Delay to allow for context menu to be positioned correctly
+  };
+
+  // Handle delete channel
+  const handleDeleteChannel = (channelId) => {
+    if (onDeleteChannel) {
+      onDeleteChannel(channelId);
+    }
+    setContextMenu({ ...contextMenu, visible: false });
+  };
+
+  // Handle add new channel
+  const handleAddChannel = (channelData) => {
+    if (onAddChannel) {
+      onAddChannel(channelData);
+    }
+    setIsAddChannelOpen(false);
+  };
+
   return (
-    <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} />
+    <div
+      className="relative flex items-center border-b border-gray-200"
+      ref={tabsRef}
+    >
+      <div className="flex-1 overflow-x-auto scrollbar-hide">
+        <div className="relative flex items-center gap-4 px-6 py-3 border-b border-gray-300">
+          {channels.map((channel) => (
+            <button
+              key={channel.id}
+              onClick={() => onChannelChange(channel.id)}
+              onContextMenu={(e) => handleContextMenu(e, channel.id)}
+              className={`text-sm font-bold relative rounded-full bg-white focus:outline-none ${
+                activeChannel === channel.id
+                  ? "text-regal-blue border-regal-blue"
+                  : "text-gray-500 hover:text-regal-blue"
+              }`}
+            >
+              {channel.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Add Channel Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="ml-2 mr-2 text-gray-500 hover:text-blue-600 hover:bg-gray-50"
+        onClick={() => setIsAddChannelOpen(true)}
+      >
+        <Plus className="h-5 w-5" />
+      </Button>
+
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <ChannelContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          channelId={contextMenu.channelId}
+          onDelete={handleDeleteChannel}
+        />
+      )}
+
+      {/* Add Channel Modal */}
+      <AddChannelModal
+        isOpen={isAddChannelOpen}
+        onClose={() => setIsAddChannelOpen(false)}
+        onAdd={handleAddChannel}
+      />
+    </div>
   );
 }

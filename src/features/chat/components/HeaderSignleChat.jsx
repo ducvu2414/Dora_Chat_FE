@@ -34,12 +34,16 @@ export default function HeaderSignleChat({
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
     if (currentCall) {
-      alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+      alert(
+        "Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới."
+      );
       return;
     }
     const isGroup = conversation.type;
     if (currentCall) {
-      alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
+      alert(
+        "Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới."
+      );
       return;
     }
 
@@ -87,7 +91,7 @@ export default function HeaderSignleChat({
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
-          src={ conversation.avatar || Avatar}
+          src={conversation.avatar || Avatar}
           className="w-[70px] h-[70px] object-cover rounded-full"
         />
         <div className="ml-3">
@@ -124,9 +128,9 @@ export default function HeaderSignleChat({
         <></>
       ) : (
         <ChannelTab
-          tabs={channelTabs}
-          activeTab={activeTab}
-          onTabChange={onChannelChange}
+          channels={channelTabs}
+          activeChannel={activeTab}
+          onChannelChange={onChannelChange}
           className="fixed top-0 left-0 right-0"
         />
       )}
