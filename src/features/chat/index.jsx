@@ -15,7 +15,6 @@ import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
 import HeaderSignleChat from "./components/HeaderSignleChat";
 import MessageInput from "./components/MessageInput";
-import conversationApi from "@/api/conversation";
 import channelApi from "@/api/channel";
 import memberApi from "@/api/member";
 import messageApi from "@/api/message";
@@ -31,7 +30,6 @@ export default function ChatSingle() {
   const conversationMessages = messages[conversationId] || [];
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(false);
-  const [conversation, setConversation] = useState(null);
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
@@ -39,14 +37,19 @@ export default function ChatSingle() {
   const [showDetail, setShowDetail] = useState(false);
   const [member, setMember] = useState(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-
+  const [conversation, setConversation] = useState(
+    conversations.filter((conv) => conv._id === conversationId)[0]
+  );
   const chatBoxRef = useRef(null);
 
-  console.log("channels", channels);
+  useEffect(() => {
+    setConversation(
+      conversations.filter((conv) => conv._id === conversationId)[0]
+    );
+  }, [conversationId, conversation]);
 
   useEffect(() => {
     const resetState = () => {
-      setConversation(null);
       setActiveChannel(null);
       setPhotosVideos([]);
       setFiles([]);
@@ -63,11 +66,9 @@ export default function ChatSingle() {
         setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
 
-        let res = null;
         let channelsRes = [];
 
         try {
-          res = await conversationApi.getConversationById(conversationId);
           channelsRes = await channelApi.getAllChannelByConversationId(
             conversationId
           );
@@ -95,14 +96,13 @@ export default function ChatSingle() {
           dispatch(setPinMessages(pinMessages));
           dispatch(setChannels(channelsRes));
           setIsMember(isMember);
-          setConversation(res);
           setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {
           console.error("Error fetching conversation:", error);
         }
 
-        if (res) {
-          if (!res.type) {
+        if (conversation) {
+          if (!conversation.type) {
             // single chat
             try {
               const messages = await messageApi.fetchMessages(conversationId);
@@ -348,9 +348,7 @@ export default function ChatSingle() {
                 channelTabs={channels}
                 activeTab={activeChannel}
                 handleDetail={setShowDetail}
-                conversation={
-                  conversations.filter((conv) => conv._id === conversationId)[0]
-                }
+                conversation={conversation}
                 onChannelChange={setActiveChannel}
                 onDeleteChannel={handleDeleteChannel}
                 onAddChannel={handleAddChannel}
@@ -368,10 +366,7 @@ export default function ChatSingle() {
                 onSend={handleSendMessage}
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
-                isGroup={
-                  conversations.filter((conv) => conv._id === conversationId)[0]
-                    .type
-                }
+                isGroup={conversation.type}
               />
             </div>
 

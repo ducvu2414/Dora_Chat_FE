@@ -20,7 +20,7 @@ export default function VoteDisplay({
 
   const currentUserVoteIds = vote.options.reduce((acc, option) => {
     const userVote = option.members?.find(
-      (memberTemp) => memberTemp.memberId === member._id
+      (memberTemp) => memberTemp.memberId === member?._id
     );
     if (userVote) {
       acc.push(option._id);
