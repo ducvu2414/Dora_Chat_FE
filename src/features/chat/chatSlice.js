@@ -244,6 +244,16 @@ const chatSlice = createSlice({
         state.channels[index].name = name;
       }
     },
+
+    updateAvatarGroupConversation: (state, action) => {
+      const { conversationId, avatar } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations[index].avatar = avatar;
+      }
+    },
   },
 });
 
@@ -273,5 +283,6 @@ export const {
   addChannel,
   deleteChannel,
   updateChannel,
+  updateAvatarGroupConversation,
 } = chatSlice.actions;
 export default chatSlice.reducer;

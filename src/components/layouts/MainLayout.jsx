@@ -32,6 +32,7 @@ import {
   addChannel,
   deleteChannel,
   updateChannel,
+  updateAvatarGroupConversation,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -56,7 +57,6 @@ import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 import callChannel from "../../utils/callChannel";
 import { AlertMessage } from "@/components/ui/alert-message";
-import { update } from "lodash";
 
 const requests = [];
 
@@ -623,6 +623,15 @@ const MainLayout = () => {
       );
     };
 
+    const handleUpdateAvatarGroupConversation = (data) => {
+      dispatch(
+        updateAvatarGroupConversation({
+          conversationId: data.conversationId,
+          avatar: data.avatar,
+        })
+      );
+    };
+
     // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -644,6 +653,10 @@ const MainLayout = () => {
       SOCKET_EVENTS.UPDATE_NAME_CONVERSATION,
       handleUpdateNameConversation
     );
+    socket.on(
+      SOCKET_EVENTS.UPDATE_AVATAR_GROUP_CONVERSATION,
+      handleUpdateAvatarGroupConversation
+    );
 
     return () => {
       socket.off(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
@@ -664,6 +677,10 @@ const MainLayout = () => {
       socket.off(
         SOCKET_EVENTS.CONVERSATION_DISBANDED,
         handleDisbandedConversation
+      );
+      socket.off(
+        SOCKET_EVENTS.UPDATE_AVATAR_GROUP_CONVERSATION,
+        handleUpdateAvatarGroupConversation
       );
     };
   }, [socket]);
