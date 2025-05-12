@@ -154,7 +154,7 @@ export default function UserInformation() {
       try {
         setLoading(true);
         const user = JSON.parse(localStorage.getItem("user"));
-        const response = await me.getProfile(user._id);
+        const response = await me.getProfile();
         setUserInfo(response);
         const qrResponse = await me.getQR(user._id);
         setQr(qrResponse);

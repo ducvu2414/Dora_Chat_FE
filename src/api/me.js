@@ -1,8 +1,8 @@
 import axios from "./axiosClient";
 
 const meApi = {
-  getProfile: (id) => {
-    const url = `api/me/profile/${id}`;
+  getProfile: () => {
+    const url = `api/me/profile`;
     return axios.get(url);
   },
   getQR: (id) => {
