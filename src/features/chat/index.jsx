@@ -40,6 +40,7 @@ export default function ChatSingle() {
   const [conversation, setConversation] = useState(
     conversations.filter((conv) => conv._id === conversationId)[0]
   );
+  const [members, setMembers] = useState([]);
   const chatBoxRef = useRef(null);
 
   useEffect(() => {
@@ -82,7 +83,7 @@ export default function ChatSingle() {
             )
           );
 
-          const isMember = (
+          const isMemberRes = (
             await memberApi.isMember(
               conversationId,
               JSON.parse(localStorage.getItem("user"))._id
@@ -93,9 +94,12 @@ export default function ChatSingle() {
             conversationId
           );
 
+          const MembersRes = await memberApi.getMembers(conversationId);
+          setMembers(MembersRes.data);
+
           dispatch(setPinMessages(pinMessages));
           dispatch(setChannels(channelsRes));
-          setIsMember(isMember);
+          setIsMember(isMemberRes);
           setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {
           console.error("Error fetching conversation:", error);
@@ -162,7 +166,7 @@ export default function ChatSingle() {
     setLinks(links);
   }, [conversationMessages.length]);
 
-  const handleSendMessage = async ({ content, type, files }) => {
+  const handleSendMessage = async ({ content, type, tags, tagPositions, files }) => {
     const channelId = activeChannel;
     try {
       if (type === "TEXT") {
@@ -170,6 +174,8 @@ export default function ChatSingle() {
           conversationId,
           content,
           channelId,
+          tags,
+          tagPositions,
         });
       } else if (type === "IMAGE") {
         await messageApi.sendImageMessage(conversationId, files, channelId);
@@ -368,6 +374,8 @@ export default function ChatSingle() {
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
                 isGroup={conversation.type}
+                members={members}
+                member={member?.data}
               />
             </div>
 

@@ -8,8 +8,19 @@ import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 
-export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isGroup }) {
+export default function MessageInput({
+  onSend,
+  isMember,
+  setIsVoteModalOpen,
+  isGroup,
+  members,
+  member,
+}) {
   const [input, setInput] = useState("");
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionPosition, setMentionPosition] = useState(null);
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFiles, setVideoFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -24,6 +35,11 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null); // dùng để thao tác con trỏ input
+
+  // ignore member._id
+  const filteredMembers = members
+    .filter((m) => m._id.toString() !== member._id.toString())
+    .filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase()));
 
   useEffect(() => {
     setIsMember(isMember);
@@ -107,10 +123,38 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
 
     setIsLoading(true);
     try {
+      const tagRegex = /@(\w[\w\s]*\w|\w)/g;
+      let match;
+      const tags = [];
+      const tagPositions = [];
+
+      while ((match = tagRegex.exec(input)) !== null) {
+        const memberName = match[1];
+        const foundMember = members.find(
+          (m) =>
+            m.name.trim().toLowerCase() === memberName.trim().toLowerCase() &&
+            m._id.toString() !== member._id.toString() // Sử dụng prop member thay vì biến local
+        );
+
+        if (foundMember) {
+          tags.push(foundMember._id);
+          tagPositions.push({
+            memberId: foundMember._id,
+            start: match.index,
+            end: match.index + memberName.length + 1,
+            name: foundMember.name,
+          });
+        }
+      }
       if (input.trim()) {
         await onSend({
           content: input.trim(),
           type: "TEXT",
+          tags,
+          tagPositions,
+        }).catch((sendError) => {
+          console.error("Error in onSend TEXT:", sendError);
+          throw sendError; // Re-throw để catch bên ngoài bắt được
         });
       }
 
@@ -154,7 +198,39 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // Xử lý navigation trong dropdown mention
+    if (showMentionDropdown) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedMentionIndex((prev) =>
+          Math.min(prev + 1, filteredMembers.length - 1)
+        );
+        return;
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedMentionIndex((prev) => Math.max(prev - 1, 0));
+        return;
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (filteredMembers[selectedMentionIndex]) {
+          handleSelectMention(filteredMembers[selectedMentionIndex]);
+        }
+        return;
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setShowMentionDropdown(false);
+        return;
+      }
+    }
+
+    // Xử lý gửi tin nhắn như cũ
+    if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
       e.preventDefault();
       handleSend();
     }
@@ -173,6 +249,58 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
         cursorPos + emojiData.emoji.length,
         cursorPos + emojiData.emoji.length
       );
+    }, 0);
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInput(value);
+
+    const cursorPos = e.target.selectionStart;
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtPos = textBeforeCursor.lastIndexOf("@");
+
+    if (
+      lastAtPos >= 0 &&
+      (cursorPos === lastAtPos + 1 ||
+        /^[\w\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1)))
+    ) {
+      const query = textBeforeCursor.substring(lastAtPos + 1);
+
+      setMentionQuery(query);
+      setShowMentionDropdown(true);
+      setMentionPosition({
+        start: lastAtPos,
+        end: cursorPos,
+      });
+      setSelectedMentionIndex(0);
+    } else {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  const handleSelectMention = (selectedMember) => {
+    if (
+      !mentionPosition ||
+      selectedMember._id.toString() === member._id.toString()
+    ) {
+      setShowMentionDropdown(false);
+      return;
+    }
+
+    const newText =
+      input.substring(0, mentionPosition.start) +
+      `@${selectedMember.name}` +
+      input.substring(mentionPosition.end);
+
+    setInput(newText);
+    setShowMentionDropdown(false);
+
+    setTimeout(() => {
+      const newCursorPos =
+        mentionPosition.start + selectedMember.name.length + 1;
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
 
@@ -257,27 +385,75 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
         </div>
       )}
 
+      {/* Mention Dropdown */}
+      {showMentionDropdown && filteredMembers.length > 0 && (
+        <div
+          className="absolute bottom-[70px] left-4 z-10 w-64 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
+          style={{
+            left: mentionPosition ? `${mentionPosition.start * 8}px` : "0",
+          }}
+        >
+          {filteredMembers.length === 0 ? (
+            <div className="p-2 text-gray-500">No members to mention</div>
+          ) : (
+            filteredMembers.map((member, index) => (
+              <div
+                key={member._id}
+                className={`p-2 hover:bg-gray-100 cursor-pointer ${
+                  selectedMentionIndex === index ? "bg-blue-50" : ""
+                }`}
+                onClick={() => handleSelectMention(member)}
+              >
+                <div className="flex items-center">
+                  <div className="mr-2">
+                    {member.avatar ? (
+                      <img
+                        src={member.avatar}
+                        alt={member.name}
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{
+                          backgroundColor: member.avatarColor || "#ccc",
+                        }}
+                      >
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium">{member.name}</div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       <div className="flex items-center p-3 border-t">
         {!isMemberState ? (
           <></>
         ) : (
           // !isLoading && (
-            <>
-              <Button
-                size="icon"
-                className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none focus:outline-none mr-3"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <Plus className="!h-6 !w-6" />
-              </Button>
-              <MoreMessageDropdown
-                isOpen={isDropdownOpen}
-                onClose={() => setIsDropdownOpen(false)}
-                onFileSelect={handleFileSelect}
-                setIsVoteModalOpen={setIsVoteModalOpen}
-                isGroup={isGroup}
-              />
-            </>
+          <>
+            <Button
+              size="icon"
+              className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none focus:outline-none mr-3"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <Plus className="!h-6 !w-6" />
+            </Button>
+            <MoreMessageDropdown
+              isOpen={isDropdownOpen}
+              onClose={() => setIsDropdownOpen(false)}
+              onFileSelect={handleFileSelect}
+              setIsVoteModalOpen={setIsVoteModalOpen}
+              isGroup={isGroup}
+            />
+          </>
 
           // )
         )}
@@ -299,7 +475,7 @@ export default function MessageInput({ onSend, isMember, setIsVoteModalOpen, isG
               <input
                 ref={inputRef}
                 value={input || ""}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 type="text"
                 placeholder="Type a message..."
