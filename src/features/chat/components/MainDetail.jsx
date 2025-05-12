@@ -6,7 +6,6 @@ import { useState, useEffect, useRef } from "react";
 import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
-import Avatar from "@assets/chat/avatar.png";
 import Bell from "@assets/chat/bell.svg";
 import CheckDecentraliza from "@assets/chat/check_icon.svg";
 import Decentraliza from "@assets/chat/decentraliza.svg";
@@ -58,6 +57,12 @@ export default function MainDetail({
   const [isHoverAvatar, setIsHoverAvatar] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  const partner =
+    conversation.name ||
+    conversation.members?.filter((member) => {
+      return member.userId !== JSON.parse(localStorage.getItem("user"))._id;
+    });
 
   // Set name of conversation
   useEffect(() => {
@@ -384,7 +389,7 @@ export default function MainDetail({
           onMouseLeave={() => setIsHoverAvatar(false)}
         >
           <img
-            src={conversation.avatar || Avatar}
+            src={conversation.type ? conversation.avatar : partner[0]?.avatar}
             className="w-16 h-16 rounded-full"
             alt="Avatar"
             onClick={handleButtonClick}

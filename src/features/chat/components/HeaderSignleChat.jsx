@@ -2,7 +2,6 @@
 import { ChannelTab } from "@/features/chat/components/ChannelTab";
 import { SOCKET_EVENTS } from "@/utils/constant";
 import { socket } from "@/utils/socketClient";
-import Avatar from "@assets/chat/avatar.png";
 import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
@@ -93,7 +92,7 @@ export default function HeaderSignleChat({
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
       <div className="flex items-center px-4 pt-5 pb-1 border-b">
         <img
-          src={conversation.avatar || Avatar}
+          src={conversation.type ? conversation.avatar : partner[0]?.avatar}
           className="w-[70px] h-[70px] object-cover rounded-full"
         />
         <div className="ml-3">

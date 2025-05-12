@@ -344,6 +344,7 @@ export default function ChatSingle() {
           <div className="flex flex-1 overflow-auto">
             {/* ChatBox  */}
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
+              {console.log("header single chat", conversation)}
               <HeaderSignleChat
                 channelTabs={channels}
                 activeTab={activeChannel}
