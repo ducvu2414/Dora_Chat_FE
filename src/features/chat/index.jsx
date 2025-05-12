@@ -43,6 +43,41 @@ export default function ChatSingle() {
   const [members, setMembers] = useState([]);
   const chatBoxRef = useRef(null);
 
+
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [messageSkip, setMessageSkip] = useState(100);
+
+
+  const loadMoreMessages = async () => {
+    if (loadingMore || !conversationId || !activeChannel) return;
+
+    setLoadingMore(true);
+
+    try {
+      const res = await messageApi.fetchMessagesByChannelId(activeChannel, {
+        skip: messageSkip,
+        limit: 100,
+      });
+
+      const existingIds = new Set(messages[conversationId]?.map(msg => msg._id));
+      const uniqueMessages = res.filter(msg => !existingIds.has(msg._id));
+      if (uniqueMessages.length === 0) {
+        setHasMoreMessages(false);
+      } else {
+        dispatch(setMessages({
+          conversationId,
+          messages: [...uniqueMessages, ...messages[conversationId]],
+        }));
+        setMessageSkip(prev => prev + uniqueMessages.length);
+      }
+    } catch (error) {
+      console.error("Error loading more messages", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
     setConversation(
       conversations.filter((conv) => conv._id === conversationId)[0]
@@ -73,8 +108,6 @@ export default function ChatSingle() {
           channelsRes = await channelApi.getAllChannelByConversationId(
             conversationId
           );
-
-          console.log("channelsRes", channelsRes);
 
           setMember(
             await memberApi.getByConversationIdAndUserId(
@@ -136,7 +169,11 @@ export default function ChatSingle() {
     const fetchChannelMessages = async () => {
       try {
         const messages = await messageApi.fetchMessagesByChannelId(
-          activeChannel
+          activeChannel,
+          {
+            skip: 0,
+            limit: 100,
+          }
         );
         dispatch(setMessages({ conversationId, messages }));
       } catch (error) {
@@ -368,6 +405,7 @@ export default function ChatSingle() {
                 onSave={handleUpdateVote}
                 onLock={handleLockVote}
                 ref={chatBoxRef}
+                onLoadMore={hasMoreMessages ? loadMoreMessages : () => { }}
               />
               <MessageInput
                 onSend={handleSendMessage}
@@ -381,9 +419,7 @@ export default function ChatSingle() {
 
             {/* DetailChat*/}
             <div
-              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
-                showDetail ? "w-[385px]" : "w-0"
-              }`}
+              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"}`}
             >
               {/* log messages */}
               {showDetail && (

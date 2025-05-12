@@ -9,7 +9,7 @@ import {
 } from "react";
 import MessageItem from "./MessageItem";
 const ChatBox = forwardRef(
-  ({ messages, onSelected, member, onSave, onLock }, ref) => {
+  ({ messages, onSelected, member, onSave, onLock, onLoadMore }, ref) => {
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
 
@@ -51,6 +51,21 @@ const ChatBox = forwardRef(
           chatContainerRef.current.scrollHeight;
       }
     }, [messages.length]);
+
+    useEffect(() => {
+      const container = chatContainerRef.current;
+      if (!container) return;
+
+      const handleScroll = () => {
+        if (container.scrollTop < 100) {
+          onLoadMore();
+        }
+      };
+
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }, [onLoadMore]);
+
 
     return (
       <div className="flex-1 flex flex-col h-px bg-[#fff] py-2">
