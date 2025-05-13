@@ -16,7 +16,6 @@ export default function MessageInput({
   members,
   member,
 }) {
-  const [input, setInput] = useState("");
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
   const [mentionPosition, setMentionPosition] = useState(null);
@@ -31,10 +30,11 @@ export default function MessageInput({
   const [isMemberState, setIsMember] = useState(isMember);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
-  const inputRef = useRef(null); // dùng để thao tác con trỏ input
+  const editableRef = useRef(null); // dùng để thao tác con trỏ input
 
   // ignore member._id
   const filteredMembers = members
@@ -118,43 +118,66 @@ export default function MessageInput({
   };
 
   const handleSend = async () => {
-    if (!input.trim() && !imageFiles.length && !file && !videoFiles.length)
+    console.log("click send");
+    if (
+      !editableRef.current?.innerText.trim() &&
+      !imageFiles.length &&
+      !file &&
+      !videoFiles.length
+    )
       return;
+    console.log("click send 2");
 
     setIsLoading(true);
     try {
-      const tagRegex = /@(\w[\w\s]*\w|\w)/g;
-      let match;
+      // Lấy plain text từ contentEditable (đã bỏ các tag HTML)
+      const plainText = editableRef.current?.innerText || "";
+
+      // Xử lý tags như cũ
       const tags = [];
       const tagPositions = [];
 
-      while ((match = tagRegex.exec(input)) !== null) {
-        const memberName = match[1];
-        const foundMember = members.find(
-          (m) =>
-            m.name.trim().toLowerCase() === memberName.trim().toLowerCase() &&
-            m._id.toString() !== member._id.toString() // Sử dụng prop member thay vì biến local
-        );
+      if (editableRef.current) {
+        const spans = editableRef.current.querySelectorAll(".mention");
 
-        if (foundMember) {
-          tags.push(foundMember._id);
-          tagPositions.push({
-            memberId: foundMember._id,
-            start: match.index,
-            end: match.index + memberName.length + 1,
-            name: foundMember.name,
-          });
-        }
+        spans.forEach((span) => {
+          const memberName = span.textContent.replace(/^@/, "").trim();
+
+          const foundMember = members.find(
+            (m) =>
+              m.name.trim().toLowerCase() === memberName.toLowerCase() &&
+              m._id.toString() !== member._id.toString()
+          );
+
+          if (foundMember) {
+            tags.push(foundMember._id);
+
+            // Tính vị trí start/end dựa trên plainText
+            const plainText = editableRef.current.innerText;
+            const mentionText = span.innerText;
+            const start = plainText.indexOf(mentionText);
+            const end = start + mentionText.length;
+
+            tagPositions.push({
+              memberId: foundMember._id,
+              start,
+              end,
+              name: foundMember.name,
+            });
+          }
+        });
       }
-      if (input.trim()) {
+
+      // Gửi tin nhắn (giữ nguyên phần còn lại)
+      if (plainText.trim()) {
+        console.log("tags", tags);
+        console.log("tagPositions", tagPositions[0]);
+        console.log("plainText", plainText.trim());
         await onSend({
-          content: input.trim(),
+          content: plainText.trim(),
           type: "TEXT",
           tags,
           tagPositions,
-        }).catch((sendError) => {
-          console.error("Error in onSend TEXT:", sendError);
-          throw sendError; // Re-throw để catch bên ngoài bắt được
         });
       }
 
@@ -179,7 +202,6 @@ export default function MessageInput({
         });
       }
 
-      setInput("");
       setImageFiles([]);
       setVideoFiles([]);
       setImagePreviews([]);
@@ -237,36 +259,73 @@ export default function MessageInput({
   };
 
   const onEmojiClick = (emojiData) => {
-    const cursorPos = inputRef.current.selectionStart;
-    const newText =
-      input.slice(0, cursorPos) + emojiData.emoji + input.slice(cursorPos);
-    setInput(newText || "");
+    if (!editableRef.current) return;
 
-    // Cập nhật vị trí con trỏ sau khi thêm emoji
-    setTimeout(() => {
-      inputRef.current.focus();
-      inputRef.current.setSelectionRange(
-        cursorPos + emojiData.emoji.length,
-        cursorPos + emojiData.emoji.length
-      );
-    }, 0);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const emojiNode = document.createTextNode(emojiData.emoji);
+    range.deleteContents();
+    range.insertNode(emojiNode);
+
+    // Di chuyển cursor sau emoji
+    const newRange = document.createRange();
+    newRange.setStartAfter(emojiNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
   };
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInput(value);
+  const handleInputChange = () => {
+    if (!editableRef.current) return;
 
-    const cursorPos = e.target.selectionStart;
-    const textBeforeCursor = value.substring(0, cursorPos);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    let cursorPos = 0;
+    try {
+      const range = selection.getRangeAt(0);
+      const node = selection.anchorNode;
+
+      if (editableRef.current.contains(node)) {
+        // Tính vị trí cursorPos tương đối với đầu contentEditable
+        let pos = 0;
+
+        const traverse = (currentNode) => {
+          if (currentNode === node) {
+            pos += range.startOffset;
+            throw pos; // stop recursion with result
+          }
+
+          if (currentNode.nodeType === Node.TEXT_NODE) {
+            pos += currentNode.textContent.length;
+          }
+
+          currentNode.childNodes.forEach(traverse);
+        };
+
+        try {
+          traverse(editableRef.current);
+        } catch (result) {
+          cursorPos = result;
+        }
+      }
+    } catch (error) {
+      console.error("Error getting cursor position:", error);
+    }
+
+    const text = editableRef.current.innerText || "";
+
+    const textBeforeCursor = text.substring(0, cursorPos);
     const lastAtPos = textBeforeCursor.lastIndexOf("@");
 
     if (
       lastAtPos >= 0 &&
       (cursorPos === lastAtPos + 1 ||
-        /^[\w\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1)))
+        /^[\\w\\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1)))
     ) {
       const query = textBeforeCursor.substring(lastAtPos + 1);
-
       setMentionQuery(query);
       setShowMentionDropdown(true);
       setMentionPosition({
@@ -280,28 +339,46 @@ export default function MessageInput({
   };
 
   const handleSelectMention = (selectedMember) => {
-    if (
-      !mentionPosition ||
-      selectedMember._id.toString() === member._id.toString()
-    ) {
+    if (!mentionPosition || !editableRef.current) {
       setShowMentionDropdown(false);
       return;
     }
 
-    const newText =
-      input.substring(0, mentionPosition.start) +
-      `@${selectedMember.name}` +
-      input.substring(mentionPosition.end);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-    setInput(newText);
+    const textNode = editableRef.current.firstChild || editableRef.current;
+
+    try {
+      const range = document.createRange();
+      range.setStart(textNode, mentionPosition.start);
+      range.setEnd(textNode, mentionPosition.end);
+      range.deleteContents();
+
+      // Tạo span với style mention
+      const span = document.createElement("span");
+      span.style.color = "#1a73e8";
+      span.className = "mention";
+      span.textContent = `@${selectedMember.name}`;
+
+      // Thêm span vào DOM
+      range.insertNode(span);
+
+      // Thêm dấu cách phía sau mention
+      const spaceNode = document.createTextNode("\u00A0"); // &nbsp;
+      span.after(spaceNode);
+
+      // Đưa con trỏ ra sau dấu cách đó
+      const newRange = document.createRange();
+      newRange.setStartAfter(spaceNode);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    } catch (error) {
+      console.error("Error inserting mention:", error);
+    }
+
     setShowMentionDropdown(false);
-
-    setTimeout(() => {
-      const newCursorPos =
-        mentionPosition.start + selectedMember.name.length + 1;
-      inputRef.current.focus();
-      inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
   };
 
   return (
@@ -435,7 +512,12 @@ export default function MessageInput({
 
       <div className="flex items-center p-3 border-t">
         {!isMemberState ? (
-          <></>
+          <input
+            type="text"
+            placeholder="You cannot message this conversation"
+            className="w-full text-sm italic outline-none bg-inherit placeholder:text-center"
+            disabled={true}
+          />
         ) : (
           // !isLoading && (
           <>
@@ -459,7 +541,7 @@ export default function MessageInput({
         )}
 
         <div
-          className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4
+          className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative
            focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300"
         >
           {!isMemberState ? (
@@ -472,20 +554,19 @@ export default function MessageInput({
           ) : (
             // !isLoading && (
             <>
-              <input
-                ref={inputRef}
-                value={input || ""}
-                onChange={handleInputChange}
+              <div
+                ref={editableRef}
+                contentEditable
+                onInput={handleInputChange}
                 onKeyDown={handleKeyDown}
-                type="text"
-                placeholder="Type a message..."
-                className="w-full text-sm outline-none bg-inherit"
+                className="editable-input text-sm bg-inherit py-2 text-left w-full outline-none placeholder:text-gray-500"
+                data-placeholder="Type a message..."
+                suppressContentEditableWarning={true}
               />
               <label className="cursor-pointer hover:opacity-70">
                 <img src={PictureIcon} className="p-2" alt="Picture" />
                 <input
                   type="file"
-                  // accept="image/*,video/*"
                   accept="image/*,video/*"
                   className="hidden"
                   multiple
