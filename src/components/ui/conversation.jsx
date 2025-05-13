@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
@@ -21,9 +22,16 @@ export function Conversation({
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
   const [isPending, startTransition] = useTransition();
+
   const navigate = useNavigate();
 
   const showDropdown = isConversationHovered || isDropdownHovered;
+
+  const partner =
+    name ||
+    members?.filter((member) => {
+      return member.userId !== idUser;
+    });
 
   const handleConversationEnter = () => {
     startTransition(() => {
@@ -58,7 +66,11 @@ export function Conversation({
 
   const handleViewInfo = () => {
     startTransition(() => {
-      navigate("/friend-information");
+      navigate("/friend-information", {
+        state: {
+          userData: partner[0],
+        },
+      });
     });
   };
 
@@ -78,11 +90,6 @@ export function Conversation({
       });
     }
   };
-  const partner =
-    name ||
-    members?.filter((member) => {
-      return member.userId !== idUser;
-    });
 
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>

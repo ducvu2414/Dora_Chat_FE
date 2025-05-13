@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MessageCircle, UserRoundPlus, UserRoundMinus } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setFriends,

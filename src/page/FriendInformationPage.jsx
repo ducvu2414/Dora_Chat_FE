@@ -1,7 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { MessageCircle, UserMinus } from "lucide-react";
+import { MessageCircle, UserRoundMinus, UserRoundPlus } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
 import BannerImage from "@/assets/banner-user-info.png";
 import CatIllustration from "@/assets/friend-information.png";
+import friendApi from "../api/friend";
+import { updateFriendChat } from "../features/friend/friendSlice";
+import {
+  setFriends,
+  setRequestFriends,
+  setMyRequestFriends,
+  updateFriend,
+  updateRequestFriends,
+  updateMyRequestFriend,
+} from "@/features/friend/friendSlice";
 
 const hobbies = [
   { icon: "🏸", label: "Bamintion" },
@@ -11,6 +24,123 @@ const hobbies = [
 ];
 
 export default function FriendInformationPage() {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const userData = state?.userData;
+  const userLogin = JSON.parse(localStorage.getItem("user"));
+  const userId = userLogin._id;
+
+  const { friends, requestFriends, myRequestFriends } = useSelector(
+    (s) => s.friend
+  );
+
+  // Determine relationship status
+  const isFriend = friends.some((f) => f._id === userData?._id);
+  const hasSentRequest = myRequestFriends.some((r) => r._id === userData?._id);
+  const hasReceivedRequest = requestFriends.some(
+    (r) => r._id === userData?._id
+  );
+
+  // Conversation lookup
+  const conversations = useSelector((s) => s.chat.conversations);
+  const conversation = conversations.find(
+    (conv) =>
+      conv.members.some((m) => m.userId === userId) &&
+      conv.members.some((m) => m.userId === userData.userId)
+  );
+
+  // Fetch all lists on mount
+  useEffect(() => {
+    fetchFriends();
+    fetchFriendRequests();
+    fetchSentRequests();
+
+    return () => {};
+  }, []);
+
+  // --- API calls with .data extraction to avoid non-serializable ----------
+  const fetchFriends = async (searchName = "") => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const response = await friendApi.fetchFriends(user._id, searchName);
+      dispatch(setFriends(response));
+    } catch (err) {
+      console.error("Error fetching friends:", err);
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    try {
+      const response = await friendApi.fetchListRequestFriend();
+      console.log("Friend Requests:", response);
+      dispatch(setRequestFriends(response));
+    } catch (err) {
+      console.error("Error fetching friend requests:", err);
+    }
+  };
+
+  const fetchSentRequests = async () => {
+    try {
+      const response = await friendApi.fetchMyRequestFriend();
+      console.log("Sent Friend Requests:", response);
+      dispatch(setMyRequestFriends(response));
+    } catch (err) {
+      console.error("Error fetching sent requests:", err);
+    }
+  };
+
+  const handleAcceptRequest = async () => {
+    try {
+      await friendApi.acceptRequestFriend(userData._id);
+      dispatch(updateRequestFriends(userData._id));
+      dispatch(updateFriend(userData._id));
+      dispatch(updateFriendChat(userData._id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRejectRequest = async () => {
+    try {
+      await friendApi.deleteRequestFriend(userData._id);
+      dispatch(updateRequestFriends(userData._id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUnfriend = async () => {
+    try {
+      if (window.confirm("Are you sure you want to remove this friend?")) {
+        await friendApi.deleteFriend(userData._id);
+        dispatch(updateFriend(userData._id));
+        dispatch(updateFriendChat(userData._id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    try {
+      await friendApi.deleteSentRequestFriend(userData._id);
+      dispatch(updateMyRequestFriend(userData._id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddFriend = async () => {
+    try {
+      await friendApi.sendRequestFriend(userData._id);
+      dispatch(updateMyRequestFriend(userData._id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Main Content */}
@@ -19,7 +149,7 @@ export default function FriendInformationPage() {
         <div
           className="w-full bg-center bg-cover h-72 rounded-2xl"
           style={{
-            backgroundImage: `url(${BannerImage})`,
+            backgroundImage: `url(${userData?.coverImage || BannerImage})`,
           }}
         />
 
@@ -29,7 +159,7 @@ export default function FriendInformationPage() {
             {/* Profile Image - Positioned to overlap */}
             <div className="absolute transform -translate-x-1/2 -top-12 left-1/2">
               <img
-                src="https://s3-alpha-sig.figma.com/img/4f96/6c32/0b9a00911f35a7ae254f6846bb1f4021?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=RZT9n-2xU0OV8osbPbAYdd9QxuYH93wC6VE9dRymL0hPPUZ2RrulkhHwVDP9WDfRJ7I2sgUnBX5gtvWi1gXCuM~DJ-9iwXYx9E3IFuWp-zhH14Bm6--o6Vj3ebU9u1GmG0h0Q445KGb9rFAwuGD3N-VDabqhIYv0xy-hmyRzZxfaX9fTzNtctDMCis-~0QNLwxuVBFTUx9TjaCznyHzRvqhq1NHtvhE~H488WFMLDxbFJpy52EZn7fK7ZCS4x98dGgsHTYzwuqReluqWUwLKcPQl0RR-ShqPub-vYnjN-NxMmsVHzoAzPD1Pc4Eu1TYzBAWTzGgchaiYyFXO-FEWuA__"
+                src={userData?.avatar || BannerImage}
                 alt="Monica William"
                 className="object-cover w-24 h-24 border-4 border-white rounded-full"
               />
@@ -38,7 +168,7 @@ export default function FriendInformationPage() {
             <div className="flex flex-col items-center pt-4">
               {/* Name and Bio */}
               <h1 className="mb-1 text-2xl font-semibold text-blue-600">
-                Monica William
+                {userData?.name || "Unknown User"}
               </h1>
               <p className="mb-6 text-gray-600">
                 ✨ Adding a little sparkle to your day.
@@ -46,17 +176,52 @@ export default function FriendInformationPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-4 mb-4">
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => navigate(`/chat/${conversation?._id}`)}
+                >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Send message
                 </Button>
-                <Button
-                  variant="outline"
-                  className="text-blue-600 border-blue-600 hover:bg-red-600 hover:border-transparent"
-                >
-                  <UserMinus className="w-4 h-4 mr-2" />
-                  Unfriend
-                </Button>
+                {hasReceivedRequest ? (
+                  <>
+                    <Button
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={handleAcceptRequest}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      className="bg-red-600 hover:bg-red-700"
+                      onClick={handleRejectRequest}
+                    >
+                      Reject
+                    </Button>
+                  </>
+                ) : isFriend ? (
+                  <Button
+                    className="bg-red-600 hover:bg-red-700"
+                    onClick={handleUnfriend}
+                  >
+                    <UserRoundMinus className="w-4 h-4 mr-2" />
+                    Unfriend
+                  </Button>
+                ) : hasSentRequest ? (
+                  <Button
+                    className="bg-gray-400 hover:bg-gray-500"
+                    onClick={handleCancelRequest}
+                  >
+                    Cancel Request
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handleAddFriend}
+                  >
+                    <UserRoundPlus className="w-4 h-4 mr-2" />
+                    Add friend
+                  </Button>
+                )}
               </div>
 
               {/* Information Section */}
