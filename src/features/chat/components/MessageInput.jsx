@@ -170,9 +170,6 @@ export default function MessageInput({
 
       // Gửi tin nhắn (giữ nguyên phần còn lại)
       if (plainText.trim()) {
-        console.log("tags", tags);
-        console.log("tagPositions", tagPositions[0]);
-        console.log("plainText", plainText.trim());
         await onSend({
           content: plainText.trim(),
           type: "TEXT",
@@ -347,38 +344,62 @@ export default function MessageInput({
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
-    const textNode = editableRef.current.firstChild || editableRef.current;
+    const range = document.createRange();
+    let charIndex = 0;
+    let found = false;
 
-    try {
-      const range = document.createRange();
-      range.setStart(textNode, mentionPosition.start);
-      range.setEnd(textNode, mentionPosition.end);
-      range.deleteContents();
+    const traverseNodes = (node) => {
+      if (found) return;
 
-      // Tạo span với style mention
-      const span = document.createElement("span");
-      span.style.color = "#1a73e8";
-      span.className = "mention";
-      span.textContent = `@${selectedMember.name}`;
+      if (node.nodeType === Node.TEXT_NODE) {
+        const nextCharIndex = charIndex + node.textContent.length;
 
-      // Thêm span vào DOM
-      range.insertNode(span);
+        if (
+          mentionPosition.start >= charIndex &&
+          mentionPosition.end <= nextCharIndex
+        ) {
+          const startOffset = mentionPosition.start - charIndex;
+          const endOffset = mentionPosition.end - charIndex;
 
-      // Thêm dấu cách phía sau mention
-      const spaceNode = document.createTextNode("\u00A0"); // &nbsp;
-      span.after(spaceNode);
+          range.setStart(node, startOffset);
+          range.setEnd(node, endOffset);
 
-      // Đưa con trỏ ra sau dấu cách đó
-      const newRange = document.createRange();
-      newRange.setStartAfter(spaceNode);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    } catch (error) {
-      console.error("Error inserting mention:", error);
+          found = true;
+          return;
+        }
+
+        charIndex = nextCharIndex;
+      } else {
+        node.childNodes.forEach(traverseNodes);
+      }
+    };
+
+    traverseNodes(editableRef.current);
+
+    if (!found) {
+      console.error("Failed to locate mention position");
+      return;
     }
 
+    // Chèn mention span như cũ
+    const span = document.createElement("span");
+    span.style.color = "#1a73e8";
+    span.className = "mention";
+    span.textContent = `@${selectedMember.name}`;
+    range.deleteContents();
+    range.insertNode(span);
+
+    const spaceNode = document.createTextNode("\u00A0");
+    span.after(spaceNode);
+
+    const newRange = document.createRange();
+    newRange.setStartAfter(spaceNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
     setShowMentionDropdown(false);
+    setMentionPosition(null);
   };
 
   return (
