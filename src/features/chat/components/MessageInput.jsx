@@ -16,6 +16,7 @@ export default function MessageInput({
   members,
   member,
 }) {
+  const [input, setInput] = useState("");
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
   const [mentionPosition, setMentionPosition] = useState(null);
@@ -314,6 +315,8 @@ export default function MessageInput({
           cursorPos = result;
         }
       }
+
+      setInput(editableRef.current.innerText);
     } catch (error) {
       console.error("Error getting cursor position:", error);
     }
@@ -590,15 +593,30 @@ export default function MessageInput({
           ) : (
             // !isLoading && (
             <>
-              <div
-                ref={editableRef}
-                contentEditable
-                onInput={handleInputChange}
-                onKeyDown={handleKeyDown}
-                className="editable-input text-sm bg-inherit py-2 text-left w-full outline-none placeholder:text-gray-500"
-                data-placeholder="Type a message..."
-                suppressContentEditableWarning={true}
-              />
+              <div className="relative w-full">
+                {/* Placeholder giả */}
+                {input.trim() === "" && (
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none select-none text-sm">
+                    Type a message...
+                  </div>
+                )}
+
+                <div
+                  ref={editableRef}
+                  contentEditable
+                  onInput={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  data-placeholder="Type a message..."
+                  suppressContentEditableWarning={true}
+                  className="text-sm bg-inherit py-2 text-left w-full outline-none ml-4"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    minHeight: "24px",
+                  }}
+                />
+              </div>
+
               <label className="cursor-pointer hover:opacity-70">
                 <img src={PictureIcon} className="p-2" alt="Picture" />
                 <input
