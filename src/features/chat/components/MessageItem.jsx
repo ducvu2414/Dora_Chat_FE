@@ -7,6 +7,9 @@ import { useState, useEffect, useRef } from "react";
 import MessageActionsMenu from "./MessageActionsMenu";
 import { MdError } from "react-icons/md";
 import VoteDisplay from "@/components/ui/vote-display";
+import userApi from "../../../api/user";
+import friendApi from "../../../api/friend";
+import { useNavigate } from "react-router-dom";
 
 export default function MessageItem({
   msg,
@@ -29,6 +32,8 @@ export default function MessageItem({
   const [hoverVideoUrl, setHoverVideoUrl] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const timeoutRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const MAX_TEXT_LENGTH = 350;
 
@@ -115,6 +120,25 @@ export default function MessageItem({
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false);
     }, 300);
+  };
+
+  const handleTagClick = async (memberId) => {
+    const userRes = await userApi.getByMemberId(memberId);
+    const friendRes = await friendApi.isFriend(userId, userRes._id);
+    const isFriend = friendRes === true ? true : friendRes.data;
+    isFriend
+      ? navigate("/friend-information", {
+          state: {
+            userData: userRes,
+            isSentRequest: isFriend ? true : false,
+          },
+        })
+      : navigate("/other-people-information", {
+          state: {
+            userData: userRes,
+            isSentRequest: isFriend ? true : false,
+          },
+        });
   };
 
   return (
@@ -313,87 +337,102 @@ export default function MessageItem({
                   }
                 }}
               >
-                {(msg.tags?.length > 0 && msg.tagPositions?.length > 0) ? (
-  (() => {
-    const parts = [];
-    let lastIndex = 0;
+                {msg.tags?.length > 0 && msg.tagPositions?.length > 0
+                  ? (() => {
+                      const parts = [];
+                      let lastIndex = 0;
 
-    msg.tagPositions.forEach((tagPos, index) => {
-      // Text bình thường trước tag (nếu có)
-      if (tagPos.start > lastIndex) {
-        parts.push(
-          <span key={`text-${index}`}>
-            {msg.content.slice(lastIndex, tagPos.start)}
-          </span>
-        );
-      }
+                      msg.tagPositions.forEach((tagPos, index) => {
+                        // Text bình thường trước tag (nếu có)
+                        if (tagPos.start > lastIndex) {
+                          parts.push(
+                            <span key={`text-${index}`}>
+                              {msg.content.slice(lastIndex, tagPos.start)}
+                            </span>
+                          );
+                        }
 
-      // Tag highlight màu xanh + in đậm
-      parts.push(
-        <span key={`tag-${index}`} className="text-blue-500 font-semibold">
-          {msg.content.slice(tagPos.start, tagPos.end)}
-        </span>
-      );
+                        // Tag highlight màu xanh + in đậm
+                        parts.push(
+                          <span
+                            key={`tag-${index}`}
+                            className="text-blue-500 font-semibold cursor-pointer hover:underline"
+                            onClick={() => handleTagClick(tagPos.memberId)}
+                          >
+                            {msg.content.slice(tagPos.start, tagPos.end)}
+                          </span>
+                        );
 
-      // Cập nhật vị trí đã xử lý
-      lastIndex = tagPos.end;
-    });
+                        // Cập nhật vị trí đã xử lý
+                        lastIndex = tagPos.end;
+                      });
 
-    // Text sau tag cuối cùng (nếu có)
-    if (lastIndex < msg.content.length) {
-      parts.push(
-        <span key="text-last">
-          {msg.content.slice(lastIndex)}
-        </span>
-      );
-    }
+                      // Text sau tag cuối cùng (nếu có)
+                      if (lastIndex < msg.content.length) {
+                        parts.push(
+                          <span key="text-last">
+                            {msg.content.slice(lastIndex)}
+                          </span>
+                        );
+                      }
 
-    // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
-    const fullText = parts.map((part) => {
-      if (typeof part === 'string') return part;
-      return part.props.children;
-    }).join("");
+                      // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
+                      const fullText = parts
+                        .map((part) => {
+                          if (typeof part === "string") return part;
+                          return part.props.children;
+                        })
+                        .join("");
 
-    if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
-      const trimmedLength = MAX_TEXT_LENGTH;
-      const trimmedParts = [];
-      let currentLength = 0;
+                      if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
+                        const trimmedLength = MAX_TEXT_LENGTH;
+                        const trimmedParts = [];
+                        let currentLength = 0;
 
-      for (let part of parts) {
-        const partText = typeof part === 'string' ? part : part.props.children;
-        const remainingLength = trimmedLength - currentLength;
+                        for (let part of parts) {
+                          const partText =
+                            typeof part === "string"
+                              ? part
+                              : part.props.children;
+                          const remainingLength = trimmedLength - currentLength;
 
-        if (remainingLength <= 0) break;
+                          if (remainingLength <= 0) break;
 
-        if (partText.length <= remainingLength) {
-          trimmedParts.push(part);
-          currentLength += partText.length;
-        } else {
-          const trimmedText = partText.slice(0, remainingLength);
+                          if (partText.length <= remainingLength) {
+                            trimmedParts.push(part);
+                            currentLength += partText.length;
+                          } else {
+                            const trimmedText = partText.slice(
+                              0,
+                              remainingLength
+                            );
 
-          if (typeof part === 'string') {
-            trimmedParts.push(trimmedText);
-          } else {
-            trimmedParts.push(
-              <span key={`trimmed-${part.key}`} className={part.props.className}>
-                {trimmedText}
-              </span>
-            );
-          }
+                            if (typeof part === "string") {
+                              trimmedParts.push(trimmedText);
+                            } else {
+                              trimmedParts.push(
+                                <span
+                                  key={`trimmed-${part.key}`}
+                                  className={part.props.className}
+                                >
+                                  {trimmedText}
+                                </span>
+                              );
+                            }
 
-          currentLength += remainingLength;
-          break;
-        }
-      }
+                            currentLength += remainingLength;
+                            break;
+                          }
+                        }
 
-      return trimmedParts;
-    }
+                        return trimmedParts;
+                      }
 
-    return parts;
-  })()
-) : (
-  expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)
-)}
+                      return parts;
+                    })()
+                  : expanded
+                  ? msg.content
+                  : msg.content.slice(0, MAX_TEXT_LENGTH)}
 
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
                   <span

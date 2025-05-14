@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 import Avatar from "@assets/chat/avatar.png";
+import _ from "lodash";
 
 export function Conversation({
   onClick,
@@ -65,10 +66,16 @@ export function Conversation({
   };
 
   const handleViewInfo = () => {
+    const partData = {
+      _id: partner[0].userId,
+      name: partner[0].name,
+      avatar: partner[0].avatar,
+      coverImage: partner[0].coverImage,
+    }
     startTransition(() => {
       navigate("/friend-information", {
         state: {
-          userData: partner[0],
+          userData: partData,
         },
       });
     });

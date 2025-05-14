@@ -48,7 +48,7 @@ export default function FriendInformationPage() {
   const conversation = conversations.find(
     (conv) =>
       conv.members.some((m) => m.userId === userId) &&
-      conv.members.some((m) => m.userId === userData.userId)
+      conv.members.some((m) => m.userId === userData._id)
   );
 
   // Fetch all lists on mount
