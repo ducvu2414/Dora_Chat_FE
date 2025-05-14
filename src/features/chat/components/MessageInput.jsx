@@ -337,8 +337,7 @@ export default function MessageInput({
 
     if (
       lastAtPos >= 0 &&
-      (cursorPos === lastAtPos + 1 ||
-        /^[\\w\\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1)))
+      /^[\w\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1))
     ) {
       const query = textBeforeCursor.substring(lastAtPos + 1);
       setMentionQuery(query);
