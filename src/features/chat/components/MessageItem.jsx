@@ -32,7 +32,10 @@ export default function MessageItem({
 
   const MAX_TEXT_LENGTH = 350;
 
-  const isMe = msg.memberId?.userId === undefined ? (msg.userId === userId) : (msg.memberId?.userId === userId);
+  const isMe =
+    msg.memberId?.userId === undefined
+      ? msg.userId === userId
+      : msg.memberId?.userId === userId;
   const isImage = msg.type === "IMAGE";
   const isFile = msg.type === "FILE";
   const isVideo = msg.type === "VIDEO";
@@ -49,7 +52,6 @@ export default function MessageItem({
     }
 
     try {
-      
       // Tách public ID từ URL
       const uploadIndex = msg.content.indexOf("/upload/") + "/upload/".length;
       const publicIdWithExt = msg.content.slice(uploadIndex);
@@ -311,13 +313,94 @@ export default function MessageItem({
                   }
                 }}
               >
-                {expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)}
+                {(msg.tags?.length > 0 && msg.tagPositions?.length > 0) ? (
+  (() => {
+    const parts = [];
+    let lastIndex = 0;
+
+    msg.tagPositions.forEach((tagPos, index) => {
+      // Text bình thường trước tag (nếu có)
+      if (tagPos.start > lastIndex) {
+        parts.push(
+          <span key={`text-${index}`}>
+            {msg.content.slice(lastIndex, tagPos.start)}
+          </span>
+        );
+      }
+
+      // Tag highlight màu xanh + in đậm
+      parts.push(
+        <span key={`tag-${index}`} className="text-blue-500 font-semibold">
+          {msg.content.slice(tagPos.start, tagPos.end)}
+        </span>
+      );
+
+      // Cập nhật vị trí đã xử lý
+      lastIndex = tagPos.end;
+    });
+
+    // Text sau tag cuối cùng (nếu có)
+    if (lastIndex < msg.content.length) {
+      parts.push(
+        <span key="text-last">
+          {msg.content.slice(lastIndex)}
+        </span>
+      );
+    }
+
+    // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
+    const fullText = parts.map((part) => {
+      if (typeof part === 'string') return part;
+      return part.props.children;
+    }).join("");
+
+    if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
+      const trimmedLength = MAX_TEXT_LENGTH;
+      const trimmedParts = [];
+      let currentLength = 0;
+
+      for (let part of parts) {
+        const partText = typeof part === 'string' ? part : part.props.children;
+        const remainingLength = trimmedLength - currentLength;
+
+        if (remainingLength <= 0) break;
+
+        if (partText.length <= remainingLength) {
+          trimmedParts.push(part);
+          currentLength += partText.length;
+        } else {
+          const trimmedText = partText.slice(0, remainingLength);
+
+          if (typeof part === 'string') {
+            trimmedParts.push(trimmedText);
+          } else {
+            trimmedParts.push(
+              <span key={`trimmed-${part.key}`} className={part.props.className}>
+                {trimmedText}
+              </span>
+            );
+          }
+
+          currentLength += remainingLength;
+          break;
+        }
+      }
+
+      return trimmedParts;
+    }
+
+    return parts;
+  })()
+) : (
+  expanded ? msg.content : msg.content.slice(0, MAX_TEXT_LENGTH)
+)}
+
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
                   <span
                     className="text-[#086DC0] hover:underline ml-1 cursor-pointer"
                     onClick={() => setExpanded(!expanded)}
                   >
-                    {expanded ? "Thu gọn" : "Xem thêm"}
+                    {expanded ? "Collapse" : "More"}
                   </span>
                 )}
               </p>

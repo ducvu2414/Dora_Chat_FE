@@ -36,6 +36,12 @@ export default function MessageInput({
   const fileInputRef = useRef(null);
   const editableRef = useRef(null); // dùng để thao tác con trỏ input
 
+  useEffect(() => {
+    if (editableRef.current?.innerText.trim() === "") {
+      editableRef.current.classList.add("show-placeholder");
+    }
+  }, []);
+
   // ignore member._id
   const filteredMembers = members
     .filter((m) => m._id.toString() !== member._id.toString())
@@ -313,6 +319,15 @@ export default function MessageInput({
     }
 
     const text = editableRef.current.innerText || "";
+
+    // Toggle show-placeholder class
+    if (editableRef.current) {
+      if (text.trim() === "") {
+        editableRef.current.classList.add("show-placeholder");
+      } else {
+        editableRef.current.classList.remove("show-placeholder");
+      }
+    }
 
     const textBeforeCursor = text.substring(0, cursorPos);
     const lastAtPos = textBeforeCursor.lastIndexOf("@");

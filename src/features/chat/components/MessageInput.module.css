@@ -17,6 +17,19 @@
   position: absolute;
 }
 
+[contenteditable][data-placeholder]:before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+  display: block;
+  position: absolute;
+  visibility: hidden;
+}
+
+[contenteditable][data-placeholder].show-placeholder:before {
+  visibility: visible;
+}
+
 .mention {
   color: #1a73e8;
 }
