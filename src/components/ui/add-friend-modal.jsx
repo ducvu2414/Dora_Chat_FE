@@ -36,11 +36,9 @@ export function AddFriendModal({ isOpen, onClose }) {
     setHasSentRequest(false);
   };
 
-  const myFriendRequests = resMyFriendRequest.some(
-    (friend) => friend._id === searchResult?._id
-  ) || resFriendRequest.some(
-    (friend) => friend._id === searchResult?._id
-  );
+  const myFriendRequests =
+    resMyFriendRequest.some((friend) => friend._id === searchResult?._id) ||
+    resFriendRequest.some((friend) => friend._id === searchResult?._id);
 
   useEffect(() => {
     const fetchMyFriendRequest = async () => {
@@ -221,12 +219,18 @@ export function AddFriendModal({ isOpen, onClose }) {
                     alt={searchResult.name}
                     className="object-cover w-12 h-12 rounded-full cursor-pointer"
                     onClick={() => {
-                      navigate("/other-people-information", {
-                        state: {
-                          userData: searchResult,
-                          isSentRequest: myFriendRequests ? true : false,
-                        },
-                      });
+                      isFriend
+                        ? navigate("/friend-information", {
+                            state: {
+                              userData: searchResult,
+                            },
+                          })
+                        : navigate("/other-people-information", {
+                            state: {
+                              userData: searchResult,
+                              isSentRequest: myFriendRequests ? true : false,
+                            },
+                          });
                       onClose();
                     }}
                   />
@@ -238,12 +242,18 @@ export function AddFriendModal({ isOpen, onClose }) {
                       backgroundColor: searchResult.avatarColor || "#ccc",
                     }}
                     onClick={() => {
-                      navigate("/other-people-information", {
-                        state: {
-                          userData: searchResult,
-                          isSentRequest: myFriendRequests ? true : false,
-                        },
-                      });
+                      isFriend
+                        ? navigate("/friend-information", {
+                            state: {
+                              userData: searchResult,
+                            },
+                          })
+                        : navigate("/other-people-information", {
+                            state: {
+                              userData: searchResult,
+                              isSentRequest: myFriendRequests ? true : false,
+                            },
+                          });
                       onClose();
                     }}
                   />
@@ -253,12 +263,18 @@ export function AddFriendModal({ isOpen, onClose }) {
                   <h4
                     className="text-sm font-medium cursor-pointer"
                     onClick={() => {
-                      navigate("/other-people-information", {
-                        state: {
-                          userData: searchResult,
-                          isSentRequest: myFriendRequests ? true : false,
-                        },
-                      });
+                      isFriend
+                        ? navigate("/friend-information", {
+                            state: {
+                              userData: searchResult,
+                            },
+                          })
+                        : navigate("/other-people-information", {
+                            state: {
+                              userData: searchResult,
+                              isSentRequest: myFriendRequests ? true : false,
+                            },
+                          });
                       onClose();
                     }}
                   >
