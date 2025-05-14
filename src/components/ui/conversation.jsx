@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 import Avatar from "@assets/chat/avatar.png";
+import friendApi from "../../api/friend";
 
 export function Conversation({
   onClick,
@@ -64,20 +65,33 @@ export function Conversation({
     });
   };
 
-  const handleViewInfo = () => {
+  const handleViewInfo = async () => {
     const partData = {
       _id: partner[0].userId,
       name: partner[0].name,
       avatar: partner[0].avatar,
       coverImage: partner[0].coverImage,
-    }
-    startTransition(() => {
-      navigate("/friend-information", {
-        state: {
-          userData: partData,
-        },
-      });
-    });
+    };
+    const friendRes = await friendApi.isFriend(
+      JSON.parse(localStorage.getItem("user"))?._id,
+      partData._id
+    );
+    const isFriend = friendRes === true ? true : friendRes.data;
+    isFriend
+      ? startTransition(() => {
+          navigate("/friend-information", {
+            state: {
+              userData: partData,
+            },
+          });
+        })
+      : startTransition(() => {
+          navigate("/other-people-information", {
+            state: {
+              userData: partData,
+            },
+          });
+        });
   };
 
   const handleClick = (e) => {
@@ -100,8 +114,9 @@ export function Conversation({
   return (
     <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
-          } ${isPending ? "opacity-70" : ""}`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
+          isActive ? "bg-blue-100" : "hover:bg-gray-100"
+        } ${isPending ? "opacity-70" : ""}`}
         onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
