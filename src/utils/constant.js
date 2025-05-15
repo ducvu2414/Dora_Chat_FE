@@ -14,6 +14,8 @@ export const SOCKET_EVENTS = {
   RECEIVE_MESSAGE: "receive-message",
   MESSAGE_RECALLED: "message-recalled",
   MESSAGE_DELETED_FOR_ME: "message_deleted_for_me",
+  TAGGED: "tagged",
+
   // Friend system
   ACCEPT_FRIEND: "accept-friend",
   SEND_FRIEND_INVITE: "send-friend-invite",

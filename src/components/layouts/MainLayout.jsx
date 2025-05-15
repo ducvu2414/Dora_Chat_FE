@@ -823,6 +823,21 @@ const MainLayout = () => {
     );
   }, [socket, dispatch]);
 
+  useEffect(() => {
+    const showToastMessage = (message) => {
+      AlertMessage({
+        type: "info",
+        message: `You were mentioned in ${message.conversationName}:\n${message.content}`,
+      });
+    };
+
+    socket.on(SOCKET_EVENTS.TAGGED, showToastMessage);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.TAGGED, showToastMessage);
+    };
+  }, [socket, dispatch]);
+
   const handleConversationClick = (id) => {
     startTransition(() => {
       navigate(`/chat/${id}`);
