@@ -135,10 +135,8 @@ export default function MessageInput({
 
     setIsLoading(true);
     try {
-      // Lấy plain text từ contentEditable (đã bỏ các tag HTML)
       const plainText = editableRef.current?.innerText || "";
 
-      // Xử lý tags như cũ
       const tags = [];
       const tagPositions = [];
 
@@ -173,7 +171,6 @@ export default function MessageInput({
         });
       }
 
-      // Gửi tin nhắn (giữ nguyên phần còn lại)
       if (plainText.trim()) {
         await onSend({
           content: plainText.trim(),
@@ -233,7 +230,6 @@ export default function MessageInput({
 
     if (ignoredKeys.includes(e.key)) return;
 
-    // Xử lý gửi tin nhắn như cũ
     if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
       e.preventDefault();
       handleSend();
@@ -334,7 +330,6 @@ export default function MessageInput({
       selection.removeAllRanges();
       selection.addRange(newRange);
       
-      // Cập nhật input
       setInput(editableRef.current.innerText);
       return;
     }
@@ -345,7 +340,6 @@ export default function MessageInput({
 
     const text = editableRef.current.innerText || "";
     
-    // Cập nhật trạng thái placeholder
     if (text.trim() === "") {
       editableRef.current.classList.add("show-placeholder");
     } else {
@@ -485,12 +479,10 @@ export default function MessageInput({
     selection.removeAllRanges();
     selection.addRange(newRange);
 
-    // Reset states
     setShowMentionDropdown(false);
     setMentionQuery("");
     setMentionPosition(null);
     
-    // Cập nhật nội dung input
     setInput(editableRef.current.innerText);
   };
 
