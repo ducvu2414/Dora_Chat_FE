@@ -337,7 +337,7 @@ export default function MessageItem({
                   }
                 }}
               >
-                {msg.tags?.length > 0 && msg.tagPositions?.length > 0
+                {msg.tags?.length > 0 && msg.tagPositions?.length > 0 && !msg.isDeleted
                   ? (() => {
                       const parts = [];
                       let lastIndex = 0;
