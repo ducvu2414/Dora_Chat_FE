@@ -125,7 +125,6 @@ export default function MessageInput({
   };
 
   const handleSend = async () => {
-    console.log("click send");
     if (
       !editableRef.current?.innerText.trim() &&
       !imageFiles.length &&
@@ -133,7 +132,6 @@ export default function MessageInput({
       !videoFiles.length
     )
       return;
-    console.log("click send 2");
 
     setIsLoading(true);
     try {
@@ -177,6 +175,10 @@ export default function MessageInput({
 
       // Gửi tin nhắn (giữ nguyên phần còn lại)
       if (plainText.trim()) {
+        console.log("Sending message:");
+        console.log("Content:", plainText.trim());
+        console.log("Tags:", tags);
+        console.log("Tag Positions:", tagPositions);
         await onSend({
           content: plainText.trim(),
           type: "TEXT",
@@ -224,6 +226,20 @@ export default function MessageInput({
   };
 
   const handleKeyDown = (e) => {
+    const ignoredKeys = ["Shift", "Control", "Alt", "Meta"];
+
+    if (ignoredKeys.includes(e.key)) return;
+
+    // Xử lý gửi tin nhắn như cũ
+    console.log("Key pressed:", e.key);
+    console.log("Shift pressed:", e.shiftKey);
+    console.log("showMentionDropdown:", showMentionDropdown);
+    if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
+      console.log("Enter pressed");
+      e.preventDefault();
+      handleSend();
+    }
+
     // Xử lý navigation trong dropdown mention
     if (showMentionDropdown) {
       if (e.key === "ArrowDown") {
@@ -254,12 +270,6 @@ export default function MessageInput({
         return;
       }
     }
-
-    // Xử lý gửi tin nhắn như cũ
-    if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
-      e.preventDefault();
-      handleSend();
-    }
   };
 
   const onEmojiClick = (emojiData) => {
@@ -287,50 +297,33 @@ export default function MessageInput({
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
+    setInput(editableRef.current.innerText);
+
+    const range = selection.getRangeAt(0);
+    const node = selection.anchorNode;
+
     let cursorPos = 0;
-    try {
-      const range = selection.getRangeAt(0);
-      const node = selection.anchorNode;
 
-      if (editableRef.current.contains(node)) {
-        // Tính vị trí cursorPos tương đối với đầu contentEditable
-        let pos = 0;
-
-        const traverse = (currentNode) => {
-          if (currentNode === node) {
-            pos += range.startOffset;
-            throw pos; // stop recursion with result
-          }
-
-          if (currentNode.nodeType === Node.TEXT_NODE) {
-            pos += currentNode.textContent.length;
-          }
-
-          currentNode.childNodes.forEach(traverse);
-        };
-
-        try {
-          traverse(editableRef.current);
-        } catch (result) {
-          cursorPos = result;
-        }
+    const traverse = (currentNode) => {
+      if (currentNode === node) {
+        cursorPos += range.startOffset;
+        throw cursorPos;
       }
 
-      setInput(editableRef.current.innerText);
-    } catch (error) {
-      console.error("Error getting cursor position:", error);
+      if (currentNode.nodeType === Node.TEXT_NODE) {
+        cursorPos += currentNode.textContent.length;
+      }
+
+      currentNode.childNodes.forEach(traverse);
+    };
+
+    try {
+      traverse(editableRef.current);
+    } catch (result) {
+      cursorPos = result;
     }
 
     const text = editableRef.current.innerText || "";
-
-    // Toggle show-placeholder class
-    if (editableRef.current) {
-      if (text.trim() === "") {
-        editableRef.current.classList.add("show-placeholder");
-      } else {
-        editableRef.current.classList.remove("show-placeholder");
-      }
-    }
 
     const textBeforeCursor = text.substring(0, cursorPos);
     const lastAtPos = textBeforeCursor.lastIndexOf("@");
@@ -340,13 +333,24 @@ export default function MessageInput({
       /^[\w\s]*$/.test(textBeforeCursor.substring(lastAtPos + 1))
     ) {
       const query = textBeforeCursor.substring(lastAtPos + 1);
+      const matchedMembers = members
+        .filter((m) => m._id.toString() !== member._id.toString())
+        .filter((m) =>
+          m.name.toLowerCase().includes(query.trim().toLowerCase())
+        );
+
       setMentionQuery(query);
-      setShowMentionDropdown(true);
-      setMentionPosition({
-        start: lastAtPos,
-        end: cursorPos,
-      });
-      setSelectedMentionIndex(0);
+
+      if (matchedMembers.length > 0) {
+        setShowMentionDropdown(true);
+        setMentionPosition({
+          start: lastAtPos,
+          end: cursorPos,
+        });
+        setSelectedMentionIndex(0);
+      } else {
+        setShowMentionDropdown(false);
+      }
     } else {
       setShowMentionDropdown(false);
     }
@@ -398,7 +402,6 @@ export default function MessageInput({
       return;
     }
 
-    // Chèn mention span như cũ
     const span = document.createElement("span");
     span.style.color = "#1a73e8";
     span.className = "mention";
@@ -415,7 +418,9 @@ export default function MessageInput({
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    // Reset states
     setShowMentionDropdown(false);
+    setMentionQuery("");
     setMentionPosition(null);
   };
 
