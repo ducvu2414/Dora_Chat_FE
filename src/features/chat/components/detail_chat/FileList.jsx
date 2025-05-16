@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 export default function FileList({ limit, files }) {
-  console.log("files", files);
 
   function formatFileSize(bytes) {
     if (isNaN(bytes) || bytes < 0) return "0 KB";
@@ -67,7 +66,7 @@ export default function FileList({ limit, files }) {
         >
           <img src={getFileIcon(file.link)} alt="icon" />
           <div>
-            <p className="text-sm font-medium">{file.name}</p>
+            <p className="text-sm font-medium text-left">{file.name}</p>
             <p className="text-xs text-[#086DC0] font-light text-start">
               {file.size}
             </p>
