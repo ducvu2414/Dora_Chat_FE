@@ -104,8 +104,7 @@ export default function MessageInput({
   };
 
   const handleFileSelect = (file) => {
-    const selectedFile = file[0];
-    setFile(selectedFile);
+    setFile(file);
   };
 
   const removeImage = (index) => {

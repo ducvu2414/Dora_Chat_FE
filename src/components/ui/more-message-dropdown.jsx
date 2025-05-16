@@ -2,7 +2,6 @@
 /* eslint-disable react/prop-types */
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 import { Vote, FileUp } from "lucide-react";
-import { useDispatch } from "react-redux";
 import { useRef } from "react";
 
 export default function MoreMessageDropdown({
@@ -12,7 +11,6 @@ export default function MoreMessageDropdown({
   setIsVoteModalOpen,
   isGroup,
 }) {
-  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleFileInputClick = () => {
