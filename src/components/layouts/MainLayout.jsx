@@ -152,11 +152,6 @@ const MainLayout = () => {
           })
         );
       });
-      // check message đã được lưu vào redux store hay chưa (messages: {}, // { conversationId: [message] })
-      const conversations = conversations.find(
-        (conv) => conv._id === message.conversationId
-      );
-      console.log("conversations", conversations);
     };
     socket.on(SOCKET_EVENTS.MESSAGE_RECALLED, (data) => {
       startTransition(() => {
