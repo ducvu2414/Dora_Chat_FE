@@ -3,15 +3,15 @@ import Link from "@assets/chat/link_list.svg";
 
 export default function LinkList({ limit, links }) {
   function getDomainName(url) {
-    let domain = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+    let domain = url.replace(/^(https?:\/\/)?(www\.)?/, "");
     domain = domain.split(/[/?#]/)[0];
     return domain;
   }
 
   function removeProtocol(url) {
-    return url.replace(/^(https?:\/\/)?(www\.)?/, '');
+    return url.replace(/^(https?:\/\/)?(www\.)?/, "");
   }
-  
+
   const linksHandle = links?.map((item) => {
     return {
       name: getDomainName(item.content),
@@ -26,6 +26,13 @@ export default function LinkList({ limit, links }) {
         <li
           key={index}
           className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
+          target="_blank"
+          onClick={() => {
+            window.open(
+              file.link.startsWith("http") ? file.link : `https://${file.link}`,
+              "_blank"
+            );
+          }}
         >
           <img src={Link} alt="icon" className="p-3 bg-white rounded-md" />
           <div>
