@@ -5,7 +5,7 @@ import messageApi from "../../../api/message";
 import pinMessageApi from "../../../api/pinMessage";
 import memberApi from "../../../api/member";
 import ForwardMessageModal from "./ForwardMessageModal";
-
+import { REACT_ICONS } from "../../../utils/constant";
 export default function MessageActionsMenu({
   isMe,
   messageId,
@@ -18,6 +18,7 @@ export default function MessageActionsMenu({
   const [showAbove, setShowAbove] = useState(false);
   const [showForwardModal, setShowForwardModal] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [showReactions, setShowReactions] = useState(false); // Trạng thái hiển thị reactions
 
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -51,6 +52,7 @@ export default function MessageActionsMenu({
         !buttonRef.current.contains(event.target)
       ) {
         setIsOpen(false);
+        setShowReactions(false);
       }
     };
 
@@ -92,7 +94,12 @@ export default function MessageActionsMenu({
       const res = await pinMessageApi.addPinMessage(
         messageId,
         conversationId,
-        await memberApi.getByConversationIdAndUserId(conversationId, JSON.parse(localStorage.getItem('user'))._id).then((res) => res.data._id)
+        await memberApi
+          .getByConversationIdAndUserId(
+            conversationId,
+            JSON.parse(localStorage.getItem("user"))._id
+          )
+          .then((res) => res.data._id)
       );
       console.log("Pinned message:", res);
       setIsOpen(false);
@@ -102,15 +109,9 @@ export default function MessageActionsMenu({
     }
   };
 
-
-
   const handleSpeakMessage = async () => {
     try {
-      const res = await messageApi.convertTextToSpeech(
-        messageContent,
-        1,
-        1.0
-      );
+      const res = await messageApi.convertTextToSpeech(messageContent, 1, 1.0);
       if (res.success && res.url) {
         setAudioUrl(null);
         setTimeout(() => {
@@ -125,13 +126,31 @@ export default function MessageActionsMenu({
     }
   };
 
+  // Xử lý chọn reaction
+  const handleReactMessage = async (reactType) => {
+    try {
+      const res = await messageApi.reactToMessage({
+        conversationId,
+        messageId,
+        reactType,
+      });
+      console.log("Reacted to message:", res);
+      setShowReactions(false);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error reacting to message:", error);
+      alert("Cannot react to message");
+    }
+  };
+
   return (
     <>
       <div className="relative">
         {/* Button với cả hover và click */}
         <button
-          className={`p-1 rounded-full transition-colors duration-200 ${isOpen ? "bg-gray-200" : "hover:bg-gray-200"
-            }`}
+          className={`p-1 rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+          }`}
           onClick={toggleMenu}
           ref={buttonRef}
           aria-label="Message actions"
@@ -142,10 +161,17 @@ export default function MessageActionsMenu({
         {/* Menu dropdown */}
         {isOpen && (
           <div
-            className={`absolute ${showAbove ? "bottom-full mb-1" : "top-full mt-1"
-              } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
+            className={`absolute ${
+              showAbove ? "bottom-full mb-1" : "top-full mt-1"
+            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
             ref={menuRef}
           >
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={() => setShowReactions(!showReactions)}
+            >
+              React
+            </button>
             <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
               Reply
             </button>
@@ -175,7 +201,6 @@ export default function MessageActionsMenu({
             >
               Pin
             </button>
-
             {type === "TEXT" && (
               <button
                 className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
@@ -183,6 +208,20 @@ export default function MessageActionsMenu({
               >
                 Speak Message
               </button>
+            )}{" "}
+            {/* Menu reactions */}
+            {showReactions && (
+              <div className="absolute top-0 z-50 flex gap-2 p-2 ml-2 bg-white border rounded-md shadow-md left-full">
+                {Object.entries(REACT_ICONS).map(([type, icon]) => (
+                  <button
+                    key={type}
+                    className="p-1 text-2xl rounded-full hover:bg-gray-100"
+                    onClick={() => handleReactMessage(Number(type))}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -197,7 +236,6 @@ export default function MessageActionsMenu({
           style={{ display: "block" }}
         />
       )}
-
 
       {showForwardModal && (
         <ForwardMessageModal

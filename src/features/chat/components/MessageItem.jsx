@@ -10,7 +10,7 @@ import VoteDisplay from "@/components/ui/vote-display";
 import userApi from "../../../api/user";
 import friendApi from "../../../api/friend";
 import { useNavigate } from "react-router-dom";
-
+import { REACT_ICONS } from "../../../utils/constant";
 export default function MessageItem({
   msg,
   showAvatar,
@@ -31,6 +31,7 @@ export default function MessageItem({
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [hoverVideoUrl, setHoverVideoUrl] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredReaction, setHoveredReaction] = useState(null); // Trạng thái hover cho reaction
   const timeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -140,6 +141,43 @@ export default function MessageItem({
           },
         });
   };
+  // Hiển thị reactions và tooltip khi hover
+  const renderReactions = () => {
+    if (!msg.reacts || msg.reacts.length === 0) return null;
+
+    const reactionCounts = msg.reacts.reduce((acc, react) => {
+      acc[react.type] = acc[react.type] || { count: 0, users: [] };
+      acc[react.type].count += 1;
+      acc[react.type].users.push(react.memberId.name);
+      return acc;
+    }, {});
+
+    return (
+      <div className="relative flex items-center gap-1 mt-1">
+        {Object.entries(reactionCounts).map(([type, { count, users }]) => (
+          <div
+            key={type}
+            className="relative"
+            onMouseEnter={() => setHoveredReaction({ type, users })}
+            onMouseLeave={() => setHoveredReaction(null)}
+          >
+            <span className="text-sm cursor-pointer">
+              {REACT_ICONS[type]} {count > 1 ? count : ""}
+            </span>
+            {hoveredReaction?.type === type && (
+              <div className="absolute bottom-full mb-1 bg-white border rounded-md shadow-md p-2 min-w-[150px] z-50">
+                {users.map((user, index) => (
+                  <div key={index} className="text-sm">
+                    {user} {REACT_ICONS[type]}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -177,7 +215,7 @@ export default function MessageItem({
             <img
               src={msg.memberId?.avatar || Avatar}
               alt="avatar"
-              className="ml-1 self-start w-10 h-10 rounded-full"
+              className="self-start w-10 h-10 ml-1 rounded-full"
             />
           ) : (
             <div className="w-10 h-10 rounded-full" />
@@ -337,7 +375,9 @@ export default function MessageItem({
                   }
                 }}
               >
-                {msg.tags?.length > 0 && msg.tagPositions?.length > 0 && !msg.isDeleted
+                {msg.tags?.length > 0 &&
+                msg.tagPositions?.length > 0 &&
+                !msg.isDeleted
                   ? (() => {
                       const parts = [];
                       let lastIndex = 0;
@@ -356,7 +396,7 @@ export default function MessageItem({
                         parts.push(
                           <span
                             key={`tag-${index}`}
-                            className="text-blue-500 font-semibold cursor-pointer hover:underline"
+                            className="font-semibold text-blue-500 cursor-pointer hover:underline"
                             onClick={() => handleTagClick(tagPos.memberId)}
                           >
                             {msg.content.slice(tagPos.start, tagPos.end)}
@@ -444,7 +484,8 @@ export default function MessageItem({
                 )}
               </p>
             )}
-
+            {/* Hiển thị reactions */}
+            {renderReactions()}
             {showTime && (
               <span
                 className={`text-xs text-[#959595F3] mt-2 ${

@@ -48,7 +48,6 @@ export default function ForwardMessageModal({ message, onClose }) {
           })
         );
         // Gửi tin nhắn chuyển tiếp
-        console.log("type", message);
         await messageApi.sendTextMessage({
           conversationId: conversation._id,
           content: message.content,

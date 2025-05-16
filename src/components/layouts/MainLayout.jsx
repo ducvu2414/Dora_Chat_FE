@@ -32,6 +32,7 @@ import {
   addChannel,
   deleteChannel,
   updateChannel,
+  updateMessage,
   updateAvatarGroupConversation,
 } from "../../features/chat/chatSlice";
 import {
@@ -263,7 +264,19 @@ const MainLayout = () => {
         });
       }
     );
-
+    socket.on(SOCKET_EVENTS.REACT_TO_MESSAGE, (message) => {
+      startTransition(() => {
+        dispatch(
+          updateMessage({
+            conversationId: message.conversationId,
+            messageId: message._id,
+            updates: {
+              reacts: message.reacts,
+            },
+          })
+        );
+      });
+    });
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 
     return () => {

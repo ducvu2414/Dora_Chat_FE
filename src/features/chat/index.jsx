@@ -43,11 +43,9 @@ export default function ChatSingle() {
   const [members, setMembers] = useState([]);
   const chatBoxRef = useRef(null);
 
-
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
-
 
   const loadMoreMessages = async () => {
     if (loadingMore || !conversationId || !activeChannel) return;
@@ -60,16 +58,20 @@ export default function ChatSingle() {
         limit: 100,
       });
 
-      const existingIds = new Set(messages[conversationId]?.map(msg => msg._id));
-      const uniqueMessages = res.filter(msg => !existingIds.has(msg._id));
+      const existingIds = new Set(
+        messages[conversationId]?.map((msg) => msg._id)
+      );
+      const uniqueMessages = res.filter((msg) => !existingIds.has(msg._id));
       if (uniqueMessages.length === 0) {
         setHasMoreMessages(false);
       } else {
-        dispatch(setMessages({
-          conversationId,
-          messages: [...uniqueMessages, ...messages[conversationId]],
-        }));
-        setMessageSkip(prev => prev + uniqueMessages.length);
+        dispatch(
+          setMessages({
+            conversationId,
+            messages: [...uniqueMessages, ...messages[conversationId]],
+          })
+        );
+        setMessageSkip((prev) => prev + uniqueMessages.length);
       }
     } catch (error) {
       console.error("Error loading more messages", error);
@@ -142,7 +144,10 @@ export default function ChatSingle() {
           if (!conversation.type) {
             // single chat
             try {
-              const messages = await messageApi.fetchMessages(conversationId);
+              const messages = await messageApi.fetchMessages(conversationId, {
+                skip: 0,
+                limit: 100,
+              });
               dispatch(setMessages({ conversationId, messages }));
             } catch (error) {
               console.error("Error fetching messages:", error);
@@ -203,7 +208,13 @@ export default function ChatSingle() {
     setLinks(links);
   }, [conversationMessages.length]);
 
-  const handleSendMessage = async ({ content, type, tags, tagPositions, files }) => {
+  const handleSendMessage = async ({
+    content,
+    type,
+    tags,
+    tagPositions,
+    files,
+  }) => {
     const channelId = activeChannel;
     try {
       if (type === "TEXT") {
@@ -387,7 +398,6 @@ export default function ChatSingle() {
           <div className="flex flex-1 overflow-auto">
             {/* ChatBox  */}
             <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
-              {console.log("header single chat", conversation)}
               <HeaderSignleChat
                 channelTabs={channels}
                 activeTab={activeChannel}
@@ -405,7 +415,7 @@ export default function ChatSingle() {
                 onSave={handleUpdateVote}
                 onLock={handleLockVote}
                 ref={chatBoxRef}
-                onLoadMore={hasMoreMessages ? loadMoreMessages : () => { }}
+                onLoadMore={hasMoreMessages ? loadMoreMessages : () => {}}
               />
               <MessageInput
                 onSend={handleSendMessage}
@@ -419,7 +429,9 @@ export default function ChatSingle() {
 
             {/* DetailChat*/}
             <div
-              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${showDetail ? "w-[385px]" : "w-0"}`}
+              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
+                showDetail ? "w-[385px]" : "w-0"
+              }`}
             >
               {/* log messages */}
               {showDetail && (

@@ -5,11 +5,13 @@ const messageApi = {
     return axios.get("/api/messages/conversations");
   },
 
-  fetchMessages: (conversationId) => {
-    return axios.get(`/api/messages/${conversationId}`);
+  fetchMessages: (conversationId, params = {}) => {
+    return axios.get(`/api/messages/${conversationId}?skip=${params.skip}`);
   },
   fetchMessagesByChannelId: (channelId, params = {}) => {
-    return axios.get(`/api/messages/channel/${channelId}?limit=${params.limit}&skip=${params.skip}`);
+    return axios.get(
+      `/api/messages/channel/${channelId}?limit=${params.limit}&skip=${params.skip}`
+    );
   },
   sendTextMessage: (body) => {
     return axios.post(`/api/messages/text`, body);
@@ -72,8 +74,16 @@ const messageApi = {
     console.log(res);
     return res;
   },
-
-
+  // Thêm hàm reactToMessage
+  reactToMessage: async ({ conversationId, messageId, reactType }) => {
+    return axios
+      .post("/api/messages/react", {
+        conversationId,
+        messageId,
+        reactType,
+      })
+      .then((res) => res.data);
+  },
 };
 
 export default messageApi;

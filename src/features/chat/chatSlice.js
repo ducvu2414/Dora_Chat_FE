@@ -75,7 +75,7 @@ const chatSlice = createSlice({
       const index = state.messages[conversationId].findIndex(
         (m) => m._id === message._id
       );
-      
+
       if (index !== -1) {
         state.messages[conversationId][index].options = message.options;
       } else {
@@ -92,7 +92,7 @@ const chatSlice = createSlice({
       const index = state.messages[conversationId].findIndex(
         (m) => m._id === message._id
       );
-      
+
       if (index !== -1) {
         state.messages[conversationId][index].lockedVote = message.lockedVote;
       } else {
@@ -212,7 +212,7 @@ const chatSlice = createSlice({
     addPinMessage: (state, action) => {
       const pinMessage = action.payload;
       if (!state.pinMessages.some((msg) => msg._id === pinMessage._id)) {
-        state.pinMessages.push(pinMessage); 
+        state.pinMessages.push(pinMessage);
       }
     },
 
@@ -244,7 +244,16 @@ const chatSlice = createSlice({
         state.channels[index].name = name;
       }
     },
-
+    updateMessage: (state, action) => {
+      const { conversationId, messageId, updates } = action.payload;
+      const messages = state.messages[conversationId];
+      if (messages) {
+        const index = messages.findIndex((msg) => msg._id === messageId);
+        if (index !== -1) {
+          Object.assign(messages[index], updates); // cập nhật các field mới
+        }
+      }
+    },
     updateAvatarGroupConversation: (state, action) => {
       const { conversationId, avatar } = action.payload;
       const index = state.conversations.findIndex(
@@ -283,6 +292,7 @@ export const {
   addChannel,
   deleteChannel,
   updateChannel,
+  updateMessage,
   updateAvatarGroupConversation,
 } = chatSlice.actions;
 export default chatSlice.reducer;
