@@ -49,7 +49,9 @@ export default function MainDetail({
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [quantityMember, setQuantityMember] = useState(0);
+  const [quantityMember, setQuantityMember] = useState(
+    sessionStorage.getItem(`memberCount_${conversation._id}`)
+  );
   const [members, setMembers] = useState([]);
   const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -180,14 +182,23 @@ export default function MainDetail({
           )
         );
         // quantity member
-        setQuantityMember(
-          membersInGroup.data.reduce((acc, member) => {
-            if (member.active) {
-              acc += 1;
-            }
-            return acc;
-          }, 0)
+        const activeMemberCount = membersInGroup.data.reduce((acc, member) => {
+          if (member.active) {
+            acc += 1;
+          }
+          return acc;
+        }, 0);
+        const cachedMemberCount = sessionStorage.getItem(
+          `memberCount_${conversation._id}`
         );
+        if (!cachedMemberCount || cachedMemberCount !== activeMemberCount) {
+          sessionStorage.setItem(
+            `memberCount_${conversation._id}`,
+            activeMemberCount
+          );
+          setQuantityMember(cachedMemberCount);
+        }
+
         setFriends(friendsData);
       } catch (error) {
         console.error("Error fetching friends:", error);

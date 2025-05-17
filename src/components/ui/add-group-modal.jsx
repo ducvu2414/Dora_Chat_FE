@@ -151,7 +151,7 @@ export function AddGroupModal({ onClose, isOpen }) {
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white focus:outline-none"
           onClick={handleCreateGroup}
-          disabled={!groupName}
+          disabled={!groupName || selectedFriends.length < 2}
         >
           Create Group
         </Button>

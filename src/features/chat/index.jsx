@@ -430,6 +430,7 @@ export default function ChatSingle() {
                 onLoadMore={hasMoreMessages ? loadMoreMessages : () => {}}
               />
               <MessageInput
+                conversation={conversation}
                 onSend={handleSendMessage}
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
@@ -448,20 +449,26 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
-              {showDetail && (
-                <DetailChat
-                  conversation={
-                    conversations.filter(
-                      (conv) => conv._id === conversationId
-                    )[0]
-                  }
-                  imagesVideos={photosVideos}
-                  files={files}
-                  links={links}
-                  pinMessages={pinMessages}
-                  onScrollToMessage={handleScrollToMessage}
-                />
-              )}
+              {showDetail &&
+                (console.log("conversationMessages", pinMessages),
+                (
+                  <DetailChat
+                    conversation={
+                      conversations.filter(
+                        (conv) => conv._id === conversationId
+                      )[0]
+                    }
+                    imagesVideos={photosVideos}
+                    files={files}
+                    links={links}
+                    pinMessages={pinMessages.filter((pinMessage) =>
+                      conversationMessages.some(
+                        (message) => message._id === pinMessage.messageId
+                      )
+                    )}
+                    onScrollToMessage={handleScrollToMessage}
+                  />
+                ))}
             </div>
           </div>
         </div>
