@@ -418,6 +418,7 @@ export default function ChatSingle() {
                 onLoadMore={hasMoreMessages ? loadMoreMessages : () => {}}
               />
               <MessageInput
+                conversation={conversation}
                 onSend={handleSendMessage}
                 isMember={isMember}
                 setIsVoteModalOpen={setIsVoteModalOpen}
