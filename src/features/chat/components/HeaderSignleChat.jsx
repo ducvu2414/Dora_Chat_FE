@@ -28,8 +28,8 @@ export default function HeaderSignleChat({
       return member.userId !== user._id;
     });
 
-  const avatarMessage = conversation.avatar || partner?.avatar;
-  const name = conversation.name || partner?.name || partner?.username;
+  // const avatarMessage = conversation.avatar || partner?.avatar;
+  // const name = conversation.name || partner?.name || partner?.username;
   const { currentCall, incomingCall } = useSelector((state) => state.call);
 
   const handleCall = (type) => {

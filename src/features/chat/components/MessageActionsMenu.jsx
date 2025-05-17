@@ -10,10 +10,11 @@ export default function MessageActionsMenu({
   isMe,
   messageId,
   conversationId,
-  messageContent,
+  message,
   type,
   isOpen,
   setIsOpen,
+  onReply,
 }) {
   const [showAbove, setShowAbove] = useState(false);
   const [showForwardModal, setShowForwardModal] = useState(false);
@@ -30,6 +31,7 @@ export default function MessageActionsMenu({
       calculateMenuPosition();
     }
     setIsOpen(!isOpen);
+    setShowReactions(false);
   };
 
   // Tính toán vị trí menu
@@ -111,7 +113,7 @@ export default function MessageActionsMenu({
 
   const handleSpeakMessage = async () => {
     try {
-      const res = await messageApi.convertTextToSpeech(messageContent, 1, 1.0);
+      const res = await messageApi.convertTextToSpeech(message.content, 1, 1.0);
       if (res.success && res.url) {
         setAudioUrl(null);
         setTimeout(() => {
@@ -142,7 +144,16 @@ export default function MessageActionsMenu({
       alert("Cannot react to message");
     }
   };
-
+  // Xử lý chọn Reply
+  const handleReply = () => {
+    onReply({
+      messageId,
+      content: message.content,
+      type,
+      member: message.memberId.name,
+    });
+    setIsOpen(false);
+  };
   return (
     <>
       <div className="relative">
@@ -172,7 +183,10 @@ export default function MessageActionsMenu({
             >
               React
             </button>
-            <button className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent">
+            <button
+              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+              onClick={handleReply}
+            >
               Reply
             </button>
             <button
@@ -208,7 +222,7 @@ export default function MessageActionsMenu({
               >
                 Speak Message
               </button>
-            )}{" "}
+            )}
             {/* Menu reactions */}
             {showReactions && (
               <div className="absolute top-0 z-50 flex gap-2 p-2 ml-2 bg-white border rounded-md shadow-md left-full">
@@ -241,7 +255,7 @@ export default function MessageActionsMenu({
         <ForwardMessageModal
           message={{
             _id: messageId,
-            content: messageContent,
+            content: message.content,
             conversationId,
             type,
           }}

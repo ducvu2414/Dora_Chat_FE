@@ -9,7 +9,10 @@ import {
 } from "react";
 import MessageItem from "./MessageItem";
 const ChatBox = forwardRef(
-  ({ messages, onSelected, member, onSave, onLock, onLoadMore }, ref) => {
+  (
+    { messages, onReply, onSelected, member, onSave, onLock, onLoadMore },
+    ref
+  ) => {
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
 
@@ -66,7 +69,6 @@ const ChatBox = forwardRef(
       return () => container.removeEventListener("scroll", handleScroll);
     }, [onLoadMore]);
 
-
     return (
       <div className="flex-1 flex flex-col h-px bg-[#fff] py-2">
         <div
@@ -91,6 +93,8 @@ const ChatBox = forwardRef(
                   member={member}
                   onSave={onSave}
                   onLock={onLock}
+                  onReply={onReply}
+                  messages={messages}
                 />
               </div>
             );

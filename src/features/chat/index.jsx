@@ -43,11 +43,10 @@ export default function ChatSingle() {
   );
   const [members, setMembers] = useState([]);
   const chatBoxRef = useRef(null);
-
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
-
+  const [replyMessage, setReplyMessage] = useState(null);
   const loadMoreMessages = async () => {
     if (loadingMore || !conversationId || !activeChannel) return;
 
@@ -215,10 +214,20 @@ export default function ChatSingle() {
     tags,
     tagPositions,
     files,
+    replyMessageId,
   }) => {
     const channelId = activeChannel;
     try {
-      if (type === "TEXT") {
+      if (replyMessageId) {
+        // Gửi tin nhắn reply
+        await messageApi.sendReplyMessage({
+          conversationId,
+          content: content || (files ? files[0].name : ""),
+          replyMessageId,
+          channelId,
+          type,
+        });
+      } else if (type === "TEXT") {
         await messageApi.sendTextMessage({
           conversationId,
           content,
@@ -238,7 +247,9 @@ export default function ChatSingle() {
       throw error;
     }
   };
-
+  const handleReply = (message) => {
+    setReplyMessage(message);
+  };
   const handleCreateVote = async (vote) => {
     const newVote = {
       memberId: member.data._id,
@@ -418,6 +429,7 @@ export default function ChatSingle() {
               <ChatBox
                 key={conversationId}
                 messages={messages[conversationId]}
+                onReply={handleReply}
                 onSelected={onSelected}
                 member={member?.data}
                 onSave={handleUpdateVote}
@@ -433,6 +445,8 @@ export default function ChatSingle() {
                 isGroup={conversation.type}
                 members={members}
                 member={member?.data}
+                onReply={setReplyMessage}
+                replyMessage={replyMessage}
               />
             </div>
 

@@ -8,6 +8,7 @@ import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 import { AlertMessage } from "@/components/ui/alert-message";
+import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
 
 export default function MessageInput({
   conversation,
@@ -17,6 +18,8 @@ export default function MessageInput({
   isGroup,
   members,
   member,
+  onReply,
+  replyMessage,
 }) {
   const [input, setInput] = useState("");
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
@@ -45,7 +48,6 @@ export default function MessageInput({
     }
   }, []);
 
-  // ignore member._id
   const filteredMembers = members
     .filter((m) => m._id.toString() !== member._id.toString())
     .filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase()));
@@ -178,6 +180,7 @@ export default function MessageInput({
           type: "TEXT",
           tags,
           tagPositions,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -185,6 +188,7 @@ export default function MessageInput({
         await onSend({
           type: "IMAGE",
           files: imageFiles,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -192,6 +196,7 @@ export default function MessageInput({
         await onSend({
           type: "VIDEO",
           files: videoFiles,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -199,6 +204,7 @@ export default function MessageInput({
         await onSend({
           type: "FILE",
           files: [file],
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -218,6 +224,7 @@ export default function MessageInput({
         editableRef.current.classList.add("show-placeholder");
       }
       setInput("");
+      onReply(null);
     } catch (error) {
       console.error("Send message error:", error);
       AlertMessage({
@@ -337,6 +344,8 @@ export default function MessageInput({
       }
 
       if (!editableRef.current) return;
+
+      setInput(editableRef.current.innerText);
 
       const text = editableRef.current.innerText || "";
 
@@ -483,9 +492,54 @@ export default function MessageInput({
       setInput(editableRef.current.innerText);
     }
   };
+  // Hiển thị tin nhắn đang reply
+  const renderReplyPreview = () => {
+    if (!replyMessage) return null;
+    const isRepliedImage = replyMessage.type === "IMAGE";
+    const isRepliedVideo = replyMessage.type === "VIDEO";
+    const isRepliedFile = replyMessage.type === "FILE";
+    return (
+      <div className="flex items-center justify-between p-2 mx-3 bg-gray-100 border-t border-gray-200 rounded-t-lg">
+        <div>
+          <span className="block text-xs font-medium text-gray-500">
+            Replying to {replyMessage.member || "User"}
+          </span>
+          {isRepliedImage ? (
+            <img
+              src={replyMessage.content}
+              alt="Replied"
+              className="max-w-[50px] max-h-[50px] object-contain rounded"
+            />
+          ) : isRepliedVideo ? (
+            <video
+              src={replyMessage.content}
+              className="max-w-[50px] max-h-[50px] object-contain rounded"
+            />
+          ) : isRepliedFile ? (
+            <div className="flex items-center text-xs text-[#086DC0]">
+              <AiOutlinePaperClip size={16} className="mr-1" />
+              {replyMessage.fileName || "File"}
+            </div>
+          ) : (
+            <p className="text-xs text-left text-gray-600 truncate">
+              {replyMessage.content}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => onReply(null)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <AiOutlineClose size={16} />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="relative flex flex-col w-full">
+      {/* Hiển thị tin nhắn đang reply */}
+      {renderReplyPreview()}
       {/* Previews (chỉ hiển thị 1 trong 2: image hoặc video) */}
       {(imagePreviews.length > 0 ||
         videoPreviews.length > 0 ||
@@ -594,7 +648,7 @@ export default function MessageInput({
                       />
                     ) : (
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        className="flex items-center justify-center w-8 h-8 rounded-full"
                         style={{
                           backgroundColor: member.avatarColor || "#ccc",
                         }}
@@ -626,7 +680,7 @@ export default function MessageInput({
           <>
             <Button
               size="icon"
-              className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none focus:outline-none mr-3"
+              className="mr-3 text-white transition-all duration-200 border-none rounded-full shrink-0 bg-regal-blue hover:scale-105 hover:bg-regal-blue/80 focus:outline-none"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <Plus className="!h-6 !w-6" />
@@ -660,7 +714,7 @@ export default function MessageInput({
               <div className="relative w-full">
                 {/* Placeholder giả */}
                 {input.trim() === "" && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none select-none text-sm">
+                  <div className="absolute text-sm text-gray-400 -translate-y-1/2 pointer-events-none select-none left-4 top-1/2">
                     Type a message...
                   </div>
                 )}
@@ -671,7 +725,7 @@ export default function MessageInput({
                   onInput={handleInputChange}
                   onKeyDown={handleKeyDown}
                   suppressContentEditableWarning={true}
-                  className="text-sm bg-inherit py-2 text-left w-full outline-none ml-4 show-placeholder"
+                  className="w-full py-2 ml-4 text-sm text-left outline-none bg-inherit show-placeholder"
                   style={{
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
