@@ -31,11 +31,9 @@ export function AlertMessage({ type, message }) {
             {alertStyles[type].icon}
           </div>
           <div className="ml-2 min-w-0">
-            {/* Dòng đầu tiên: nowrap nhưng có thể kéo dài */}
             <div className="whitespace-nowrap overflow-x-auto">
               {firstLine}
             </div>
-            {/* Các dòng sau: xuống dòng tự nhiên */}
             {remainingLines.map((line, index) => (
               <div key={index} className="whitespace-normal break-words">
                 {line}
