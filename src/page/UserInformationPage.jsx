@@ -81,6 +81,9 @@ export default function UserInformation() {
   const [qr, setQr] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState();
   const [userInfo, setUserInfo] = useState(null);
+  const [originalUserInfo, setOriginalUserInfo] = useState(null);
+  const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
+  const [multiSelectKey, setMultiSelectKey] = useState(Date.now());
 
   const fileInputRef = React.useRef(null);
   const bannerFileInputRef = React.useRef(null);
@@ -154,14 +157,20 @@ export default function UserInformation() {
       try {
         setLoading(true);
         const user = JSON.parse(localStorage.getItem("user"));
+
         const response = await me.getProfile();
         setUserInfo(response);
+
         const qrResponse = await me.getQR(user._id);
         setQr(qrResponse);
-        setUserInfo(response);
-        console.log("User info:", response);
+
         setDateOfBirth(
-          `${response.dateOfBirth.year}-${String(response.dateOfBirth.month).padStart(2, '0')}-${String(response.dateOfBirth.day).padStart(2, '0')}`
+          `${response.dateOfBirth.year}-${String(
+            response.dateOfBirth.month
+          ).padStart(2, "0")}-${String(response.dateOfBirth.day).padStart(
+            2,
+            "0"
+          )}`
         );
       } catch (err) {
         console.error("Error fetching user profile:", err);
@@ -276,7 +285,12 @@ export default function UserInformation() {
       const userInfoRequest = {
         id: userInfo._id,
         ...userInfo,
-        dateOfBirth: `${userInfo.dateOfBirth.year}-${String(userInfo.dateOfBirth.month).padStart(2, '0')}-${String(userInfo.dateOfBirth.day).padStart(2, '0')}T00:00:00.000Z`,
+        dateOfBirth: `${userInfo.dateOfBirth.year}-${String(
+          userInfo.dateOfBirth.month
+        ).padStart(2, "0")}-${String(userInfo.dateOfBirth.day).padStart(
+          2,
+          "0"
+        )}T00:00:00.000Z`,
       };
       delete userInfoRequest._id;
       console.log(userInfoRequest);
@@ -293,6 +307,27 @@ export default function UserInformation() {
       setLoading(false);
     }
   };
+
+  const handleEditing = () => {
+    if (!isEditing) {
+      const userInfoCopy = {
+        ...userInfo,
+        hobbies: userInfo.hobbies ? [...userInfo.hobbies] : [],
+      };
+      setOriginalUserInfo(userInfoCopy);
+      setOriginalDateOfBirth(dateOfBirth);
+    } else {
+      setUserInfo({ ...originalUserInfo });
+      setDateOfBirth(originalDateOfBirth);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      setMultiSelectKey(Date.now());
+    }
+  }, [userInfo?.hobbies, isEditing]);
 
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
@@ -453,7 +488,7 @@ export default function UserInformation() {
                       <Button
                         variant="ghost"
                         className="text-blue-600 bg-white hover:text-blue-700"
-                        onClick={() => setIsEditing(!isEditing)}
+                        onClick={handleEditing}
                       >
                         Edit
                       </Button>
@@ -564,14 +599,15 @@ export default function UserInformation() {
                           Your hobbies
                         </label>
                         <MultiSelect
+                          key={multiSelectKey}
                           disabled={!isEditing}
                           options={availableHobbies}
-                          onValueChange={(value) =>
-                            setUserInfo({ ...userInfo, hobbies: value })
-                          }
-                          defaultValue={userInfo.hobbies}
+                          onValueChange={(value) => {
+                            setUserInfo({ ...userInfo, hobbies: value });
+                          }}
                           placeholder="Select options"
                           variant="inverted"
+                          defaultValue={userInfo.hobbies}
                           animation={2}
                           maxCount={3}
                         />
