@@ -41,7 +41,7 @@ export function AddGroupModal({ onClose, isOpen }) {
     }
 
     fetchFriendList();
-  }, []);
+  }, [isOpen]);
 
   const resetModalState = () => {
     setGroupName("");

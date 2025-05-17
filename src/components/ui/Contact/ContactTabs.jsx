@@ -1,11 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 export function ContactTabs({ activeTab, onTabChange }) {
     const friendList = useSelector(state => state.friend.friends);
     const friendRequests = useSelector(state => state.friend.requestFriends);
     const sentRequests = useSelector(state => state.friend.myRequestFriends);
-    const groupList = [];
 
     const tabs = [
         { id: 'friend-list', label: 'Friend list', count: friendList.length },
