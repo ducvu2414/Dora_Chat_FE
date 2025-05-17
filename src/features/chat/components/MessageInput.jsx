@@ -341,7 +341,7 @@ export default function MessageInput({
 
       if (!editableRef.current) return;
 
-    setInput(editableRef.current.innerText);
+      setInput(editableRef.current.innerText);
 
       const text = editableRef.current.innerText || "";
 
@@ -490,9 +490,6 @@ export default function MessageInput({
   };
   // Hiển thị tin nhắn đang reply
   const renderReplyPreview = () => {
-    console.log("member", members);
-    console.log("reply", replyMessage);
-
     if (!replyMessage) return null;
     const isRepliedImage = replyMessage.type === "IMAGE";
     const isRepliedVideo = replyMessage.type === "VIDEO";
