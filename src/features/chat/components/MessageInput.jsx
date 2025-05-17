@@ -300,6 +300,7 @@ export default function MessageInput({
   };
 
   const handleInputChange = () => {
+    console.log("conversation", conversation);
     if (conversation?.type) {
       // Xử lý khi gõ bên trong một mention span
       const selection = window.getSelection();

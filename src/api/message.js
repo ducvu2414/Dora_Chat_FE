@@ -83,23 +83,6 @@ const messageApi = {
       })
       .then((res) => res.data);
   },
-  sendReplyMessage: async ({
-    conversationId,
-    content,
-    replyMessageId,
-    channelId,
-    type,
-  }) => {
-    return axios
-      .post("/api/messages/reply", {
-        conversationId,
-        content,
-        replyMessageId,
-        channelId,
-        type,
-      })
-      .then((res) => res.data);
-  },
 };
 
 export default messageApi;
