@@ -28,6 +28,7 @@ import cloudinaryApi from "@/api/cloudinary";
 import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
 import { Button } from "@/components/ui/button";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function MainDetail({
   handleSetActiveTab,
@@ -99,7 +100,10 @@ export default function MainDetail({
       console.log("Selected user IDs:", responseAddMembers);
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("You do not have permission to add members to this group");
+      AlertMessage({
+        type: "error",
+        message: "You do not have permission to add members to this group",
+      });
     }
   };
 
@@ -113,7 +117,10 @@ export default function MainDetail({
       console.log("Selected user IDs:", responseTransferAdmin);
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("You do not have permission to decentralize in this group");
+      AlertMessage({
+        type: "error",
+        message: "You do not have permission to decentralize in this group",
+      });
     }
   };
 
@@ -128,7 +135,10 @@ export default function MainDetail({
       console.log("Selected user IDs:", responseAddManager);
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("You do not add manager for this member in group");
+      AlertMessage({
+        type: "error",
+        message: "You do not add manager for this member in group",
+      });
     }
   };
 
@@ -141,7 +151,10 @@ export default function MainDetail({
       console.log("Selected user IDs:", responseDisband);
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("You do not have permission to decentralize in this group");
+      AlertMessage({
+        type: "error",
+        message: "You do not have permission to decentralize in this group",
+      });
     }
   };
 
@@ -234,7 +247,10 @@ export default function MainDetail({
         setName(responseName.data.name);
       }
     } catch {
-      alert("You do not have permission to change the group name");
+      AlertMessage({
+        type: "error",
+        message: "You do not have permission to change the group name",
+      });
       setName(conversation.name);
     }
   };
@@ -272,7 +288,10 @@ export default function MainDetail({
 
     // Kiểm tra loại file (chỉ cho phép ảnh)
     if (!file.type.match("image.*")) {
-      alert("Vui lòng chọn file ảnh (JPEG/PNG/WEBP)");
+      AlertMessage({
+        type: "error",
+        message: "Vui lòng chọn file ảnh (JPEG/PNG/WEBP)",
+      });
       return;
     }
 

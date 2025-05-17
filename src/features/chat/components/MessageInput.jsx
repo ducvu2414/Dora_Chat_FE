@@ -7,6 +7,7 @@ import EmojiIcon from "@assets/chat/emoji_icon.svg";
 import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function MessageInput({
   conversation,
@@ -219,7 +220,10 @@ export default function MessageInput({
       setInput("");
     } catch (error) {
       console.error("Send message error:", error);
-      alert("Send message error!");
+      AlertMessage({
+        type: "error",
+        message: "Send message error!",
+      });
     } finally {
       setIsLoading(false);
     }

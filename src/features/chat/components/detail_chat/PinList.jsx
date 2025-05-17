@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Spinner } from "@/page/Spinner";
 import PinItem from "./PinItem";
 import pinMessageApi from "@/api/pinMessage";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function PinList({ onBack, pinMessages, onScrollToMessage }) {
   const [pinMessagesState, setPinMessages] = useState(pinMessages);
@@ -21,9 +22,11 @@ export default function PinList({ onBack, pinMessages, onScrollToMessage }) {
       );
       console.log(responseRemovePinMessage);
     } catch (error) {
-      alert(
-        error.response?.data?.message || "You cannot remove this pin message"
-      );
+      AlertMessage({
+        type: "error",
+        message:
+          error.response?.data?.message || "You cannot remove this pin message",
+      });
     }
     console.log(pinMessage);
   };

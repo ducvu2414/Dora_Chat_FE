@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Spinner } from "@/page/Spinner";
 import memberApi from "@/api/member";
 import conversationApi from "@/api/conversation";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function MemberList({
   onBack,
@@ -33,11 +34,17 @@ export default function MemberList({
   }, [conversationId]);
 
   const handleAddFriend = (member) => {
-    alert(`Gửi lời mời kết bạn đến ${member.name}`);
+    AlertMessage({
+      type: "error",
+      message: `Gửi lời mời kết bạn đến ${member.name}`,
+    });
   };
 
   const handleMessage = (member) => {
-    alert(`Chuyển đến tin nhắn của ${member.name}`);
+    AlertMessage({
+      type: "error",
+      message: `Chuyển đến tin nhắn của ${member.name}`,
+    });
   };
 
   const handleRemove = async (member) => {

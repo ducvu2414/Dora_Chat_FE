@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Plus, Settings, X } from "lucide-react";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function VoteModal({
   isOpen,
@@ -120,7 +121,10 @@ export default function VoteModal({
   const handleSubmit = () => {
     // Validate form
     if (!content.trim()) {
-      alert("Please enter a topic");
+      AlertMessage({
+        type: "error",
+        message: "Please enter a topic",
+      });
       return;
     }
 
@@ -128,12 +132,18 @@ export default function VoteModal({
 
     if (vote) {
       if (validNewOptions.length < 1 && newOptions.length > 0) {
-        alert("Please enter valid options");
+        AlertMessage({
+          type: "error",
+          message: "Please enter valid options",
+        });
         return;
       }
     } else {
       if (allOptionsCombined.filter((opt) => opt.trim() !== "").length < 2) {
-        alert("Please enter at least 2 options");
+        AlertMessage({
+          type: "error",
+          message: "Please enter at least 2 options",
+        });
         return;
       }
     }
@@ -141,7 +151,10 @@ export default function VoteModal({
     const duplicates = findDuplicateGroups(allOptionsCombined);
     if (duplicates.length > 0) {
       setDuplicateGroups(duplicates);
-      alert("Please remove duplicate options before submitting");
+      AlertMessage({
+        type: "error",
+        message: "Please remove duplicate options before submitting",
+      });
       return;
     }
 
@@ -336,7 +349,9 @@ export default function VoteModal({
                 onClick={handleSubmit}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={
-                  newOptions.length < 1 || newOptions.some((opt) => opt.trim() === "") || duplicateGroups.length > 0
+                  newOptions.length < 1 ||
+                  newOptions.some((opt) => opt.trim() === "") ||
+                  duplicateGroups.length > 0
                 }
               >
                 Save
@@ -348,7 +363,8 @@ export default function VoteModal({
                 // content not empty,  at least 2 options and no duplicate options
                 disabled={
                   content.trim() === "" ||
-                  allOptionsCombined.filter((opt) => opt.trim() !== "").length < 2 ||
+                  allOptionsCombined.filter((opt) => opt.trim() !== "").length <
+                    2 ||
                   duplicateGroups.length > 0
                 }
               >
