@@ -7,6 +7,7 @@ import EmojiIcon from "@assets/chat/emoji_icon.svg";
 import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
+import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
 
 export default function MessageInput({
   onSend,
@@ -15,6 +16,8 @@ export default function MessageInput({
   isGroup,
   members,
   member,
+  onReply,
+  replyMessage,
 }) {
   const [input, setInput] = useState("");
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
@@ -43,7 +46,6 @@ export default function MessageInput({
     }
   }, []);
 
-  // ignore member._id
   const filteredMembers = members
     .filter((m) => m._id.toString() !== member._id.toString())
     .filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase()));
@@ -176,6 +178,7 @@ export default function MessageInput({
           type: "TEXT",
           tags,
           tagPositions,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -183,6 +186,7 @@ export default function MessageInput({
         await onSend({
           type: "IMAGE",
           files: imageFiles,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -190,6 +194,7 @@ export default function MessageInput({
         await onSend({
           type: "VIDEO",
           files: videoFiles,
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -197,6 +202,7 @@ export default function MessageInput({
         await onSend({
           type: "FILE",
           files: [file],
+          replyMessageId: replyMessage?.messageId,
         });
       }
 
@@ -209,13 +215,14 @@ export default function MessageInput({
       if (imageInputRef.current) imageInputRef.current.value = "";
       if (videoInputRef.current) videoInputRef.current.value = "";
       if (fileInputRef.current) fileInputRef.current.value = "";
-      
+
       // Clear the input field
       if (editableRef.current) {
         editableRef.current.innerHTML = "";
         editableRef.current.classList.add("show-placeholder");
       }
       setInput("");
+      onReply(null);
     } catch (error) {
       console.error("Send message error:", error);
       alert("Send message error!");
@@ -266,8 +273,6 @@ export default function MessageInput({
     }
   };
 
-
-
   const onEmojiClick = (emojiData) => {
     if (!editableRef.current) return;
 
@@ -285,10 +290,10 @@ export default function MessageInput({
     newRange.collapse(true);
     selection.removeAllRanges();
     selection.addRange(newRange);
-    
+
     // Đảm bảo sau khi chọn emoji thì cập nhật input
     setInput(editableRef.current.innerText);
-    
+
     // Đóng emoji picker khi đã chọn
     setShowEmojiPicker(false);
   };
@@ -297,38 +302,41 @@ export default function MessageInput({
     // Xử lý khi gõ bên trong một mention span
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-    
+
     const range = selection.getRangeAt(0);
     let node = range.startContainer;
-    
+
     // Kiểm tra xem có đang gõ bên trong mention span không
     let insideMentionSpan = false;
     let mentionSpan = null;
-    
+
     while (node && node !== editableRef.current) {
-      if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('mention')) {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        node.classList.contains("mention")
+      ) {
         insideMentionSpan = true;
         mentionSpan = node;
         break;
       }
       node = node.parentNode;
     }
-    
+
     if (insideMentionSpan && mentionSpan) {
       // Nếu đang gõ trong mention span, xử lý để phá vỡ mention
       // Tạo một text node mới từ nội dung hiện tại của span
       const textNode = document.createTextNode(mentionSpan.textContent);
-      
+
       // Thay thế span cũ bằng text node mới
       mentionSpan.parentNode.replaceChild(textNode, mentionSpan);
-      
+
       // Đặt lại con trỏ vào vị trí trong text node
       const newRange = document.createRange();
       newRange.setStart(textNode, range.startOffset);
       newRange.collapse(true);
       selection.removeAllRanges();
       selection.addRange(newRange);
-      
+
       setInput(editableRef.current.innerText);
       return;
     }
@@ -338,7 +346,7 @@ export default function MessageInput({
     setInput(editableRef.current.innerText);
 
     const text = editableRef.current.innerText || "";
-    
+
     if (text.trim() === "") {
       editableRef.current.classList.add("show-placeholder");
     } else {
@@ -464,14 +472,14 @@ export default function MessageInput({
     span.setAttribute("contenteditable", "false"); // Ngăn chặn việc chỉnh sửa trực tiếp
     range.deleteContents();
     range.insertNode(span);
-    
+
     // Thêm một khoảng trắng sau đó
     const spaceNode = document.createTextNode(" ");
     const newRange = document.createRange();
     newRange.setStartAfter(span);
     newRange.collapse(true);
     newRange.insertNode(spaceNode);
-    
+
     // Di chuyển con trỏ sau khoảng trắng vừa thêm
     newRange.setStartAfter(spaceNode);
     newRange.collapse(true);
@@ -481,12 +489,59 @@ export default function MessageInput({
     setShowMentionDropdown(false);
     setMentionQuery("");
     setMentionPosition(null);
-    
     setInput(editableRef.current.innerText);
+  };
+  // Hiển thị tin nhắn đang reply
+  const renderReplyPreview = () => {
+    console.log("member", members);
+    console.log("reply", replyMessage);
+
+    if (!replyMessage) return null;
+    const isRepliedImage = replyMessage.type === "IMAGE";
+    const isRepliedVideo = replyMessage.type === "VIDEO";
+    const isRepliedFile = replyMessage.type === "FILE";
+    return (
+      <div className="flex items-center justify-between p-2 mx-3 bg-gray-100 border-t border-gray-200 rounded-t-lg">
+        <div>
+          <span className="block text-xs font-medium text-gray-500">
+            Replying to {replyMessage.member || "User"}
+          </span>
+          {isRepliedImage ? (
+            <img
+              src={replyMessage.content}
+              alt="Replied"
+              className="max-w-[50px] max-h-[50px] object-contain rounded"
+            />
+          ) : isRepliedVideo ? (
+            <video
+              src={replyMessage.content}
+              className="max-w-[50px] max-h-[50px] object-contain rounded"
+            />
+          ) : isRepliedFile ? (
+            <div className="flex items-center text-xs text-[#086DC0]">
+              <AiOutlinePaperClip size={16} className="mr-1" />
+              {replyMessage.fileName || "File"}
+            </div>
+          ) : (
+            <p className="text-xs text-left text-gray-600 truncate">
+              {replyMessage.content}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => onReply(null)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <AiOutlineClose size={16} />
+        </button>
+      </div>
+    );
   };
 
   return (
     <div className="relative flex flex-col w-full">
+      {/* Hiển thị tin nhắn đang reply */}
+      {renderReplyPreview()}
       {/* Previews (chỉ hiển thị 1 trong 2: image hoặc video) */}
       {(imagePreviews.length > 0 ||
         videoPreviews.length > 0 ||
@@ -595,7 +650,7 @@ export default function MessageInput({
                       />
                     ) : (
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        className="flex items-center justify-center w-8 h-8 rounded-full"
                         style={{
                           backgroundColor: member.avatarColor || "#ccc",
                         }}
@@ -627,7 +682,7 @@ export default function MessageInput({
           <>
             <Button
               size="icon"
-              className="shrink-0 rounded-full bg-regal-blue text-white hover:scale-105 hover:bg-regal-blue/80 transition-all duration-200 border-none focus:outline-none mr-3"
+              className="mr-3 text-white transition-all duration-200 border-none rounded-full shrink-0 bg-regal-blue hover:scale-105 hover:bg-regal-blue/80 focus:outline-none"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <Plus className="!h-6 !w-6" />
@@ -661,7 +716,7 @@ export default function MessageInput({
               <div className="relative w-full">
                 {/* Placeholder giả */}
                 {input.trim() === "" && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none select-none text-sm">
+                  <div className="absolute text-sm text-gray-400 -translate-y-1/2 pointer-events-none select-none left-4 top-1/2">
                     Type a message...
                   </div>
                 )}
@@ -673,7 +728,7 @@ export default function MessageInput({
                   onKeyDown={handleKeyDown}
                   data-placeholder="Type a message..."
                   suppressContentEditableWarning={true}
-                  className="text-sm bg-inherit py-2 text-left w-full outline-none ml-4 show-placeholder"
+                  className="w-full py-2 ml-4 text-sm text-left outline-none bg-inherit show-placeholder"
                   style={{
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",

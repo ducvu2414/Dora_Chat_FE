@@ -74,13 +74,29 @@ const messageApi = {
     console.log(res);
     return res;
   },
-  // Thêm hàm reactToMessage
   reactToMessage: async ({ conversationId, messageId, reactType }) => {
     return axios
       .post("/api/messages/react", {
         conversationId,
         messageId,
         reactType,
+      })
+      .then((res) => res.data);
+  },
+  sendReplyMessage: async ({
+    conversationId,
+    content,
+    replyMessageId,
+    channelId,
+    type,
+  }) => {
+    return axios
+      .post("/api/messages/reply", {
+        conversationId,
+        content,
+        replyMessageId,
+        channelId,
+        type,
       })
       .then((res) => res.data);
   },

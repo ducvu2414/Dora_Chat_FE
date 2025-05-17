@@ -19,6 +19,8 @@ export default function MessageItem({
   member,
   onSave,
   onLock,
+  onReply, // Thêm prop để xử lý reply
+  messages, // Thêm prop để truy xuất tin nhắn gốc
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -83,6 +85,7 @@ export default function MessageItem({
 
   const handleVideoError = () => {
     setVideoLoaded(false);
+    setVideoError(true);
   };
 
   useEffect(() => {
@@ -140,6 +143,45 @@ export default function MessageItem({
             isSentRequest: isFriend ? true : false,
           },
         });
+  };
+  // Tìm tin nhắn gốc từ replyMessageId
+  const repliedMessage = msg.replyMessageId
+    ? messages.find((m) => m._id === msg.replyMessageId)
+    : null;
+  // Hiển thị nội dung tin nhắn được reply
+  const renderRepliedMessage = () => {
+    if (!repliedMessage) return null;
+    const isRepliedImage = repliedMessage.type === "IMAGE";
+    const isRepliedVideo = repliedMessage.type === "VIDEO";
+    const isRepliedFile = repliedMessage.type === "FILE";
+    return (
+      <div className="p-2 mb-1 bg-gray-100 rounded-lg">
+        <span className="block text-xs font-medium text-gray-500">
+          {repliedMessage.memberId?.name || "User"}
+        </span>
+        {isRepliedImage ? (
+          <img
+            src={repliedMessage.content}
+            alt="Replied"
+            className="max-w-[100px] max-h-[100px] object-contain rounded"
+          />
+        ) : isRepliedVideo ? (
+          <video
+            src={repliedMessage.content}
+            className="max-w-[100px] max-h-[100px] object-contain rounded"
+          />
+        ) : isRepliedFile ? (
+          <div className="flex items-center text-xs text-[#086DC0]">
+            <AiOutlinePaperClip size={16} className="mr-1" />
+            {repliedMessage.fileName || "File"}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-600 truncate">
+            {repliedMessage.content}
+          </p>
+        )}
+      </div>
+    );
   };
   // Hiển thị reactions và tooltip khi hover
   const renderReactions = () => {
@@ -237,10 +279,11 @@ export default function MessageItem({
                   isMe={isMe}
                   messageId={msg._id.toString()}
                   conversationId={msg.conversationId.toString()}
-                  messageContent={msg.content}
+                  message={msg}
                   type={msg.type}
                   isOpen={menuOpen}
                   setIsOpen={setMenuOpen}
+                  onReply={onReply}
                 />
               )}
             </div>
@@ -251,7 +294,8 @@ export default function MessageItem({
                 {msg.memberId?.name || "User"}
               </span>
             )}
-
+            {/* Hiển thị tin nhắn được reply */}
+            {renderRepliedMessage()}
             {/* Message content */}
             {isImage ? (
               <img
