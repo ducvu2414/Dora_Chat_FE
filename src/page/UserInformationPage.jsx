@@ -238,7 +238,7 @@ export default function UserInformation() {
       AlertMessage({
         type: "error",
         message:
-          "Password must be at least 8 characters long, containing uppercase and lowercase letters and numbers",
+          "Password must be at least 8 characters\ncontaining uppercase and lowercase letters and numbers",
       });
       return;
     }

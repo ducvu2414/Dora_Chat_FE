@@ -25,17 +25,29 @@ export function AlertMessage({ type, message }) {
     const remainingLines = lines.slice(1);
 
     toast(
-      <div className={`flex items-center ${alertStyles[type].className}`}>
-        {alertStyles[type].icon}
-        <span className="ml-2">
-          {/* Dòng đầu tiên: nowrap (không ngắt dòng) */}
-          <span style={{ whiteSpace: "nowrap" }}>{firstLine}</span>
-          {/* Các dòng sau: xuống dòng tự nhiên */}
-          {remainingLines.map((line, index) => (
-            <div key={index}>{line}</div>
-          ))}
-        </span>
-      </div>
+      <div className="w-full max-w-full">
+        <div className={`flex items-start p-2 rounded border ${alertStyles[type].className}`}>
+          <div className="flex-shrink-0">
+            {alertStyles[type].icon}
+          </div>
+          <div className="ml-2 min-w-0">
+            {/* Dòng đầu tiên: nowrap nhưng có thể kéo dài */}
+            <div className="whitespace-nowrap overflow-x-auto">
+              {firstLine}
+            </div>
+            {/* Các dòng sau: xuống dòng tự nhiên */}
+            {remainingLines.map((line, index) => (
+              <div key={index} className="whitespace-normal break-words">
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>,
+      {
+        className: "!w-auto !max-w-full",
+        bodyClassName: "!w-auto !max-w-full !p-0",
+      }
     );
   }
 
