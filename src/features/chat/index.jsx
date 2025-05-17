@@ -21,6 +21,7 @@ import messageApi from "@/api/message";
 import pinMessageApi from "@/api/pinMessage";
 import voteApi from "@/api/vote";
 import VoteModal from "@/components/ui/vote-modal";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
@@ -361,12 +362,19 @@ export default function ChatSingle() {
   const handleAddChannel = async (channelData, channelId) => {
     try {
       if (!channelId) {
-        const newChannel = await channelApi.createChannel(
-          channelData.name,
-          member.data._id,
-          conversationId
-        );
-        setActiveChannel(newChannel._id);
+        if (channels.find((channel) => channel.name === channelData.name.trim())) {
+          AlertMessage({
+            type: "error",
+            message: "Channel name already exists",
+          });
+        } else {
+          const newChannel = await channelApi.createChannel(
+            channelData.name,
+            member.data._id,
+            conversationId
+          );
+          setActiveChannel(newChannel._id);
+        }
       } else {
         await channelApi.updateChannel(
           channelId,
