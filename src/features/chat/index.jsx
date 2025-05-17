@@ -217,22 +217,14 @@ export default function ChatSingle() {
   }) => {
     const channelId = activeChannel;
     try {
-      if (replyMessageId) {
-        // Gửi tin nhắn reply
-        await messageApi.sendReplyMessage({
-          conversationId,
-          content: content || (files ? files[0].name : ""),
-          replyMessageId,
-          channelId,
-          type,
-        });
-      } else if (type === "TEXT") {
+      if (type === "TEXT") {
         await messageApi.sendTextMessage({
           conversationId,
           content,
           channelId,
           tags,
           tagPositions,
+          replyMessageId,
         });
       } else if (type === "IMAGE") {
         await messageApi.sendImageMessage(conversationId, files, channelId);
@@ -449,26 +441,20 @@ export default function ChatSingle() {
               }`}
             >
               {/* log messages */}
-              {showDetail &&
-                (console.log("conversationMessages", pinMessages),
-                (
-                  <DetailChat
-                    conversation={
-                      conversations.filter(
-                        (conv) => conv._id === conversationId
-                      )[0]
-                    }
-                    imagesVideos={photosVideos}
-                    files={files}
-                    links={links}
-                    pinMessages={pinMessages.filter((pinMessage) =>
-                      conversationMessages.some(
-                        (message) => message._id === pinMessage.messageId
-                      )
-                    )}
-                    onScrollToMessage={handleScrollToMessage}
-                  />
-                ))}
+              {showDetail && (
+                <DetailChat
+                  conversation={
+                    conversations.filter(
+                      (conv) => conv._id === conversationId
+                    )[0]
+                  }
+                  imagesVideos={photosVideos}
+                  files={files}
+                  links={links}
+                  pinMessages={pinMessages}
+                  onScrollToMessage={handleScrollToMessage}
+                />
+              )}
             </div>
           </div>
         </div>
