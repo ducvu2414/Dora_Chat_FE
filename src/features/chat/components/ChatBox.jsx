@@ -95,6 +95,7 @@ const ChatBox = forwardRef(
                   onLock={onLock}
                   onReply={onReply}
                   messages={messages}
+                  handleScrollToMessage={scrollToMessage}
                 />
               </div>
             );

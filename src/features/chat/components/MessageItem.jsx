@@ -21,6 +21,7 @@ export default function MessageItem({
   onLock,
   onReply, // Thêm prop để xử lý reply
   messages, // Thêm prop để truy xuất tin nhắn gốc
+  handleScrollToMessage,
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -155,7 +156,10 @@ export default function MessageItem({
     const isRepliedVideo = repliedMessage.type === "VIDEO";
     const isRepliedFile = repliedMessage.type === "FILE";
     return (
-      <div className="p-2 mb-1 bg-gray-100 rounded-lg">
+      <div
+        className="p-2 mb-1 bg-gray-100 rounded-lg cursor-pointer"
+        onClick={() => handleScrollToMessage(repliedMessage._id)}
+      >
         <span className="block text-xs font-medium text-gray-500">
           {repliedMessage.memberId?.name || "User"}
         </span>
@@ -207,7 +211,7 @@ export default function MessageItem({
               {REACT_ICONS[type]} {count > 1 ? count : ""}
             </span>
             {hoveredReaction?.type === type && (
-              <div className="absolute bottom-full mb-1 bg-white border rounded-md shadow-md p-2 min-w-[150px] z-50">
+              <div className="absolute bottom-full mb-1 bg-white border rounded-md shadow-md p-2 min-w-[150px] z-50 -left-10">
                 {users.map((user, index) => (
                   <div key={index} className="text-sm">
                     {user} {REACT_ICONS[type]}
