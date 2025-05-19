@@ -174,3 +174,19 @@ input:-webkit-autofill:active {
     @apply bg-background text-foreground;
   }
 }
+
+.emoji-picker-container {
+  /* Reset các style toàn cục */
+  all: initial;
+  
+  /* Đảm bảo vị trí và z-index vẫn hoạt động */
+  position: absolute;
+  bottom: 70px;
+  right: 16px;
+  z-index: 10;
+}
+
+/* Ngăn các style toàn cục ảnh hưởng đến nội dung bên trong */
+.emoji-picker-container * {
+  all: revert;
+}

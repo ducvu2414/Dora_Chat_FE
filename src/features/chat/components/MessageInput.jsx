@@ -278,9 +278,25 @@ export default function MessageInput({
     if (!editableRef.current) return;
 
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    let range;
 
-    const range = selection.getRangeAt(0);
+    // Nếu không có selection hoặc selection không trong editableRef
+    if (
+      !selection.rangeCount ||
+      !editableRef.current.contains(selection.anchorNode)
+    ) {
+      // Tạo range mới ở cuối editableRef
+      editableRef.current.focus();
+      range = document.createRange();
+      range.selectNodeContents(editableRef.current);
+      range.collapse(false); // collapse to end
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      range = selection.getRangeAt(0);
+    }
+
+    // Chèn emoji
     const emojiNode = document.createTextNode(emojiData.emoji);
     range.deleteContents();
     range.insertNode(emojiNode);
@@ -292,11 +308,12 @@ export default function MessageInput({
     selection.removeAllRanges();
     selection.addRange(newRange);
 
-    // Đảm bảo sau khi chọn emoji thì cập nhật input
     setInput(editableRef.current.innerText);
 
-    // Đóng emoji picker khi đã chọn
     setShowEmojiPicker(false);
+
+    // Đảm bảo div vẫn giữ focus
+    editableRef.current.focus();
   };
 
   const handleInputChange = () => {
@@ -626,7 +643,7 @@ export default function MessageInput({
 
       {/* Emoji Picker */}
       {showEmojiPicker && (
-        <div className="absolute bottom-[70px] right-4 z-10">
+        <div className="emoji-picker-container">
           <EmojiPicker onEmojiClick={onEmojiClick} theme="light" />
         </div>
       )}
