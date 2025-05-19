@@ -11,6 +11,9 @@ import userApi from "../../../api/user";
 import friendApi from "../../../api/friend";
 import { useNavigate } from "react-router-dom";
 import { REACT_ICONS } from "../../../utils/constant";
+import { MapPin } from "lucide-react";
+import LocationModal from "@/components/ui/location-modal";
+
 export default function MessageItem({
   msg,
   showAvatar,
@@ -35,6 +38,9 @@ export default function MessageItem({
   const [hoverVideoUrl, setHoverVideoUrl] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredReaction, setHoveredReaction] = useState(null); // Trạng thái hover cho reaction
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationData, setLocationData] = useState(null);
+
   const timeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -51,6 +57,7 @@ export default function MessageItem({
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
   const isVote = msg.type === "VOTE";
+  const isLocation = msg.type === "LOCATION";
   const inviteLinkMatch = msg.content.match(
     /(https?:\/\/[^\s]+\/join\/[a-f0-9]+)/
   );
@@ -225,6 +232,23 @@ export default function MessageItem({
         ))}
       </div>
     );
+  };
+
+  // Add this function before the return statement
+  const handleLocationClick = () => {
+    if (isLocation && msg.location) {
+      try {
+        const lat = msg.location.lat;
+        const lng = msg.location.lng;
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setLocationData({ lat, lng });
+          setShowLocationModal(true);
+        }
+        
+      } catch (error) {
+        console.error("Error parsing location data:", error);
+      }
+    }
   };
 
   return (
@@ -406,6 +430,19 @@ export default function MessageItem({
                   />
                 </div>
               </div>
+            ) : isLocation ? (
+              <div
+                className="px-3 py-[14px] rounded-2xl bg-[#F5F5F5] text-[#000000] cursor-pointer hover:bg-[#EFF8FF] transition-colors"
+                onClick={handleLocationClick}
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-blue-500" />
+                  <span className="font-medium">Location</span>
+                </div>
+                <div className="mt-2 text-sm text-gray-600">
+                  Click to view shared location
+                </div>
+              </div>
             ) : inviteLinkMatch ? (
               <div>
                 <p>{msg.content.replace(inviteLinkMatch[0], "").trim()}</p>
@@ -563,6 +600,14 @@ export default function MessageItem({
             )}
           </div>
         </div>
+      )}
+      {showLocationModal && locationData && (
+        <LocationModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onSend={() => {}}
+          initialLocation={locationData}
+        />
       )}
     </>
   );

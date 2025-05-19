@@ -1,114 +1,54 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 
-export default function LocationModal({ isOpen, onClose, onSend }) {
+export default function LocationModal({ isOpen, onClose }) {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
   const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const markerRef = useRef(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    // Kiểm tra nếu Google Maps API đã được tải
+    if (window.google) {
+      setScriptLoaded(true);
+      return;
+    }
 
-    // Get current location when modal opens
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const currentLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setLocation(currentLocation);
-        setLoading(false);
-
-        // Initialize map after we have the location
-        initializeMap(currentLocation);
-      },
-      (err) => {
-        console.error("Geolocation error:", err);
-        setError("Could not get your location. Please allow location access.");
-        setLoading(false);
-      },
-      { enableHighAccuracy: true }
-    );
-
-    // Load Google Maps script
-    const loadGoogleMapsScript = () => {
-      if (window.google && window.google.maps) {
-        return Promise.resolve();
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBjLElpWo36xvvhT43k8mvB-nHKEiDFoNw&libraries=places`;
-      script.async = true;
-      script.defer = true;
-
-      const loadPromise = new Promise((resolve, reject) => {
-        script.onload = resolve;
-        script.onerror = reject;
-      });
-
-      document.head.appendChild(script);
-      return loadPromise;
-    };
-
-    loadGoogleMapsScript().catch((err) => {
-      console.error("Error loading Google Maps:", err);
-      setError("Could not load Google Maps. Please try again later.");
-      setLoading(false);
-    });
+    // Nếu chưa tải, tải script thủ công
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBjLElpWo36xvvhT43k8mvB-nHKEiDFoNw`;
+    script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    document.body.appendChild(script);
 
     return () => {
-      // Cleanup if needed
-      if (mapInstanceRef.current) {
-        // Any cleanup for map instance if needed
-      }
+      document.body.removeChild(script);
     };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLoading(false);
+        },
+        (err) => {
+          setError(
+            "Could not get your location. Please allow location access."
+          );
+          console.error("Geolocation error:", err);
+          setLoading(false);
+        }
+      );
+    }
   }, [isOpen]);
-
-  const initializeMap = (currentLocation) => {
-    if (!window.google || !window.google.maps || !mapRef.current) return;
-
-    const mapOptions = {
-      center: currentLocation,
-      zoom: 15,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-    };
-
-    const map = new window.google.maps.Map(mapRef.current, mapOptions);
-    mapInstanceRef.current = map;
-
-    // Add a marker for the current location
-    const marker = new window.google.maps.Marker({
-      position: currentLocation,
-      map: map,
-      draggable: true,
-      animation: window.google.maps.Animation.DROP,
-    });
-    markerRef.current = marker;
-
-    // Update location when marker is dragged
-    marker.addListener("dragend", () => {
-      const newPosition = marker.getPosition();
-      setLocation({
-        lat: newPosition.lat(),
-        lng: newPosition.lng(),
-      });
-    });
-
-    // Allow clicking on map to move marker
-    map.addListener("click", (event) => {
-      marker.setPosition(event.latLng);
-      setLocation({
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng(),
-      });
-    });
-  };
 
   if (!isOpen) return null;
 
@@ -119,9 +59,9 @@ export default function LocationModal({ isOpen, onClose, onSend }) {
           <h3 className="text-lg font-medium">Send Location</h3>
           <button
             onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 text-gray-500 rounded-full hover:bg-gray-100"
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200"
           >
-            <X size={20} />
+            <X size={16} className="text-gray-700" /> X
           </button>
         </div>
 
@@ -137,10 +77,38 @@ export default function LocationModal({ isOpen, onClose, onSend }) {
             </div>
           ) : (
             <div ref={mapRef} className="w-full h-full">
-              {/* Google Maps will be rendered here */}
-              {!window.google && (
+              {!scriptLoaded ? (
                 <div className="flex items-center justify-center h-full">
-                  <p>Loading map...</p>
+                  <p>Loading Google Maps...</p>
+                </div>
+              ) : loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <p>Getting your location...</p>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-red-500">{error}</p>
+                </div>
+              ) : location ? (
+                <GoogleMap
+                  mapContainerStyle={{ height: "100%", width: "100%" }}
+                  zoom={15}
+                  center={{ lat: location.lat, lng: location.lng }}
+                  options={{
+                    streetViewControl: false,
+                    mapTypeControl: false,
+                    fullscreenControl: false,
+                    draggable: false,
+                    scrollwheel: true,
+                    draggableCursor: "default",
+                    zoomControl: true,
+                  }}
+                >
+                  <Marker position={{ lat: location.lat, lng: location.lng }} />
+                </GoogleMap>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>No location data</p>
                 </div>
               )}
             </div>
@@ -158,22 +126,6 @@ export default function LocationModal({ isOpen, onClose, onSend }) {
             </p>
           </div>
         )}
-
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSend(location)}
-            disabled={!location || loading}
-            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            Send Location
-          </button>
-        </div>
       </div>
     </div>
   );
