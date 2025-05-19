@@ -311,6 +311,11 @@ const MainLayout = () => {
       type,
       initiator,
     }) => {
+      if (callerId === user._id) {
+        console.log("📭 Bỏ qua NEW_USER_CALL từ chính mình (caller)");
+        return;
+      }
+
       console.log("⚡️ NEW_USER_CALL", {
         conversationId,
         callerId,
@@ -318,6 +323,7 @@ const MainLayout = () => {
         type,
         initiator,
       });
+
       if (currentCall) {
         console.log("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
         alert("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
@@ -329,26 +335,26 @@ const MainLayout = () => {
       const conv = conversations.find((c) => c._id === conversationId);
       if (initiator) {
         // caller
-        dispatch(clearIncomingCall());
-        dispatch(
-          setCallStarted({
-            type,
-            conversationId,
-            initiator: true,
-            peerId,
-            remotePeerId: null,
-            conversation: conv,
-          })
-        );
-        console.log("caller", {
-          type,
-          conversationId,
-          callerId,
-          peerId,
-          remotePeerId: null,
-          conversation: conv,
-        });
-        navigate(`${base}?type=${type}`, { state: { conversation: conv } });
+        // dispatch(clearIncomingCall());
+        // dispatch(
+        //   setCallStarted({
+        //     type,
+        //     conversationId,
+        //     initiator: true,
+        //     peerId,
+        //     remotePeerId: null,
+        //     conversation: conv,
+        //   })
+        // );
+        // console.log("caller", {
+        //   type,
+        //   conversationId,
+        //   callerId,
+        //   peerId,
+        //   remotePeerId: null,
+        //   conversation: conv,
+        // });
+        // navigate(`${base}?type=${type}`, { state: { conversation: conv } });
       } else {
         // callee (room‑broadcast)
         console.log("callee", {
@@ -425,16 +431,6 @@ const MainLayout = () => {
     };
   }, [conversations, dispatch, location.pathname, navigate]);
 
-  // useEffect(() => {
-  //   const onRejected = ({ userId, reason }) => {
-  //     console.log(`❌ Cuộc gọi bị từ chối bởi ${userId}. Lý do: ${reason}`);
-  //     dispatch(endCall());
-  //     navigate("/home");
-  //   };
-
-  //   socket.on(SOCKET_EVENTS.CALL_REJECTED, onRejected);
-  //   return () => socket.off(SOCKET_EVENTS.CALL_REJECTED, onRejected);
-  // }, []);
 
   useEffect(() => {
     const handleCallBroadcast = (event) => {
