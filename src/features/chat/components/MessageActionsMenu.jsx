@@ -6,6 +6,8 @@ import pinMessageApi from "../../../api/pinMessage";
 import memberApi from "../../../api/member";
 import ForwardMessageModal from "./ForwardMessageModal";
 import { REACT_ICONS } from "../../../utils/constant";
+import { AlertMessage } from "@/components/ui/alert-message";
+
 export default function MessageActionsMenu({
   isMe,
   messageId,
@@ -68,7 +70,10 @@ export default function MessageActionsMenu({
       setIsOpen(false);
     } catch (error) {
       console.error("Error recalling message:", error);
-      alert("Message cannot be recalled");
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Message cannot be recalled",
+      });
     }
   };
 
@@ -87,7 +92,10 @@ export default function MessageActionsMenu({
       setIsOpen(false);
     } catch (error) {
       console.error("Error deleting message for me:", error);
-      alert("Cannot delete message");
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Cannot delete message",
+      });
     }
   };
 
@@ -107,7 +115,10 @@ export default function MessageActionsMenu({
       setIsOpen(false);
     } catch (error) {
       console.error("Error pin message:", error);
-      alert(error.response?.data?.message);
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Cannot pin message",
+      });
     }
   };
 
@@ -141,7 +152,10 @@ export default function MessageActionsMenu({
       setIsOpen(false);
     } catch (error) {
       console.error("Error reacting to message:", error);
-      alert("Cannot react to message");
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Cannot react to message",
+      });
     }
   };
   // Xử lý chọn Reply

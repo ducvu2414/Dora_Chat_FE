@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSelector } from "react-redux";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function HeaderSignleChat({
   channelTabs,
@@ -35,16 +36,18 @@ export default function HeaderSignleChat({
   const handleCall = (type) => {
     if (!conversation._id || !userId) return;
     if (currentCall) {
-      alert(
-        "Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới."
-      );
+      AlertMessage({
+        type: "error",
+        message: "Bạn đang tham gia cuộc gọi nhóm khác\nVui lòng rời khỏi trước khi tham gia kênh mới.",
+      });
       return;
     }
     const isGroup = conversation.type;
     if (currentCall) {
-      alert(
-        "Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới."
-      );
+      AlertMessage({
+        type: "error",
+        message: "Bạn đang tham gia cuộc gọi nhóm khác\nVui lòng rời khỏi trước khi tham gia kênh mới.",
+      });
       return;
     }
 

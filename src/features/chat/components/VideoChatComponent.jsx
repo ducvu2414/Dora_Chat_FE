@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import peerService from "../../../utils/peerService";
 import { SOCKET_EVENTS } from "../../../utils/constant";
@@ -6,6 +6,7 @@ import { socket } from "../../../utils/socketClient";
 import { Video, VideoOff, PhoneOff, Mic, MicOff } from "lucide-react";
 import { endCall as endCallAction } from "../callSlice";
 import { useNavigate } from "react-router-dom";
+import { AlertMessage } from "@/components/ui/alert-message";
 
 export default function VideoCallComponent() {
     const dispatch = useDispatch();
@@ -62,7 +63,10 @@ export default function VideoCallComponent() {
                 });
             } catch (err) {
                 console.error("❌ Không thể truy cập camera/microphone", err);
-                alert("Không thể truy cập camera hoặc microphone. Vui lòng kiểm tra trình duyệt.");
+                AlertMessage({
+                    type: "error",
+                    message: "Không thể truy cập camera/microphone\nVui lòng kiểm tra trình duyệt.",
+                });
                 handleEndCall();
             }
         };

@@ -326,7 +326,10 @@ const MainLayout = () => {
 
       if (currentCall) {
         console.log("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
-        alert("📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới");
+        AlertMessage({
+          type: "error",
+          message: "📵 Đang trong cuộc gọi khác, từ chối cuộc gọi mới",
+        });
         navigate("/home");
         return;
       }
@@ -430,7 +433,6 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.CALL_USER, handleCallUser);
     };
   }, [conversations, dispatch, location.pathname, navigate]);
-
 
   useEffect(() => {
     const handleCallBroadcast = (event) => {

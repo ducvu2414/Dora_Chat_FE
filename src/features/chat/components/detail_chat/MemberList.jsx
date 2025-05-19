@@ -57,7 +57,10 @@ export default function MemberList({
       console.log(responseRemoveMember);
     } catch (error) {
       console.error("Error removing member:", error);
-      alert("You cannot remove this member from the group chat");
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Cannot remove member",
+      });
     }
   };
 

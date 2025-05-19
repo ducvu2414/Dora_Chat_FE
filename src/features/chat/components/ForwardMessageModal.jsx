@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import UserSelectionModal from "./UserSelectionModal";
 import { useDispatch } from "react-redux";
 import { addConversation } from "../chatSlice";
+import { AlertMessage } from "@/components/ui/alert-message";
+
 export default function ForwardMessageModal({ message, onClose }) {
   const [isOpen, setIsOpen] = useState(true);
   const [friends, setFriends] = useState([]);
@@ -58,7 +60,10 @@ export default function ForwardMessageModal({ message, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error forwarding message:", error);
-      alert("Unable to forward message");
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Unable to forward message",
+      });
     }
   };
 

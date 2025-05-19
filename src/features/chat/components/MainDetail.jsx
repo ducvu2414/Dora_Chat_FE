@@ -114,10 +114,10 @@ export default function MainDetail({
       setCopySuccess(false);
     } catch (error) {
       console.error("Error creating invite link:", error);
-      alert(
-        "Không thể tạo link mời: " +
-          (error.response?.data?.message || "Lỗi không xác định")
-      );
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Không thể tạo link mời",
+      });
     }
   };
 
@@ -129,7 +129,10 @@ export default function MainDetail({
         setTimeout(() => setCopySuccess(false), 2000); // Reset thông báo sau 2s
       } catch (error) {
         console.error("Error copying link:", error);
-        alert("Không thể sao chép link");
+        AlertMessage({
+          type: "error",
+          message: error.response?.data?.message || "Không thể sao chép link",
+        });
       }
     }
   };
