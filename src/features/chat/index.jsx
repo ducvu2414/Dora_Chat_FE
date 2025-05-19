@@ -215,6 +215,7 @@ export default function ChatSingle() {
     tagPositions,
     files,
     replyMessageId,
+    location,
   }) => {
     const channelId = activeChannel;
     try {
@@ -242,12 +243,13 @@ export default function ChatSingle() {
           replyMessageId
         );
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(
+        await messageApi.sendVideoMessage(conversationId, files[0], channelId, replyMessageId);
+      } else if (type === "LOCATION") {
+        await messageApi.sendLocationMessage({
           conversationId,
-          files[0],
+          location,
           channelId,
-          replyMessageId
-        );
+        });
       }
     } catch (error) {
       console.error("Error sending message:", error);

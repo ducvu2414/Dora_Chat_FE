@@ -16,6 +16,9 @@ const messageApi = {
   sendTextMessage: (body) => {
     return axios.post(`/api/messages/text`, body);
   },
+  sendLocationMessage: (body) => {
+    return axios.post(`/api/messages/location`, body);
+  },
   recallMessage: async (messageId, conversationId) => {
     const response = await axios.delete(
       `/api/messages/${messageId}/conversation/${conversationId}`
