@@ -8,20 +8,18 @@ import MeetingEnded from "./components/MeetingEnded";
 import { useDispatch, useSelector } from "react-redux";
 import { setCallStarted, endCall } from "../../features/chat/callSlice";
 
-
 export default function GroupCallComponent() {
     const navigate = useNavigate();
-    const { channelId, conversation } = useLocation().state || {};
+    const location = useLocation();
+    const { channelId, conversation } = location.state || {};
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const API = import.meta.env.VITE_BACKEND_URL;
-
-    // const currentGroupCall = JSON.parse(localStorage.getItem("currentGroupCall"));
     const dispatch = useDispatch();
-    const { currentCall, incomingCall } = useSelector((state) => state.call);
-
+    const { currentCall } = useSelector((state) => state.call);
 
     const meetingRef = useRef(null);
     const hasStartedRef = useRef(false);
+    const prevLocationRef = useRef(location.pathname); // Theo dõi vị trí trước đó
 
     const [meetingJoined, setMeetingJoined] = useState(false);
     const [meetingEnded, setMeetingEnded] = useState(false);
@@ -32,7 +30,66 @@ export default function GroupCallComponent() {
     const [micShared, setMicShared] = useState(false);
     const [cameraShared, setCameraShared] = useState(false);
     const [screenShared, setScreenShared] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
 
+    // Hàm dọn dẹp cuộc họp
+    const cleanupMeeting = async () => {
+        try {
+            if (meetingRef.current) {
+                meetingRef.current.removeAllListeners();
+                await meetingRef.current.leaveMeeting();
+                meetingRef.current = null;
+            }
+        } catch (err) {
+            console.error("Lỗi khi dọn dẹp cuộc họp:", err);
+        }
+        dispatch(endCall());
+        setMeetingEnded(true);
+    };
+
+    // Chặn điều hướng tùy chỉnh
+    useEffect(() => {
+        const handleNavigation = async () => {
+            if (meetingJoined && !meetingEnded && !isLeaving && prevLocationRef.current !== location.pathname) {
+                const confirmLeave = window.confirm("Bạn có chắc muốn rời cuộc gọi?");
+                if (confirmLeave) {
+                    setIsLeaving(true);
+                    await cleanupMeeting();
+                } else {
+                    // Hoàn nguyên điều hướng bằng cách đẩy về tuyến đường hiện tại
+                    navigate(location.pathname, { replace: true });
+                }
+            }
+            prevLocationRef.current = location.pathname;
+        };
+
+        handleNavigation();
+    }, [location, meetingJoined, meetingEnded, isLeaving, navigate]);
+
+    // Dọn dẹp khi component bị hủy
+    useEffect(() => {
+        return () => {
+            if (meetingJoined && !meetingEnded && !isLeaving) {
+                cleanupMeeting();
+            }
+        };
+    }, [meetingJoined, meetingEnded, isLeaving]);
+
+    // Xử lý beforeunload (đóng tab, tải lại trang)
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (meetingJoined && !meetingEnded && !isLeaving) {
+                event.preventDefault();
+                event.returnValue = "Bạn có chắc muốn rời cuộc gọi?";
+                cleanupMeeting();
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [meetingJoined, meetingEnded, isLeaving]);
+
+    // Khởi tạo cuộc họp
     useEffect(() => {
         if (!channelId || !conversation?._id) {
             navigate("/home");
@@ -41,15 +98,12 @@ export default function GroupCallComponent() {
         if (hasStartedRef.current) return;
         hasStartedRef.current = true;
 
-
         async function startGroupCall() {
             if (currentCall) {
-                console.log("currentCall " + JSON.stringify(currentCall));
                 alert("Bạn đang tham gia cuộc gọi nhóm khác. Vui lòng rời khỏi trước khi tham gia kênh mới.");
                 navigate("/home");
                 return;
             }
-
 
             try {
                 if (meetingRef.current) {
@@ -67,25 +121,17 @@ export default function GroupCallComponent() {
                 const meeting = new window.Metered.Meeting();
                 meetingRef.current = meeting;
 
-                meeting.on("onlineParticipants", parts => {
-                    setOnlineUsers(parts);
-                });
-                meeting.on("participantJoined", p => {
-                    setOnlineUsers(prev =>
-                        prev.some(x => x._id === p._id) ? prev : [...prev, p]
-                    );
-                });
-                meeting.on("participantLeft", p => {
-                    setOnlineUsers(prev => prev.filter(x => x._id !== p._id));
-                    setRemoteTracks(prev =>
-                        prev.filter(t => t.participantSessionId !== p._id)
-                    );
-                });
-                meeting.on("remoteTrackStarted", t =>
-                    setRemoteTracks(prev => [...prev, t])
+                meeting.on("onlineParticipants", (parts) => setOnlineUsers(parts));
+                meeting.on("participantJoined", (p) =>
+                    setOnlineUsers((prev) => (prev.some((x) => x._id === p._id) ? prev : [...prev, p]))
                 );
-                meeting.on("remoteTrackStopped", t =>
-                    setRemoteTracks(prev => prev.filter(x => x.streamId !== t.streamId))
+                meeting.on("participantLeft", (p) => {
+                    setOnlineUsers((prev) => prev.filter((x) => x._id !== p._id));
+                    setRemoteTracks((prev) => prev.filter((t) => t.participantSessionId !== p._id));
+                });
+                meeting.on("remoteTrackStarted", (t) => setRemoteTracks((prev) => [...prev, t]));
+                meeting.on("remoteTrackStopped", (t) =>
+                    setRemoteTracks((prev) => prev.filter((x) => x.streamId !== t.streamId))
                 );
                 meeting.on("localTrackUpdated", ({ track }) => {
                     setLocalVideoStream(new MediaStream([track]));
@@ -102,124 +148,68 @@ export default function GroupCallComponent() {
                     );
                     roomName = created.roomName;
                 }
-                const { data: dom } = await axios.get(
-                    `${API}/api/metered/metered-domain`
-                );
+                const { data: dom } = await axios.get(`${API}/api/metered/metered-domain`);
                 const roomURL = `${dom.domain}/${roomName}`;
 
                 const info = await meeting.join({
                     name: user.name || "Anonymous",
-                    roomURL
+                    roomURL,
                 });
                 setMeetingInfo(info);
                 setMeetingJoined(true);
 
-                // const callInfo = {
-                //     conversationId: conversation._id,
-                //     channelId,
-                //     roomUrl: roomURL
-                // };
-                // localStorage.setItem("currentGroupCall", JSON.stringify(callInfo));
-                dispatch(setCallStarted({
-                    type: "group",
-                    conversationId: conversation._id,
-                    channelId,
-                    roomUrl: roomURL,
-                    initiator: true,
-                }));
+                dispatch(
+                    setCallStarted({
+                        type: "group",
+                        conversationId: conversation._id,
+                        channelId,
+                        roomUrl: roomURL,
+                        initiator: true,
+                    })
+                );
 
                 socket.emit(SOCKET_EVENTS.GROUP_CALL_USER, {
                     conversationId: conversation._id,
                     channelId,
-                    roomUrl: roomURL
+                    roomUrl: roomURL,
                 });
-
-
             } catch (err) {
-                console.error("Error starting group call:", err);
+                console.error("Lỗi khi bắt đầu cuộc gọi nhóm:", err);
                 setMeetingEnded(true);
             }
         }
 
         startGroupCall();
+    }, [API, channelId, conversation?._id, navigate, user.name, currentCall, dispatch]);
 
-
-    }, [API, channelId, conversation._id, navigate, user.name]);
-
-
-    useEffect(() => {
-        const handleUnload = () => {
-            if (meetingRef.current) {
-                meetingRef.current.leaveMeeting();
-            }
-            dispatch(endCall());
-        };
-
-        window.addEventListener("beforeunload", handleUnload);
-
-        return () => {
-            dispatch(endCall());
-            window.removeEventListener("beforeunload", handleUnload);
-        };
-    }, [dispatch]);
-
-
-
+    // Xử lý lời mời socket
     useEffect(() => {
         const onInvite = async ({ conversationId, roomUrl }) => {
             if (conversationId !== conversation._id) return;
-            // console.log(currentGroupCall);
-            // if (
-            //     currentGroupCall &&
-            //     (currentGroupCall.conversationId !== conversationId ||
-            //         currentGroupCall.channelId !== invitedChannel)
-            // ) {
-            //     if (meetingRef.current) {
-            //         meetingRef.current.removeAllListeners();
-            //         await meetingRef.current.leaveMeeting();
-            //         meetingRef.current = null;
-            //     }
-            //     dispatch(endGroupCall());
-            // }
-
             if (!meetingRef.current || meetingJoined) return;
 
             try {
                 const info = await meetingRef.current.join({
                     name: user.name || "Anonymous",
-                    roomURL: roomUrl
+                    roomURL: roomUrl,
                 });
                 setMeetingInfo(info);
                 setMeetingJoined(true);
             } catch (e) {
-                console.error("Failed to join on invite:", e);
+                console.error("Không thể tham gia qua lời mời:", e);
             }
         };
 
         socket.on(SOCKET_EVENTS.GROUP_CALL_USER, onInvite);
-        return () => {
-            socket.off(SOCKET_EVENTS.GROUP_CALL_USER, onInvite);
-        };
-    }, [conversation._id, user.name, socket]);
+        return () => socket.off(SOCKET_EVENTS.GROUP_CALL_USER, onInvite);
+    }, [conversation._id, user.name, meetingJoined]);
 
-
-    // useEffect(() => {
-    //     const onGroupEnded = () => {
-    //         setMeetingEnded(true);
-    //     };
-    //     socket.on(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
-    //     return () => {
-    //         socket.off(SOCKET_EVENTS.GROUP_CALL_ENDED, onGroupEnded);
-    //     };
-    // }, []);
-
-
-    // 4️⃣ Các nút điều khiển
+    // Các trình xử lý điều khiển
     const handleMicBtn = async () => {
         if (!meetingRef.current) return;
         if (micShared) await meetingRef.current.stopAudio();
         else await meetingRef.current.startAudio();
-        setMicShared(m => !m);
+        setMicShared((m) => !m);
     };
 
     const handleCameraBtn = async () => {
@@ -232,12 +222,11 @@ export default function GroupCallComponent() {
             const s = await meetingRef.current.getLocalVideoStream();
             setLocalVideoStream(s);
         }
-        setCameraShared(c => !c);
+        setCameraShared((c) => !c);
     };
 
     const handleScreenBtn = async () => {
         if (!meetingRef.current) return;
-
         try {
             if (!screenShared) {
                 await meetingRef.current.startScreenShare();
@@ -247,22 +236,20 @@ export default function GroupCallComponent() {
                 setScreenShared(false);
             }
         } catch (err) {
-            console.error("Screen share toggle failed:", err);
+            console.error("Không thể chuyển đổi chia sẻ màn hình:", err);
         }
     };
 
     const handleLeaveBtn = async () => {
-        console.log("handleLeaveBtn");
-        if (meetingRef.current) {
-            meetingRef.current.removeAllListeners();
-            await meetingRef.current.leaveMeeting();
-            meetingRef.current = null;
-        }
-        setMeetingEnded(true);
-        // localStorage.removeItem("currentGroupCall");
-        dispatch(endCall());
+        if (isLeaving) return;
+        setIsLeaving(true);
+        await cleanupMeeting();
         navigate("/home");
     };
+
+    if (meetingEnded) {
+        return <MeetingEnded />;
+    }
 
     if (!meetingJoined) {
         return (
