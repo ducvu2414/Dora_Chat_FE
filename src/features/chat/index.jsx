@@ -243,7 +243,12 @@ export default function ChatSingle() {
           replyMessageId
         );
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(conversationId, files[0], channelId, replyMessageId);
+        await messageApi.sendVideoMessage(
+          conversationId,
+          files[0],
+          channelId,
+          replyMessageId
+        );
       } else if (type === "LOCATION") {
         await messageApi.sendLocationMessage({
           conversationId,
@@ -478,7 +483,11 @@ export default function ChatSingle() {
                   imagesVideos={photosVideos}
                   files={files}
                   links={links}
-                  pinMessages={pinMessages}
+                  pinMessages={pinMessages.filter((pinMessage) =>
+                    conversationMessages.some(
+                      (message) => message._id === pinMessage.messageId
+                    )
+                  )}
                   onScrollToMessage={handleScrollToMessage}
                 />
               )}
