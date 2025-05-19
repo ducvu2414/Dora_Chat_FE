@@ -215,6 +215,7 @@ export default function ChatSingle() {
     tagPositions,
     files,
     replyMessageId,
+    location,
   }) => {
     const channelId = activeChannel;
     try {
@@ -233,6 +234,12 @@ export default function ChatSingle() {
         await messageApi.sendFileMessage(conversationId, files[0], channelId);
       } else if (type === "VIDEO") {
         await messageApi.sendVideoMessage(conversationId, files[0], channelId);
+      } else if (type === "LOCATION") {
+        await messageApi.sendLocationMessage({
+          conversationId,
+          location,
+          channelId,
+        });
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -365,7 +372,9 @@ export default function ChatSingle() {
   const handleAddChannel = async (channelData, channelId) => {
     try {
       if (!channelId) {
-        if (channels.find((channel) => channel.name === channelData.name.trim())) {
+        if (
+          channels.find((channel) => channel.name === channelData.name.trim())
+        ) {
           AlertMessage({
             type: "error",
             message: "Channel name already exists",

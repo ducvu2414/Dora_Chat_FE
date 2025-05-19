@@ -493,6 +493,17 @@ export default function MessageInput({
       setInput(editableRef.current.innerText);
     }
   };
+
+  const handleLocationSelect = (location) => {
+    onSend({
+      location: {
+        lat: location.lat,
+        lng: location.lng,
+      },
+      type: "LOCATION",
+    });
+  };
+
   // Hiển thị tin nhắn đang reply
   const renderReplyPreview = () => {
     if (!replyMessage) return null;
@@ -667,7 +678,6 @@ export default function MessageInput({
           )}
         </div>
       )}
-
       <div className="flex items-center p-3 border-t">
         {!isMemberState ? (
           <input
@@ -692,6 +702,7 @@ export default function MessageInput({
               onFileSelect={handleFileSelect}
               setIsVoteModalOpen={setIsVoteModalOpen}
               isGroup={isGroup}
+              onLocationSelect={handleLocationSelect}
             />
           </>
 
