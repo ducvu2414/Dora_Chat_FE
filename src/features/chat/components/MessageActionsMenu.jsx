@@ -225,11 +225,11 @@ export default function MessageActionsMenu({
             )}
             {/* Menu reactions */}
             {showReactions && (
-              <div className="absolute top-0 z-50 flex gap-2 p-2 ml-2 bg-white border rounded-md shadow-md left-full">
+              <div className="absolute z-50 flex gap-2 p-2 ml-2 bg-white border rounded-md shadow-md -top-12 -left-10">
                 {Object.entries(REACT_ICONS).map(([type, icon]) => (
                   <button
                     key={type}
-                    className="p-1 text-2xl rounded-full hover:bg-gray-100"
+                    className="p-1 text-sm rounded-full hover:bg-gray-100"
                     onClick={() => handleReactMessage(Number(type))}
                   >
                     {icon}

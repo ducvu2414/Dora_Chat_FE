@@ -229,11 +229,21 @@ export default function ChatSingle() {
           replyMessageId,
         });
       } else if (type === "IMAGE") {
-        await messageApi.sendImageMessage(conversationId, files, channelId);
+        await messageApi.sendImageMessage(
+          conversationId,
+          files,
+          channelId,
+          replyMessageId
+        );
       } else if (type === "FILE") {
-        await messageApi.sendFileMessage(conversationId, files[0], channelId);
+        await messageApi.sendFileMessage(
+          conversationId,
+          files[0],
+          channelId,
+          replyMessageId
+        );
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(conversationId, files[0], channelId);
+        await messageApi.sendVideoMessage(conversationId, files[0], channelId, replyMessageId);
       } else if (type === "LOCATION") {
         await messageApi.sendLocationMessage({
           conversationId,

@@ -56,6 +56,9 @@ const conversationApi = {
       avatar,
     });
   },
+  createInviteLink: (conversationId) => {
+    return axios.post(`/api/conversations/${conversationId}/invite/link`);
+  },
 };
 
 export default conversationApi;

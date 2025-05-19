@@ -19,8 +19,9 @@ export default function MessageItem({
   member,
   onSave,
   onLock,
-  onReply, // Thêm prop để xử lý reply
-  messages, // Thêm prop để truy xuất tin nhắn gốc
+  onReply,
+  messages,
+  handleScrollToMessage,
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -50,7 +51,9 @@ export default function MessageItem({
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
   const isVote = msg.type === "VOTE";
-
+  const inviteLinkMatch = msg.content.match(
+    /(https?:\/\/[^\s]+\/join\/[a-f0-9]+)/
+  );
   useEffect(() => {
     if (!msg?.content) {
       console.warn("Video content is empty");
@@ -155,7 +158,10 @@ export default function MessageItem({
     const isRepliedVideo = repliedMessage.type === "VIDEO";
     const isRepliedFile = repliedMessage.type === "FILE";
     return (
-      <div className="p-2 mb-1 bg-gray-100 rounded-lg">
+      <div
+        className="p-2 mb-1 bg-gray-100 rounded-lg cursor-pointer"
+        onClick={() => handleScrollToMessage(repliedMessage._id)}
+      >
         <span className="block text-xs font-medium text-gray-500">
           {repliedMessage.memberId?.name || "User"}
         </span>
@@ -207,7 +213,7 @@ export default function MessageItem({
               {REACT_ICONS[type]} {count > 1 ? count : ""}
             </span>
             {hoveredReaction?.type === type && (
-              <div className="absolute bottom-full mb-1 bg-white border rounded-md shadow-md p-2 min-w-[150px] z-50">
+              <div className="absolute bottom-full mb-1 bg-white border rounded-md shadow-md p-2 min-w-[150px] z-50 -left-10">
                 {users.map((user, index) => (
                   <div key={index} className="text-sm">
                     {user} {REACT_ICONS[type]}
@@ -399,6 +405,22 @@ export default function MessageItem({
                     onLock={onLock}
                   />
                 </div>
+              </div>
+            ) : inviteLinkMatch ? (
+              <div>
+                <p>{msg.content.replace(inviteLinkMatch[0], "").trim()}</p>
+                <button
+                  onClick={() => {
+                    const fullUrl = inviteLinkMatch[0];
+                    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+                    const relativePath = fullUrl.replace(backendUrl, "");
+
+                    navigate(relativePath, { replace: true });
+                  }}
+                  className="px-3 py-1 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                >
+                  Lời mời tham gia nhóm
+                </button>
               </div>
             ) : (
               <p
