@@ -60,7 +60,8 @@ export default function MainDetail({
   const [isHoverAvatar, setIsHoverAvatar] = useState(false);
 
   const fileInputRef = useRef(null);
-
+  const [inviteLink, setInviteLink] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false);
   const partner =
     conversation.name ||
     conversation.members?.filter((member) => {
@@ -106,7 +107,32 @@ export default function MainDetail({
       });
     }
   };
+  const handleCreateInviteLink = async () => {
+    try {
+      const res = await conversationApi.createInviteLink(conversation._id);
+      setInviteLink(res.inviteLink);
+      setCopySuccess(false);
+    } catch (error) {
+      console.error("Error creating invite link:", error);
+      alert(
+        "Không thể tạo link mời: " +
+          (error.response?.data?.message || "Lỗi không xác định")
+      );
+    }
+  };
 
+  const handleCopyLink = async () => {
+    if (inviteLink) {
+      try {
+        await navigator.clipboard.writeText(inviteLink);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000); // Reset thông báo sau 2s
+      } catch (error) {
+        console.error("Error copying link:", error);
+        alert("Không thể sao chép link");
+      }
+    }
+  };
   const handleDecentralize = async (selectedUserId) => {
     try {
       setIsOpenUser(false);
@@ -433,7 +459,7 @@ export default function MainDetail({
           />
           {isHoverAvatar && (
             <Button
-              className="absolute bottom-0 right-0 text-white p-1 rounded-full hover:opacity-90 transition-colors h-16 w-16"
+              className="absolute bottom-0 right-0 w-16 h-16 p-1 text-white transition-colors rounded-full hover:opacity-90"
               onClick={handleButtonClick}
             >
               <Pencil className="w-3 h-3" />
@@ -672,6 +698,34 @@ export default function MainDetail({
             </div>
           </motion.div>
         </div>
+        <div className="flex flex-col items-center w-full gap-4 mt-4">
+          {conversation.type && (
+            <button
+              onClick={handleCreateInviteLink}
+              className="px-4 py-2 text-white transition duration-300 bg-blue-600 rounded-lg shadow hover:bg-blue-700"
+            >
+              Tạo link mời
+            </button>
+          )}
+
+          {inviteLink && (
+            <div className="flex items-center w-full max-w-md p-2 bg-white border border-gray-300 rounded-lg shadow-sm">
+              <input
+                type="text"
+                value={inviteLink}
+                readOnly
+                className="flex-1 px-2 py-1 text-sm text-gray-800 bg-transparent outline-none"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="ml-2 px-4 py-1.5 text-sm text-white bg-green-500 rounded-md hover:bg-green-600 transition duration-300"
+              >
+                {copySuccess ? "Đã sao chép!" : "Sao chép"}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="w-full mt-[18px] flex items-center justify-center gap-4">
           {conversation.type ? (
             <>

@@ -19,8 +19,8 @@ export default function MessageItem({
   member,
   onSave,
   onLock,
-  onReply, // Thêm prop để xử lý reply
-  messages, // Thêm prop để truy xuất tin nhắn gốc
+  onReply,
+  messages,
   handleScrollToMessage,
 }) {
   dayjs.extend(relativeTime);
@@ -51,7 +51,9 @@ export default function MessageItem({
   const isNotify = msg.type === "NOTIFY";
   const isLink = msg.type === "TEXT" && msg.content.includes("http");
   const isVote = msg.type === "VOTE";
-
+  const inviteLinkMatch = msg.content.match(
+    /(https?:\/\/[^\s]+\/join\/[a-f0-9]+)/
+  );
   useEffect(() => {
     if (!msg?.content) {
       console.warn("Video content is empty");
@@ -403,6 +405,22 @@ export default function MessageItem({
                     onLock={onLock}
                   />
                 </div>
+              </div>
+            ) : inviteLinkMatch ? (
+              <div>
+                <p>{msg.content.replace(inviteLinkMatch[0], "").trim()}</p>
+                <button
+                  onClick={() => {
+                    const fullUrl = inviteLinkMatch[0];
+                    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+                    const relativePath = fullUrl.replace(backendUrl, "");
+
+                    navigate(relativePath, { replace: true });
+                  }}
+                  className="px-3 py-1 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                >
+                  Lời mời tham gia nhóm
+                </button>
               </div>
             ) : (
               <p
