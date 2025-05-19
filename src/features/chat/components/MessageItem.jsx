@@ -607,6 +607,7 @@ export default function MessageItem({
           onClose={() => setShowLocationModal(false)}
           onSend={() => {}}
           initialLocation={locationData}
+          position={locationData}
         />
       )}
     </>

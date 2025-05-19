@@ -3,10 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 
-export default function LocationModal({ isOpen, onClose }) {
-  const [location, setLocation] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function LocationModal({ isOpen, onClose, position }) {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const mapRef = useRef(null);
 
@@ -29,27 +26,6 @@ export default function LocationModal({ isOpen, onClose }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLoading(false);
-        },
-        (err) => {
-          setError(
-            "Could not get your location. Please allow location access."
-          );
-          console.error("Geolocation error:", err);
-          setLoading(false);
-        }
-      );
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   return (
@@ -61,39 +37,21 @@ export default function LocationModal({ isOpen, onClose }) {
             onClick={onClose}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200"
           >
-            <X size={16} className="text-gray-700" /> X
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="h-64 mb-4 overflow-hidden bg-gray-200 rounded">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
-              <p className="ml-2">Getting your location...</p>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-red-500">{error}</p>
-            </div>
-          ) : (
             <div ref={mapRef} className="w-full h-full">
               {!scriptLoaded ? (
                 <div className="flex items-center justify-center h-full">
                   <p>Loading Google Maps...</p>
                 </div>
-              ) : loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <p>Getting your location...</p>
-                </div>
-              ) : error ? (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-red-500">{error}</p>
-                </div>
-              ) : location ? (
+              ) : position ? (
                 <GoogleMap
                   mapContainerStyle={{ height: "100%", width: "100%" }}
                   zoom={15}
-                  center={{ lat: location.lat, lng: location.lng }}
+                  center={{ lat: position.lat, lng: position.lng }}
                   options={{
                     streetViewControl: false,
                     mapTypeControl: false,
@@ -104,7 +62,7 @@ export default function LocationModal({ isOpen, onClose }) {
                     zoomControl: true,
                   }}
                 >
-                  <Marker position={{ lat: location.lat, lng: location.lng }} />
+                  <Marker position={{ lat: position.lat, lng: position.lng }} />
                 </GoogleMap>
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -112,14 +70,14 @@ export default function LocationModal({ isOpen, onClose }) {
                 </div>
               )}
             </div>
-          )}
+          
         </div>
 
-        {location && (
+        {position && (
           <div className="mb-4 text-sm text-gray-600">
             <p>
-              Selected location: {location.lat.toFixed(6)},{" "}
-              {location.lng.toFixed(6)}
+              Selected location: {position.lat.toFixed(6)},{" "}
+              {position.lng.toFixed(6)}
             </p>
             <p className="mt-1 text-xs">
               Drag the marker or click on the map to adjust the location
