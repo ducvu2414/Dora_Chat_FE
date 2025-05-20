@@ -696,15 +696,7 @@ export default function MessageInput({
         </div>
       )}
       <div className="flex items-center p-3 border-t">
-        {!isMemberState ? (
-          <input
-            type="text"
-            placeholder="You cannot message this conversation"
-            className="w-full text-sm italic outline-none bg-inherit placeholder:text-center"
-            disabled={true}
-          />
-        ) : (
-          // !isLoading && (
+        {isMemberState && (
           <>
             <Button
               size="icon"
@@ -722,8 +714,6 @@ export default function MessageInput({
               onLocationSelect={handleLocationSelect}
             />
           </>
-
-          // )
         )}
 
         <div
@@ -738,7 +728,6 @@ export default function MessageInput({
               disabled={true}
             />
           ) : (
-            // !isLoading && (
             <>
               <div className="relative w-full">
                 {/* Placeholder giả */}
@@ -782,13 +771,9 @@ export default function MessageInput({
                 <img src={EmojiIcon} alt="Emoji" />
               </button>
             </>
-            // )
           )}
         </div>
-        {!isMemberState ? (
-          <></>
-        ) : (
-          // !isLoading && (
+        {isMemberState && (
           <div
             onClick={handleSend}
             className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
@@ -797,7 +782,6 @@ export default function MessageInput({
           >
             <img src={SendIcon} alt="Send" />
           </div>
-          // )
         )}
       </div>
     </div>

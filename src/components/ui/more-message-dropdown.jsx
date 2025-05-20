@@ -31,8 +31,9 @@ const googleMapsLoader = (() => {
 
         const script = document.createElement("script");
         script.id = "google-maps-script";
-        // Thêm loading=async và callback để tối ưu hiệu suất
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBjLElpWo36xvvhT43k8mvB-nHKEiDFoNw&callback=${callbackName}&loading=async`;
+        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+        console.log("API Key:", apiKey);
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=${callbackName}&loading=async`;
         script.async = true;
         script.onerror = (error) => {
           loadPromise = null;
