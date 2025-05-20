@@ -12,6 +12,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
 import classifiesApi from "../../api/classifies";
 import {
+  toggleJoinApproval,
   setConversations,
   addMessage,
   recallMessage,
@@ -272,6 +273,20 @@ const MainLayout = () => {
         );
       });
     });
+    socket.on(
+      SOCKET_EVENTS.TOGGLE_JOIN_APPROVAL,
+      ({ conversationId, isStatus }) => {
+        console.log("isStatus", isStatus);
+        startTransition(() => {
+          dispatch(
+            toggleJoinApproval({
+              conversationId,
+              newStatus: isStatus,
+            })
+          );
+        });
+      }
+    );
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
 
     return () => {

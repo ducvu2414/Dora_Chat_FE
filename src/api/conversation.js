@@ -65,6 +65,11 @@ const conversationApi = {
   acceptInvite: (token) => {
     return axios.post(`/api/conversations/join/${token}`);
   },
+  toggleJoinApproval: (conversationId, newStatus) => {
+    return axios.patch(
+      `/api/conversations/${conversationId}/acceptGroupRequest/${newStatus}`
+    );
+  },
 };
 
 export default conversationApi;

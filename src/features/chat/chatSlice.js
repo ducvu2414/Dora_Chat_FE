@@ -263,6 +263,15 @@ const chatSlice = createSlice({
         state.conversations[index].avatar = avatar;
       }
     },
+    toggleJoinApproval: (state, action) => {
+      const { conversationId, newStatus } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+      if (index !== -1) {
+        state.conversations[index].isJoinFromLink = newStatus;
+      }
+    },
   },
 });
 
@@ -294,5 +303,6 @@ export const {
   updateChannel,
   updateMessage,
   updateAvatarGroupConversation,
+  toggleJoinApproval,
 } = chatSlice.actions;
 export default chatSlice.reducer;
