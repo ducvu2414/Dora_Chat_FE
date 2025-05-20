@@ -59,6 +59,12 @@ const conversationApi = {
   createInviteLink: (conversationId) => {
     return axios.post(`/api/conversations/${conversationId}/invite/link`);
   },
+  getInfoInviteLink: (token) => {
+    return axios.get(`/api/conversations/invite/${token}`);
+  },
+  acceptInvite: (token) => {
+    return axios.post(`/api/conversations/join/${token}`);
+  },
 };
 
 export default conversationApi;

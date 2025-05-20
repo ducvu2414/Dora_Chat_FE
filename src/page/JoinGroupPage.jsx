@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import conversationApi from "../api/conversation";
 const JoinGroupPage = () => {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -14,8 +13,9 @@ const JoinGroupPage = () => {
   useEffect(() => {
     const fetchGroupInfo = async () => {
       try {
-        const res = await axios.get(`/api/conversations/invite/${token}`);
-        setGroupInfo(res.data);
+        const res = await conversationApi.getInfoInviteLink(token);
+        console.log(res);
+        setGroupInfo(res);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load group info");
       }
@@ -31,13 +31,10 @@ const JoinGroupPage = () => {
 
     setIsLoading(true);
     try {
-      const res = await axios.post(`/api/invites/accept`, {
-        token,
-        userId: userId,
-      });
-      setStatus(res.data.status);
-      if (res.data.status === "joined") {
-        navigate(`/chat/${res.data.conversationId}`);
+      const res = await conversationApi.acceptInvite(token);
+      setStatus(res.status);
+      if (res.status === "joined") {
+        navigate(`/chat/${res.newMember.conversationId}`);
       }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to join group");
@@ -63,10 +60,19 @@ const JoinGroupPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+    <div className="flex items-center justify-center w-full h-screen bg-gray-100">
+      <div className="flex flex-col items-center w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
         <h2 className="mb-4 text-2xl font-bold">Tham gia nhóm</h2>
-        <p className="mb-2 text-lg">Tên nhóm: {groupInfo.name}</p>
+        <img
+          src={groupInfo.avatar || "https://via.placeholder.com/150"}
+          alt="Group Avatar"
+          className="object-cover w-32 h-32 mb-4 rounded-full"
+        />
+
+        <p className="mb-2 text-lg font-bold">{groupInfo.name}</p>
+        <p className="mb-2 text-lg">
+          Số lượng thành viên: {groupInfo.members.length}
+        </p>
         <p className="mb-4 text-gray-600">
           {groupInfo.isJoinFromLink
             ? "Nhấn tham gia để vào nhóm ngay!"

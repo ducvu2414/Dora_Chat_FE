@@ -15,7 +15,6 @@ const ChatBox = forwardRef(
   ) => {
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
-
     const scrollToMessage = useCallback((messageId) => {
       const messageElement = messageRefs.current[messageId];
       if (messageElement) {
