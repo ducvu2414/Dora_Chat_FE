@@ -98,8 +98,8 @@ export default function MainDetail({
       return;
     }
 
-    console.log("conversation", conversation.isJoinFromLink);
     const newStatus = !conversation.isJoinFromLink; // Toggle trạng thái
+
     setIsLoading(true);
 
     try {

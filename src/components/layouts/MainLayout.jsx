@@ -276,7 +276,6 @@ const MainLayout = () => {
     socket.on(
       SOCKET_EVENTS.TOGGLE_JOIN_APPROVAL,
       ({ conversationId, isStatus }) => {
-        console.log("isStatus", isStatus);
         startTransition(() => {
           dispatch(
             toggleJoinApproval({
