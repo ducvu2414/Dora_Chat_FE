@@ -9,6 +9,7 @@ import ArrowRight from "@assets/chat/arrow_right.svg";
 import Bell from "@assets/chat/bell.svg";
 import CheckDecentraliza from "@assets/chat/check_icon.svg";
 import Decentraliza from "@assets/chat/decentraliza.svg";
+import ApprovalIcon from "@assets/chat/approval_icon.svg";
 import Dissolve from "@assets/chat/dissolve_icon.svg";
 import File from "@assets/chat/file_detail.svg";
 import Leave from "@assets/chat/leave_icon.svg";
@@ -29,7 +30,6 @@ import conversationApi from "@/api/conversation";
 import { ChooseModal } from "@/components/ui/choose-modal";
 import { Button } from "@/components/ui/button";
 import { AlertMessage } from "@/components/ui/alert-message";
-
 export default function MainDetail({
   handleSetActiveTab,
   conversation,
@@ -62,6 +62,7 @@ export default function MainDetail({
   const fileInputRef = useRef(null);
   const [inviteLink, setInviteLink] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const partner =
     conversation.name ||
     conversation.members?.filter((member) => {
@@ -91,7 +92,29 @@ export default function MainDetail({
   useEffect(() => {
     setIsMuted(conversation.mute);
   }, [conversation.mute]);
+  // Hàm toggle phê duyệt thành viên
+  const handleToggleJoinApproval = async () => {
+    if (!conversation?._id) {
+      return;
+    }
 
+    const newStatus = !conversation.isJoinFromLink; // Toggle trạng thái
+
+    setIsLoading(true);
+
+    try {
+      const response = await conversationApi.toggleJoinApproval(
+        conversation._id,
+        newStatus
+      );
+
+      console.log("response", response);
+    } catch (error) {
+      console.error("Error toggling join approval:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleSubmit = async (selectedUserIds) => {
     try {
       const responseAddMembers = await conversationApi.addMembersToConversation(
@@ -385,40 +408,34 @@ export default function MainDetail({
         onClose={() => setIsOpenUser(false)}
         title="Choose a new team leader before leaving"
       >
-        {loading ? (
-          <div className="flex justify-center my-8">
-            <Spinner />
-          </div>
-        ) : (
-          (console.log("members", members),
-          (
-            <UserSelectionModal
-              buttonText={"Confirm"}
-              onSubmit={handleDecentralize}
-              users={memberFilter}
-            />
-          ))
-        )}
+        loading ? (
+        <div className="flex justify-center my-8">
+          <Spinner />
+        </div>
+        ) : ( (
+        <UserSelectionModal
+          buttonText={"Confirm"}
+          onSubmit={handleDecentralize}
+          users={memberFilter}
+        />
+        ))
       </Modal>
       <Modal
         isOpen={isOpenManager}
         onClose={() => setIsOpenManager(false)}
         title="Adjust manager"
       >
-        {loading ? (
-          <div className="flex justify-center my-8">
-            <Spinner />
-          </div>
-        ) : (
-          (console.log("members", members),
-          (
-            <UserSelectionModal
-              buttonText={"Confirm"}
-              onSubmit={handleAddManager}
-              users={members}
-            />
-          ))
-        )}
+        loading ? (
+        <div className="flex justify-center my-8">
+          <Spinner />
+        </div>
+        ) : ( (
+        <UserSelectionModal
+          buttonText={"Confirm"}
+          onSubmit={handleAddManager}
+          users={members}
+        />
+        ))
       </Modal>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
@@ -660,7 +677,23 @@ export default function MainDetail({
                 alt="Icon"
               />
               <p className="text-[#F49300] font-bold text-sm ml-1">
-                {"Decentralize"}
+                Decentralize
+              </p>
+            </div>
+            <div
+              className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
+              onClick={handleToggleJoinApproval}
+              disabled={isLoading}
+            >
+              <img
+                src={ApprovalIcon}
+                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
+                alt="Icon"
+              />
+              <p className="text-[#F49300] font-bold text-sm ml-1">
+                {conversation.isJoinFromLink
+                  ? "Tắt phê duyệt thành viên"
+                  : "Bật phê duyệt thành viên"}
               </p>
             </div>
             <ChooseModal
