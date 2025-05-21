@@ -75,6 +75,10 @@ export default function ChatSingle() {
       }
     } catch (error) {
       console.error("Error loading more messages", error);
+      AlertMessage({
+        type: "error",
+        message: error.response?.data.message || "Error loading more messages",
+      });
     } finally {
       setLoadingMore(false);
     }
@@ -137,7 +141,11 @@ export default function ChatSingle() {
           setIsMember(isMemberRes);
           setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
         } catch (error) {
-          console.error("Error fetching conversation:", error);
+          console.error("Error fetching channels", error);
+          AlertMessage({
+            type: "error",
+            message: error.response?.data.message || "Error fetching channels",
+          });
         }
 
         if (conversation) {
@@ -150,7 +158,11 @@ export default function ChatSingle() {
               });
               dispatch(setMessages({ conversationId, messages }));
             } catch (error) {
-              console.error("Error fetching messages:", error);
+              console.error("Error fetching messages", error);
+              AlertMessage({
+                type: "error",
+                message: error.response?.data.message || "Error fetching messages",
+              });
             }
           }
         }
@@ -159,7 +171,11 @@ export default function ChatSingle() {
           dispatch(markRead({ conversationId }));
         }
       } catch (error) {
-        console.error("Error in useEffect:", error);
+        console.error("Error fetching data", error);
+        AlertMessage({
+          type: "error",
+          message: error.response?.data.message || "Error fetching data",
+        });
       } finally {
         setIsLoadingMessages(false);
       }
@@ -182,7 +198,12 @@ export default function ChatSingle() {
         );
         dispatch(setMessages({ conversationId, messages }));
       } catch (error) {
-        console.error("Error fetching messages by channel:", error);
+        console.error("Error fetching channel messages", error);
+        AlertMessage({
+          type: "error",
+          message:
+            error.response?.data.message || "Error fetching channel messages",
+        });
       }
     };
 
@@ -257,7 +278,11 @@ export default function ChatSingle() {
         });
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error sending message", error);
+      AlertMessage({
+        type: "error",
+        message: error.response?.data.message || "Error sending message",
+      });
       throw error;
     }
   };
@@ -380,7 +405,11 @@ export default function ChatSingle() {
         prev === channelId ? channels[0]?.id || null : prev
       );
     } catch (error) {
-      console.error("Error deleting channel:", error.response.data.message);
+      console.error("Error deleting channel", error);
+      AlertMessage({
+        type: "error",
+        message: error.response.data.message || "Error deleting channel",
+      });
     }
   };
 
@@ -390,6 +419,7 @@ export default function ChatSingle() {
         if (
           channels.find((channel) => channel.name === channelData.name.trim())
         ) {
+          console.error("Channel name already exists");
           AlertMessage({
             type: "error",
             message: "Channel name already exists",
@@ -411,7 +441,11 @@ export default function ChatSingle() {
         );
       }
     } catch (error) {
-      console.error("Error adding channel:", error.response.data.message);
+      console.error("Error adding channel", error);
+      AlertMessage({
+        type: "error",
+        message: error.response.data.message || "Error adding channel",
+      });
     }
   };
 

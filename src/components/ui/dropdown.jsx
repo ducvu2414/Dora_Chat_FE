@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// eslint-disable-next-line react/prop-types
 export function Dropdown({
   isOpen,
   onClose,
@@ -38,7 +37,6 @@ export function Dropdown({
   );
 }
 
-// eslint-disable-next-line react/prop-types
 export function DropdownItem({ icon: Icon, children, onClick }) {
   return (
     <button
