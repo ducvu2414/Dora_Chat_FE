@@ -70,6 +70,35 @@ const conversationApi = {
       `/api/conversations/${conversationId}/acceptGroupRequest/${isStatus}`
     );
   },
+  getJoinRequest: (conversationId) => {
+    return axios.get(`/api/conversations/${conversationId}/groupRequest`);
+  }, // Chấp nhận yêu cầu tham gia của một người
+  acceptJoinRequest: (conversationId, userId) => {
+    return axios.post(
+      `/api/conversations/${conversationId}/groupRequest/accept/${userId}`
+    );
+  },
+
+  // Từ chối yêu cầu tham gia của một người
+  rejectJoinRequest: (conversationId, userId) => {
+    return axios.delete(
+      `/api/conversations/${conversationId}/groupRequest/reject/${userId}`
+    );
+  },
+
+  // Chấp nhận tất cả yêu cầu tham gia
+  acceptAllJoinRequests: (conversationId) => {
+    return axios.post(
+      `/api/conversations/${conversationId}/groupRequest/accept`
+    );
+  },
+
+  // Từ chối tất cả yêu cầu tham gia
+  rejectAllJoinRequests: (conversationId) => {
+    return axios.delete(
+      `/api/conversations/${conversationId}/groupRequest/reject`
+    );
+  },
 };
 
 export default conversationApi;

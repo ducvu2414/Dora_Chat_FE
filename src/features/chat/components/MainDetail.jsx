@@ -63,6 +63,7 @@ export default function MainDetail({
   const [inviteLink, setInviteLink] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const requestCount = conversation.joinRequests.length;
   const partner =
     conversation.name ||
     conversation.members?.filter((member) => {
@@ -532,18 +533,32 @@ export default function MainDetail({
           </div>
         </div>
         {conversation.type ? (
-          <div
-            className="flex items-center w-full mt-3 cursor-pointer"
-            onClick={() => handleSetActiveTab({ tab: "members" })}
-          >
-            <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
-              <img src={Member} />
+          <>
+            <div
+              className="flex items-center w-full mt-3 cursor-pointer"
+              onClick={() => handleSetActiveTab({ tab: "members" })}
+            >
+              <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+                <img src={Member} />
+              </div>
+              <p className="text-[#086DC0] ml-2">Members ({quantityMember})</p>
+              <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+                <img src={ArrowRight} />
+              </div>
             </div>
-            <p className="text-[#086DC0] ml-2">Members ({quantityMember})</p>
-            <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
-              <img src={ArrowRight} />
+            <div
+              className="flex items-center w-full mt-3 cursor-pointer"
+              onClick={() => handleSetActiveTab({ tab: "request" })}
+            >
+              <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+                <img src={Member} />
+              </div>
+              <p className="text-[#086DC0] ml-2">Request ({requestCount})</p>
+              <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+                <img src={ArrowRight} />
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <></>
         )}
@@ -691,7 +706,7 @@ export default function MainDetail({
                 alt="Icon"
               />
               <p className="text-[#F49300] font-bold text-sm ml-1">
-                {conversation.isJoinFromLink
+                {!conversation.isJoinFromLink
                   ? "Tắt phê duyệt thành viên"
                   : "Bật phê duyệt thành viên"}
               </p>
