@@ -546,18 +546,23 @@ export default function MainDetail({
                 <img src={ArrowRight} />
               </div>
             </div>
-            <div
-              className="flex items-center w-full mt-3 cursor-pointer"
-              onClick={() => handleSetActiveTab({ tab: "request" })}
-            >
-              <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
-                <img src={Member} />
+            {conversation.managerIds.includes(memberLoginNow?._id) ||
+            conversation.leaderId === memberLoginNow?._id ? (
+              <div
+                className="flex items-center w-full mt-3 cursor-pointer"
+                onClick={() => handleSetActiveTab({ tab: "request" })}
+              >
+                <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
+                  <img src={Member} />
+                </div>
+                <p className="text-[#086DC0] ml-2">Request ({requestCount})</p>
+                <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
+                  <img src={ArrowRight} />
+                </div>
               </div>
-              <p className="text-[#086DC0] ml-2">Request ({requestCount})</p>
-              <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
-                <img src={ArrowRight} />
-              </div>
-            </div>
+            ) : (
+              <></>
+            )}
           </>
         ) : (
           <></>

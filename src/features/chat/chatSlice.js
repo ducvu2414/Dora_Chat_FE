@@ -272,6 +272,20 @@ const chatSlice = createSlice({
         state.conversations[index].isJoinFromLink = newStatus;
       }
     },
+    acceptJoinRequest: (state, action) => {
+      const { conversationId, newMember } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        const member = conversation.members.findIndex(
+          (member) => member._id === newMember._id
+        );
+        if (member !== -1) {
+          conversation.members[member] = newMember;
+        }
+      }
+    },
   },
 });
 
