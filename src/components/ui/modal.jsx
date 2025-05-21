@@ -7,9 +7,9 @@ export function Modal({ isOpen, onClose, children, title }) {
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 z-[1000] bg-black/50" onClick={onClose} />
       {/* Modal */}
-      <div className="fixed z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg left-1/2 top-1/2">
+      <div className="fixed z-[1000] w-full max-w-md -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg left-1/2 top-1/2">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold text-regal-blue">{title}</h2>

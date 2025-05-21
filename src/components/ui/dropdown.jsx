@@ -22,7 +22,7 @@ export function Dropdown({
   return (
     <>
       <div
-        className="fixed inset-0 z-40 cursor-default"
+        className="fixed inset-0 z-[200] cursor-default"
         onClick={(e) => {
           e.stopPropagation();
           onClose();
@@ -30,7 +30,7 @@ export function Dropdown({
       />
 
       <div
-        className={`absolute ${getAlignment()} w-48 rounded-lg border bg-white shadow-lg z-[150]`}
+        className={`absolute ${getAlignment()} w-48 rounded-lg border bg-white shadow-lg z-[200]`}
       >
         <div className="p-1">{children}</div>
       </div>

@@ -112,7 +112,7 @@ export function Conversation({
   };
 
   return (
-    <div className="relative" style={{ zIndex: showDropdown ? 500 : 0 }}>
+    <div className="relative z-[100]" style={{ zIndex: showDropdown ? 150 : 100 }}>
       <div
         className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
           isActive ? "bg-blue-100" : "hover:bg-gray-100"
@@ -156,6 +156,7 @@ export function Conversation({
           <div
             onMouseEnter={handleDropdownEnter}
             onMouseLeave={handleDropdownLeave}
+            className="z-[150]"
           >
             {activeTab === "messages" ? (
               <ContactCardDropdown

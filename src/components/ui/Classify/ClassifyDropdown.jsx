@@ -32,7 +32,7 @@ export function ClassifyDropdown({ selectedIds = [], onSelect, onManage }) {
   }, [open]);
 
   return (
-    <div ref={dropdownRef} className="relative inline-block text-left z-[100]">
+    <div ref={dropdownRef} className="relative inline-block text-left">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center px-3 py-2 text-sm rounded outline-none"
@@ -41,7 +41,7 @@ export function ClassifyDropdown({ selectedIds = [], onSelect, onManage }) {
       </button>
 
       {open && (
-        <div className="absolute z-10 mt-2 w-64 bg-white shadow-lg rounded p-3 space-y-3">
+        <div className="absolute z-[200] mt-2 w-64 bg-white shadow-lg rounded p-3 space-y-3">
           <div>
             <p className="text-xs font-semibold text-gray-500 mb-1">
               By classify tag

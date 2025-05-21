@@ -72,7 +72,7 @@ export function SideBar({
         onOpenManager={() => setIsManagerOpen(true)}
       />
 
-      <div className="relative z-10 flex-1 px-2 overflow-y-auto scrollbar-hide">
+      <div className="relative z-[100] flex-1 px-2 overflow-y-auto scrollbar-hide">
         {filteredConversations.length > 0 ? (
           filteredConversations.map((conv, i) => (
             <Conversation
@@ -92,7 +92,7 @@ export function SideBar({
         )}
       </div>
 
-      <div className="relative flex items-center justify-between p-4 bg-white border-t">
+      <div className="relative flex items-center justify-between p-4 bg-white border-t z-[150]">
         <div className="flex items-center gap-3">
           <img
             src={user.avatar}
