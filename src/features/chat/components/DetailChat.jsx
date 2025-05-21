@@ -5,6 +5,7 @@ import MainDetail from "./MainDetail";
 import MediaDetail from "./detail_chat/MediaDetail";
 import MemberList from "./detail_chat/MemberList";
 import PinList from "./detail_chat/PinList";
+import RequestList from "./detail_chat/RequestList";
 export default function DetailChat({
   conversation,
   imagesVideos,
@@ -36,6 +37,19 @@ export default function DetailChat({
       )}
       {activeTab.tab === "members" && (
         <MemberList
+          onBack={() =>
+            setActiveTab((prev) => ({
+              ...prev,
+              tab: "detail",
+            }))
+          }
+          conversationId={conversation._id}
+          managers={conversation?.managerIds}
+          leader={conversation?.leaderId}
+        />
+      )}
+      {activeTab.tab === "request" && (
+        <RequestList
           onBack={() =>
             setActiveTab((prev) => ({
               ...prev,
