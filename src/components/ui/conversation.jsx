@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactCardDropdown from "@/components/ui/Contact/ContactCardDropdown";
 import GroupCardDropdown from "@/components/ui/Contact/GroupCardDropdown";
 import Avatar from "@assets/chat/avatar.png";
 import friendApi from "../../api/friend";
+import dayjs from "dayjs"
 
 export function Conversation({
   onClick,
@@ -15,7 +16,6 @@ export function Conversation({
   name,
   avatar,
   lastMessageId,
-  time,
   id,
   unread,
   type,
@@ -23,6 +23,50 @@ export function Conversation({
   const [isConversationHovered, setIsConversationHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [timeDisplay, setTimeDisplay] = useState("");
+  const intervalRef = useRef(null);
+
+  const formatTimeDifference = () => {
+    if (!lastMessageId?.createdAt) {
+      return ""
+    }
+
+    const messageDate = dayjs(lastMessageId.createdAt)
+    const now = dayjs()
+    const diffMinutes = now.diff(messageDate, "minute")
+    const diffHours = now.diff(messageDate, "hour")
+    const diffDays = now.diff(messageDate, "day")
+
+    // Format based on how old the message is
+    if (diffMinutes < 1) {
+      return "just now"
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes}m`
+    } else if (diffHours < 24) {
+      return `${diffHours}h`
+    } else if (diffDays < 7) {
+      return `${diffDays}d`
+    } else {
+      return messageDate.format("MM/DD")
+    }
+  }
+
+  useEffect(() => {
+    // Initial update
+    setTimeDisplay(formatTimeDifference())
+
+    // Set up interval for continuous updates
+    intervalRef.current = setInterval(() => {
+      setTimeDisplay(formatTimeDifference())
+    }, 60000) // Update every minute
+
+    // Clean up interval on unmount or when lastMessageId changes
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [formatTimeDifference, lastMessageId?.createdAt])
 
   const navigate = useNavigate();
 
@@ -150,7 +194,7 @@ export function Conversation({
           </p>
         </div>
 
-        {!showDropdown && <span className="text-sm text-gray-400">{time}</span>}
+        {!showDropdown && <span className="text-sm text-gray-400">{timeDisplay}</span>}
 
         {showDropdown && (
           <div
