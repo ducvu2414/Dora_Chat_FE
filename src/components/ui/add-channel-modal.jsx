@@ -48,6 +48,7 @@ export function AddChannelModal({
       isOpen={isOpen}
       onClose={handleClose}
       title={isEditing ? "Edit Channel" : "Add New Channel"}
+      style={{ zIndex: 1000 }}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
