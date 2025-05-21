@@ -17,6 +17,7 @@ import { AlertMessage } from "@/components/ui/alert-message";
 import BannerImage from "@/assets/banner-user-info.png";
 import { Spinner } from "@/page/Spinner";
 import { Pencil } from "lucide-react";
+import QRCode from "qrcode";
 
 const availableHobbies = [
   {
@@ -78,12 +79,12 @@ export default function UserInformation() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [qr, setQr] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState();
   const [userInfo, setUserInfo] = useState(null);
   const [originalUserInfo, setOriginalUserInfo] = useState(null);
   const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
   const [multiSelectKey, setMultiSelectKey] = useState(Date.now());
+  const [qr, setQr] = useState(null);
 
   const fileInputRef = React.useRef(null);
   const bannerFileInputRef = React.useRef(null);
@@ -156,13 +157,8 @@ export default function UserInformation() {
     async function fetchUserProfile() {
       try {
         setLoading(true);
-        const user = JSON.parse(localStorage.getItem("user"));
-
         const response = await me.getProfile();
         setUserInfo(response);
-
-        const qrResponse = await me.getQR(user._id);
-        setQr(qrResponse);
 
         setDateOfBirth(
           `${response.dateOfBirth.year}-${String(
@@ -329,6 +325,28 @@ export default function UserInformation() {
     }
   }, [userInfo?.hobbies, isEditing]);
 
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        // Lấy dữ liệu user từ localStorage
+        const userData = localStorage.getItem("user");
+        if (!userData) throw new Error("No user data found");
+
+        const user = JSON.parse(userData);
+        if (!user?._id) throw new Error("User ID not found");
+
+        // Tạo QR code từ user._id
+        const qrData = { userId: user._id };
+        const qrUrl = await QRCode.toDataURL(JSON.stringify(qrData));
+        setQr(qrUrl);
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+      }
+    };
+
+    generateQR();
+  }, []); 
+
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Main Content */}
@@ -435,13 +453,7 @@ export default function UserInformation() {
 
                   {/* QR Code */}
                   <div className="flex flex-col items-center">
-                    {qr ? (
-                      <img src={qr} alt="QR Code" className="w-32 h-32 mb-2" />
-                    ) : (
-                      <>
-                        <img alt="QR Code" />
-                      </>
-                    )}
+                    <img src={qr} alt="QR Code" className="w-32 h-32 mb-2" />
 
                     <p className="text-sm font-bold text-orange-500">
                       QR code helps people follow you quickly

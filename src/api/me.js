@@ -5,10 +5,6 @@ const meApi = {
     const url = `api/me/profile`;
     return axios.get(url);
   },
-  getQR: (id) => {
-    const url = `api/qr/user/${id}`;
-    return axios.get(url);
-  },
   putProfile: (data) => {
     const url = `api/me/profile`;
     return axios.put(url, data);
