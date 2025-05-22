@@ -293,6 +293,13 @@ export default function ChatSingle() {
     setLinks(links);
   }, [conversationMessages]);
 
+  useEffect(() => {
+    if (conversationId && activeChannel && conversationMessages.length > 0) {
+      const cacheKey = `${conversationId}_${activeChannel}`;
+      channelMessagesCache.set(cacheKey, conversationMessages);
+    }
+  }, [conversationId, activeChannel, conversationMessages]);
+
   const handleSendMessage = async ({
     content,
     type,

@@ -195,6 +195,7 @@ export default function MessageInput({
       }
 
       if (plainText.trim()) {
+        
         await onSend({
           content: plainText.trim(),
           type: "TEXT",
