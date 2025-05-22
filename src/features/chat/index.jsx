@@ -24,6 +24,7 @@ import VoteModal from "@/components/ui/vote-modal";
 import { AlertMessage } from "@/components/ui/alert-message";
 
 const conversationCache = new Map();
+const channelMessagesCache = new Map();
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
@@ -59,6 +60,8 @@ export default function ChatSingle() {
   const isInitialMount = useRef(true);
   const previousConversationId = useRef(conversationId);
   const loadingConversationId = useRef(null);
+  const previousChannelId = useRef(activeChannel);
+  const loadingChannelId = useRef(null);
 
   const loadMoreMessages = async () => {
     if (loadingMore || !conversationId || !activeChannel) return;
@@ -85,6 +88,14 @@ export default function ChatSingle() {
             messages: [...uniqueMessages, ...messages[conversationId]],
           })
         );
+
+        const cacheKey = `${conversationId}_${activeChannel}`;
+        const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+        channelMessagesCache.set(cacheKey, [
+          ...uniqueMessages,
+          ...cachedMessages,
+        ]);
+
         setMessageSkip((prev) => prev + uniqueMessages.length);
       }
     } catch (error) {
@@ -135,6 +146,7 @@ export default function ChatSingle() {
       }
 
       previousConversationId.current = conversationId;
+      previousChannelId.current = null;
     }
   }, [conversationId]);
 
@@ -174,7 +186,7 @@ export default function ChatSingle() {
         setIsMember(isMemberRes.data);
         setMembers(membersRes.data);
 
-        if (!activeChannel) {
+        if (!activeChannel && channelsRes.length > 0) {
           setActiveChannel(channelsRes[0]?._id || null);
         }
 
@@ -218,22 +230,34 @@ export default function ChatSingle() {
 
   useEffect(() => {
     if (!activeChannel || !conversationId || !conversation?.type) return;
+    if (previousChannelId.current === activeChannel) return;
+    if (loadingChannelId.current === activeChannel) return;
 
     const fetchChannelMessages = async () => {
+      const cacheKey = `${conversationId}_${activeChannel}`;
+      const cachedMessages = channelMessagesCache.get(cacheKey);
+
+      if (cachedMessages) {
+        console.log("Using cached messages for channel:", activeChannel);
+        dispatch(setMessages({ conversationId, messages: cachedMessages }));
+        setIsLoadingMessages(false);
+        return;
+      }
+
       try {
-        if (
-          !messages[conversationId] ||
-          messages[conversationId].length === 0
-        ) {
-          const messagesRes = await messageApi.fetchMessagesByChannelId(
-            activeChannel,
-            {
-              skip: 0,
-              limit: 100,
-            }
-          );
-          dispatch(setMessages({ conversationId, messages: messagesRes }));
-        }
+        loadingChannelId.current = activeChannel;
+        setIsLoadingMessages(true);
+        const messagesRes = await messageApi.fetchMessagesByChannelId(
+          activeChannel,
+          {
+            skip: 0,
+            limit: 100,
+          }
+        );
+        dispatch(setMessages({ conversationId, messages: messagesRes }));
+        channelMessagesCache.set(cacheKey, messagesRes);
+        setMessageSkip(100);
+        setHasMoreMessages(true);
       } catch (error) {
         console.error("Error fetching channel messages", error);
         AlertMessage({
@@ -241,11 +265,15 @@ export default function ChatSingle() {
           message:
             error.response?.data.message || "Error fetching channel messages",
         });
+      } finally {
+        setIsLoadingMessages(false);
+        loadingChannelId.current = null;
       }
     };
 
     fetchChannelMessages();
-  }, [activeChannel, conversationId, dispatch, conversation?.type, messages]);
+    previousChannelId.current = activeChannel;
+  }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   useEffect(() => {
     if (!conversationMessages.length) return;
@@ -430,6 +458,10 @@ export default function ChatSingle() {
         conversationId
       );
       dispatch(deleteChannel({ channelId }));
+
+      const cacheKey = `${conversationId}_${channelId}`;
+      channelMessagesCache.delete(cacheKey);
+
       setActiveChannel((prev) =>
         prev === channelId ? channels[0]?.id || null : prev
       );

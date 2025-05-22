@@ -88,8 +88,10 @@ export default function HeaderSignleChat({
   };
 
   useEffect(() => {
-    onChannelChange(activeTab);
-  }, [activeTab]);
+   if (activeTab) {
+      onChannelChange(activeTab)
+    }
+  }, [activeTab, onChannelChange]);
 
   return (
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">
