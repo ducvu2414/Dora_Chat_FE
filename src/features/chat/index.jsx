@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Spinner } from "@/page/Spinner";
@@ -23,14 +23,25 @@ import voteApi from "@/api/vote";
 import VoteModal from "@/components/ui/vote-modal";
 import { AlertMessage } from "@/components/ui/alert-message";
 
+const conversationCache = new Map();
+
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
   const { messages, unread, pinMessages, conversations, channels } =
     useSelector((state) => state.chat);
-  const conversationMessages = messages[conversationId] || [];
+
+  const conversationMessages = useMemo(
+    () => messages[conversationId] || [],
+    [messages, conversationId]
+  );
+  const conversation = useMemo(
+    () => conversations.find((conv) => conv._id === conversationId),
+    [conversations, conversationId]
+  );
+
   const [activeChannel, setActiveChannel] = useState(null);
-  const [isMember, setIsMember] = useState(false);
+  const [isMember, setIsMember] = useState(undefined);
   const [photosVideos, setPhotosVideos] = useState([]);
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
@@ -38,15 +49,17 @@ export default function ChatSingle() {
   const [showDetail, setShowDetail] = useState(false);
   const [member, setMember] = useState(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-  const [conversation, setConversation] = useState(
-    conversations.filter((conv) => conv._id === conversationId)[0]
-  );
   const [members, setMembers] = useState([]);
   const chatBoxRef = useRef(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
   const [replyMessage, setReplyMessage] = useState(null);
+
+  const isInitialMount = useRef(true);
+  const previousConversationId = useRef(conversationId);
+  const loadingConversationId = useRef(null);
+
   const loadMoreMessages = async () => {
     if (loadingMore || !conversationId || !activeChannel) return;
 
@@ -62,6 +75,7 @@ export default function ChatSingle() {
         messages[conversationId]?.map((msg) => msg._id)
       );
       const uniqueMessages = res.filter((msg) => !existingIds.has(msg._id));
+
       if (uniqueMessages.length === 0) {
         setHasMoreMessages(false);
       } else {
@@ -85,91 +99,103 @@ export default function ChatSingle() {
   };
 
   useEffect(() => {
-    setConversation(
-      conversations.filter((conv) => conv._id === conversationId)[0]
-    );
-  }, [conversationId, conversation]);
+    if (previousConversationId.current !== conversationId) {
+      if (previousConversationId.current && member) {
+        conversationCache.set(previousConversationId.current, {
+          activeChannel,
+          isMember,
+          member,
+          members,
+          photosVideos,
+          files,
+          links,
+        });
+      }
 
-  useEffect(() => {
-    const resetState = () => {
       setActiveChannel(null);
+      setIsMember(undefined);
       setPhotosVideos([]);
       setFiles([]);
       setLinks([]);
+      setReplyMessage(null);
+      setMessageSkip(100);
+      setHasMoreMessages(true);
       setIsLoadingMessages(true);
-    };
+      if (conversationCache.has(conversationId)) {
+        const cachedData = conversationCache.get(conversationId);
+        setActiveChannel(cachedData.activeChannel);
+        setIsMember(cachedData.isMember);
+        setMember(cachedData.member);
+        setMembers(cachedData.members);
+        setPhotosVideos(cachedData.photosVideos);
+        setFiles(cachedData.files);
+        setLinks(cachedData.links);
+      } else {
+        setIsLoadingMessages(false);
+      }
+
+      previousConversationId.current = conversationId;
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!conversationId || loadingConversationId.current === conversationId)
+      return;
 
     const fetchData = async () => {
-      if (!conversationId) return;
-
-      resetState();
+      loadingConversationId.current = conversationId;
 
       try {
-        setIsLoadingMessages(true);
         dispatch(setActiveConversation(conversationId));
 
-        let channelsRes = [];
+        const [
+          channelsRes,
+          memberRes,
+          isMemberRes,
+          pinMessagesRes,
+          membersRes,
+        ] = await Promise.all([
+          channelApi.getAllChannelByConversationId(conversationId),
+          memberApi.getByConversationIdAndUserId(
+            conversationId,
+            JSON.parse(localStorage.getItem("user"))._id
+          ),
+          memberApi.isMember(
+            conversationId,
+            JSON.parse(localStorage.getItem("user"))._id
+          ),
+          pinMessageApi.getAllByConversationId(conversationId),
+          memberApi.getMembers(conversationId),
+        ]);
 
-        try {
-          channelsRes = await channelApi.getAllChannelByConversationId(
-            conversationId
-          );
+        dispatch(setPinMessages(pinMessagesRes));
+        dispatch(setChannels(channelsRes));
+        setMember(memberRes);
+        setIsMember(isMemberRes.data);
+        setMembers(membersRes.data);
 
-          setMember(
-            await memberApi.getByConversationIdAndUserId(
-              conversationId,
-              JSON.parse(localStorage.getItem("user"))._id
-            )
-          );
-
-          const isMemberRes = (
-            await memberApi.isMember(
-              conversationId,
-              JSON.parse(localStorage.getItem("user"))._id
-            )
-          ).data;
-
-          const pinMessages = await pinMessageApi.getAllByConversationId(
-            conversationId
-          );
-
-          const MembersRes = await memberApi.getMembers(conversationId);
-          setMembers(MembersRes.data);
-
-          dispatch(setPinMessages(pinMessages));
-          dispatch(setChannels(channelsRes));
-          setIsMember(isMemberRes);
-          setActiveChannel((prev) => prev || channelsRes[0]?._id || null);
-        } catch (error) {
-          console.error("Error fetching channels", error);
-          AlertMessage({
-            type: "error",
-            message: error.response?.data.message || "Error fetching channels",
-          });
+        if (!activeChannel) {
+          setActiveChannel(channelsRes[0]?._id || null);
         }
 
-        if (conversation) {
-          if (!conversation.type) {
-            // single chat
-            try {
-              const messages = await messageApi.fetchMessages(conversationId, {
-                skip: 0,
-                limit: 100,
-              });
-              dispatch(setMessages({ conversationId, messages }));
-            } catch (error) {
-              console.error("Error fetching messages", error);
-              AlertMessage({
-                type: "error",
-                message: error.response?.data.message || "Error fetching messages",
-              });
-            }
-          }
+        if (conversation && !conversation.type) {
+          const messagesRes = await messageApi.fetchMessages(conversationId, {
+            skip: 0,
+            limit: 100,
+          });
+          dispatch(setMessages({ conversationId, messages: messagesRes }));
         }
 
         if (unread[conversationId] > 0) {
           dispatch(markRead({ conversationId }));
         }
+
+        conversationCache.set(conversationId, {
+          activeChannel: channelsRes[0]?._id || null,
+          isMember: isMemberRes.data,
+          member: memberRes,
+          members: membersRes.data,
+        });
       } catch (error) {
         console.error("Error fetching data", error);
         AlertMessage({
@@ -178,25 +204,36 @@ export default function ChatSingle() {
         });
       } finally {
         setIsLoadingMessages(false);
+        loadingConversationId.current = null;
       }
     };
 
-    fetchData();
-  }, [conversationId, dispatch, unread]);
+    if (!conversationCache.has(conversationId) || isInitialMount.current) {
+      fetchData();
+      isInitialMount.current = false;
+    } else {
+      setIsLoadingMessages(false);
+    }
+  }, [conversationId, dispatch, conversation]);
 
   useEffect(() => {
     if (!activeChannel || !conversationId || !conversation?.type) return;
 
     const fetchChannelMessages = async () => {
       try {
-        const messages = await messageApi.fetchMessagesByChannelId(
-          activeChannel,
-          {
-            skip: 0,
-            limit: 100,
-          }
-        );
-        dispatch(setMessages({ conversationId, messages }));
+        if (
+          !messages[conversationId] ||
+          messages[conversationId].length === 0
+        ) {
+          const messagesRes = await messageApi.fetchMessagesByChannelId(
+            activeChannel,
+            {
+              skip: 0,
+              limit: 100,
+            }
+          );
+          dispatch(setMessages({ conversationId, messages: messagesRes }));
+        }
       } catch (error) {
         console.error("Error fetching channel messages", error);
         AlertMessage({
@@ -208,18 +245,17 @@ export default function ChatSingle() {
     };
 
     fetchChannelMessages();
-  }, [activeChannel, conversationId, dispatch, conversation?.type]);
+  }, [activeChannel, conversationId, dispatch, conversation?.type, messages]);
 
   useEffect(() => {
-    // filter type message is image, video in array conversationMessages
+    if (!conversationMessages.length) return;
+
     const photosVideos = conversationMessages.filter(
       (message) => message.type === "IMAGE" || message.type === "VIDEO"
     );
-
     const files = conversationMessages.filter(
       (message) => message.type === "FILE"
     );
-
     const links = conversationMessages.filter(
       (message) => message.type === "TEXT" && message.content.includes("http")
     );
@@ -227,7 +263,7 @@ export default function ChatSingle() {
     setPhotosVideos(photosVideos);
     setFiles(files);
     setLinks(links);
-  }, [conversationMessages.length]);
+  }, [conversationMessages]);
 
   const handleSendMessage = async ({
     content,
@@ -286,9 +322,11 @@ export default function ChatSingle() {
       throw error;
     }
   };
+
   const handleReply = (message) => {
     setReplyMessage(message);
   };
+
   const handleCreateVote = async (vote) => {
     const newVote = {
       memberId: member.data._id,
@@ -313,11 +351,9 @@ export default function ChatSingle() {
     const updatedOptions = newOptions.filter(
       (newOption) => !oldOptions.includes(newOption)
     );
-
     const deletedOptions = oldOptions.filter(
       (oldOption) => !newOptions.includes(oldOption)
     );
-
     const deletedOptionIds = deletedOptions.map(
       (option) => vote.oldOptions.options.find((opt) => opt.name === option)._id
     );
@@ -333,8 +369,6 @@ export default function ChatSingle() {
         optionId
       );
     });
-
-    console.log("vote", vote);
   };
 
   const onSelected = (optionIds, vote) => {
@@ -383,11 +417,8 @@ export default function ChatSingle() {
   };
 
   const handleScrollToMessage = useCallback((messageId) => {
-    console.log("Scrolling to message:", messageId);
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollToMessage(messageId);
-    } else {
-      console.log("ChatBox ref is null");
     }
   }, []);
 
@@ -398,9 +429,7 @@ export default function ChatSingle() {
         member.data._id,
         conversationId
       );
-
       dispatch(deleteChannel({ channelId }));
-
       setActiveChannel((prev) =>
         prev === channelId ? channels[0]?.id || null : prev
       );
@@ -449,6 +478,14 @@ export default function ChatSingle() {
     }
   };
 
+  if (!conversation || isLoadingMessages) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen bg-white">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <>
       <VoteModal
@@ -457,78 +494,68 @@ export default function ChatSingle() {
         onSubmit={handleCreateVote}
       />
 
-      {!conversation || isLoadingMessages || !messages[conversationId] ? (
-        <div className="flex items-center justify-center w-full h-screen bg-white">
-          <Spinner />
-        </div>
-      ) : (
-        <div className="flex w-full h-screen">
-          {/* Main Content */}
-          <div className="flex flex-1 overflow-auto">
-            {/* ChatBox  */}
-            <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
-              <HeaderSignleChat
-                channelTabs={channels}
-                activeTab={activeChannel}
-                handleDetail={setShowDetail}
-                conversation={conversation}
-                onChannelChange={setActiveChannel}
-                onDeleteChannel={handleDeleteChannel}
-                onAddChannel={handleAddChannel}
-              />
-              <ChatBox
-                key={conversationId}
-                messages={messages[conversationId]}
-                onReply={handleReply}
-                onSelected={onSelected}
-                member={member?.data}
-                onSave={handleUpdateVote}
-                onLock={handleLockVote}
-                ref={chatBoxRef}
-                onLoadMore={hasMoreMessages ? loadMoreMessages : () => {}}
-              />
-              <MessageInput
-                conversation={conversation}
-                onSend={handleSendMessage}
-                isMember={isMember}
-                setIsVoteModalOpen={setIsVoteModalOpen}
-                isGroup={conversation.type}
-                members={members}
-                member={member?.data}
-                onReply={setReplyMessage}
-                replyMessage={replyMessage}
-              />
-            </div>
+      <div className="flex w-full h-screen">
+        {/* Main Content */}
+        <div className="flex flex-1 overflow-auto">
+          {/* ChatBox  */}
+          <div className="flex flex-col flex-1 bg-gradient-to-b from-blue-50/50 to-white">
+            <HeaderSignleChat
+              channelTabs={channels}
+              activeTab={activeChannel}
+              handleDetail={setShowDetail}
+              conversation={conversation}
+              onChannelChange={setActiveChannel}
+              onDeleteChannel={handleDeleteChannel}
+              onAddChannel={handleAddChannel}
+            />
+            <ChatBox
+              messages={conversationMessages}
+              onReply={handleReply}
+              onSelected={onSelected}
+              member={member?.data}
+              onSave={handleUpdateVote}
+              onLock={handleLockVote}
+              ref={chatBoxRef}
+              onLoadMore={hasMoreMessages ? loadMoreMessages : () => {}}
+            />
+            <MessageInput
+              conversation={conversation}
+              onSend={handleSendMessage}
+              isMember={isMember}
+              setIsVoteModalOpen={setIsVoteModalOpen}
+              isGroup={conversation.type}
+              members={members}
+              member={member?.data}
+              onReply={setReplyMessage}
+              replyMessage={replyMessage}
+              isLoading={isLoadingMessages}
+            />
+          </div>
 
-            {/* DetailChat*/}
-            <div
-              className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px]  ${
-                showDetail ? "w-[385px]" : "w-0"
-              }`}
-            >
-              {/* log messages */}
-              {showDetail && (
-                <DetailChat
-                  conversation={
-                    conversations.filter(
-                      (conv) => conv._id === conversationId
-                    )[0]
-                  }
-                  imagesVideos={photosVideos}
-                  files={files}
-                  links={links}
-                  pinMessages={pinMessages.filter((pinMessage) =>
-                    conversationMessages.some(
-                      (message) => message._id === pinMessage.messageId
-                    )
-                  )}
-                  onScrollToMessage={handleScrollToMessage}
-                />
-              )}
-            </div>
+          {/* DetailChat*/}
+          <div
+            className={`bg-white shadow-xl transition-all duration-200 my-3 rounded-[20px] ${
+              showDetail ? "w-[385px]" : "w-0"
+            }`}
+          >
+            {/* log messages */}
+            {showDetail && (
+              <DetailChat
+                conversation={conversation}
+                imagesVideos={photosVideos}
+                files={files}
+                links={links}
+                pinMessages={pinMessages.filter((pinMessage) =>
+                  conversationMessages.some(
+                    (message) => message._id === pinMessage.messageId
+                  )
+                )}
+                onScrollToMessage={handleScrollToMessage}
+              />
+            )}
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

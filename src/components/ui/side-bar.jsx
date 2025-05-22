@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { useSelector } from "react-redux";
 import { SearchBar } from "@/components/ui/search-bar";
 import { TabConversation } from "@/components/ui/tab-conversation";
@@ -7,7 +7,7 @@ import { Conversation } from "@/components/ui/conversation";
 import { UserMenuDropdown } from "@/components/ui/user-menu-dropdown";
 import ClassifyManagerModal from "@/components/ui/classify/ClassifyManagerModal";
 
-export function SideBar({
+export const SideBar = memo(function SideBar({
   messages,
   groups,
   onConversationClick,
@@ -22,7 +22,7 @@ export function SideBar({
   const [selectedClassifyIds, setSelectedClassifyIds] = useState([]);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
 
-  const getConversations = () => {
+  const getConversations = useCallback(() => {
     let sourceList = [];
 
     switch (activeTab) {
@@ -45,18 +45,20 @@ export function SideBar({
     return sourceList.filter((conv) =>
       matchedConversationIds.includes(conv._id)
     );
-  };
+  }, [activeTab, messages, groups, selectedClassifyIds, classifies]);
 
   const filteredConversations = getConversations();
 
-  const handleConversationClick = (index, conversation) => {
-    setActiveConversation(conversation._id || index);
-    if (onConversationClick) {
-      const chatId = conversation._id || index;
-      console.log("Conversation clicked:", chatId);
-      onConversationClick(chatId);
-    }
-  };
+  const handleConversationClick = useCallback(
+    (index, conversation) => {
+      setActiveConversation(conversation._id || index);
+      if (onConversationClick) {
+        const chatId = conversation._id || index;
+        onConversationClick(chatId);
+      }
+    },
+    [onConversationClick]
+  );
 
   return (
     <div className="w-[380px] bg-white border-r flex flex-col relative">
@@ -148,4 +150,4 @@ export function SideBar({
       )}
     </div>
   );
-}
+});

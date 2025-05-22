@@ -20,6 +20,7 @@ export default function MessageInput({
   member,
   onReply,
   replyMessage,
+  isLoading = false,
 }) {
   const [input, setInput] = useState("");
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
@@ -32,8 +33,7 @@ export default function MessageInput({
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
   const [file, setFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMemberState, setIsMember] = useState(isMember);
+  const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -41,6 +41,10 @@ export default function MessageInput({
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const editableRef = useRef(null); // dùng để thao tác con trỏ input
+  const inputContainerRef = useRef(null);
+
+  const [inputMode, setInputMode] = useState("normal"); // "normal" o "restricted"
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (editableRef.current?.innerText.trim() === "") {
@@ -48,13 +52,29 @@ export default function MessageInput({
     }
   }, []);
 
-  const filteredMembers = members
-    .filter((m) => m._id.toString() !== member._id.toString())
-    .filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase()));
-
   useEffect(() => {
-    setIsMember(isMember);
-  }, [isMember]);
+    if (!isLoading && isMember !== undefined) {
+      const newMode = isMember ? "normal" : "restricted";
+
+      if (newMode !== inputMode) {
+        setIsTransitioning(true);
+
+        setTimeout(() => {
+          setInputMode(newMode);
+          setIsTransitioning(false);
+        }, 150);
+      }
+    }
+  }, [isMember, isLoading, inputMode]);
+
+  const filteredMembers =
+    members && Array.isArray(members)
+      ? members
+          .filter((m) => m._id.toString() !== (member?._id?.toString() || ""))
+          .filter((m) =>
+            m.name.toLowerCase().includes(mentionQuery.toLowerCase())
+          )
+      : [];
 
   useEffect(() => {
     if (imageFiles.length > 0) {
@@ -136,7 +156,7 @@ export default function MessageInput({
     )
       return;
 
-    setIsLoading(true);
+    setIsMessageLoading(true);
     try {
       const plainText = editableRef.current?.innerText || "";
 
@@ -232,7 +252,7 @@ export default function MessageInput({
         message: "Send message error!",
       });
     } finally {
-      setIsLoading(false);
+      setIsMessageLoading(false);
     }
   };
 
@@ -317,7 +337,6 @@ export default function MessageInput({
   };
 
   const handleInputChange = () => {
-    console.log("conversation", conversation);
     if (conversation?.type) {
       // Xử lý khi gõ bên trong một mention span
       const selection = window.getSelection();
@@ -565,6 +584,23 @@ export default function MessageInput({
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="relative flex flex-col w-full">
+        <div className="flex items-center p-3 border-t">
+          <div className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative">
+            <div className="w-full text-sm text-center text-gray-400">
+              Loading conversation...
+            </div>
+          </div>
+          <div className="px-4 py-2 ml-1 opacity-50">
+            <img src={SendIcon} alt="Send" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-col w-full">
       {/* Hiển thị tin nhắn đang reply */}
@@ -696,7 +732,7 @@ export default function MessageInput({
         </div>
       )}
       <div className="flex items-center p-3 border-t">
-        {isMemberState && (
+        {inputMode === "normal" && (
           <>
             <Button
               size="icon"
@@ -717,10 +753,14 @@ export default function MessageInput({
         )}
 
         <div
-          className="flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative
-           focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300"
+          ref={inputContainerRef}
+          className={`flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative
+           focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300
+           transition-opacity duration-150 ${
+             isTransitioning ? "opacity-0" : "opacity-100"
+           }`}
         >
-          {!isMemberState ? (
+          {inputMode === "restricted" ? (
             <input
               type="text"
               placeholder="You cannot message this conversation"
@@ -753,7 +793,11 @@ export default function MessageInput({
               </div>
 
               <label className="cursor-pointer hover:opacity-70">
-                <img src={PictureIcon} className="p-2" alt="Picture" />
+                <img
+                  src={PictureIcon}
+                  className="p-2"
+                  alt="Picture"
+                />
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -761,7 +805,7 @@ export default function MessageInput({
                   multiple
                   ref={imageInputRef}
                   onChange={handleImageOrVideoSelect}
-                  disabled={isLoading}
+                  disabled={isMessageLoading}
                 />
               </label>
               <button
@@ -773,11 +817,11 @@ export default function MessageInput({
             </>
           )}
         </div>
-        {isMemberState && (
+        {inputMode === "normal" && (
           <div
             onClick={handleSend}
             className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
-              isLoading ? "opacity-50" : ""
+              isMessageLoading ? "opacity-50" : ""
             }`}
           >
             <img src={SendIcon} alt="Send" />
