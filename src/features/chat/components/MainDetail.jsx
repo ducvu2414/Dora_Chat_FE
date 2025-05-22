@@ -518,7 +518,7 @@ export default function MainDetail({
           <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
             <img src={Bell} />
           </div>
-          <p className="text-[#086DC0] ml-2">Mute messages</p>
+          <p className="text-[#086DC0] ml-2 user-select">Mute messages</p>
           <div
             className={`relative right-2 w-11 h-6 rounded-full cursor-pointer transition-all self-end ml-auto  ${
               isMuted ? "bg-gray-400" : "bg-[#086DC0]"

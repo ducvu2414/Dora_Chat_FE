@@ -160,7 +160,7 @@ export function AddFriendModal({ isOpen, onClose }) {
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[1000]">
                   <SelectItem value="phone">
                     <div className="flex items-center gap-1">
                       <img

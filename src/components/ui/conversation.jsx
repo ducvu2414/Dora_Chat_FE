@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useTransition, useRef } from "react";
 import { useNavigate } from "react-router-dom";
