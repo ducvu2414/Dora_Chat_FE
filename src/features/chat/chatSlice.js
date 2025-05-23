@@ -272,17 +272,43 @@ const chatSlice = createSlice({
         state.conversations[index].isJoinFromLink = newStatus;
       }
     },
-    acceptJoinRequest: (state, action) => {
-      const { conversationId, newMember } = action.payload;
-      const conversation = state.conversations.find(
+    acceptMultipleJoinRequests: (state, action) => {
+      const { conversationId, newMembers } = action.payload;
+      const index = state.conversations.findIndex(
         (conv) => conv._id === conversationId
       );
-      if (conversation) {
-        const member = conversation.members.findIndex(
-          (member) => member._id === newMember._id
-        );
-        if (member !== -1) {
-          conversation.members[member] = newMember;
+      if (index !== -1) {
+        for (const newMember of newMembers) {
+          const memberIndex = state.conversations[index].members.findIndex(
+            (m) => m._id === newMember._id
+          );
+          if (memberIndex !== -1) {
+            state.conversations[index].members[memberIndex] = newMember;
+          } else {
+            state.conversations[index].members.push(newMember);
+          }
+          state.conversations[index].joinRequests = state.conversations[
+            index
+          ].joinRequests.filter(
+            (request) => request._id !== newMember.userId._id
+          );
+        }
+      }
+    },
+    rejectJoinRequests: (state, action) => {
+      const { conversationId, userIds } = action.payload;
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversationId
+      );
+
+      if (index !== -1) {
+        if (userIds.length > 0) {
+          state.conversations[index].joinRequests = state.conversations[
+            index
+          ].joinRequests.filter((request) => !userIds.includes(request._id));
+        }
+        if (userIds.length === 0) {
+          state.conversations[index].joinRequests = [];
         }
       }
     },
@@ -318,5 +344,7 @@ export const {
   updateMessage,
   updateAvatarGroupConversation,
   toggleJoinApproval,
+  acceptMultipleJoinRequests,
+  rejectJoinRequests,
 } = chatSlice.actions;
 export default chatSlice.reducer;
