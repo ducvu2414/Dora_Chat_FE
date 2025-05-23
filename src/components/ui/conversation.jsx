@@ -186,7 +186,7 @@ export const Conversation = memo(function Conversation({
           <div
             onMouseEnter={handleDropdownEnter}
             onMouseLeave={handleDropdownLeave}
-            className="z-[200]"
+            className="z-[199]"
           >
             {activeTab === "messages" ? (
               <ContactCardDropdown

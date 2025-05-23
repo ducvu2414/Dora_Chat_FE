@@ -273,10 +273,13 @@ const chatSlice = createSlice({
       }
     },
     acceptMultipleJoinRequests: (state, action) => {
-      const { conversationId, newMembers } = action.payload;
+      let { conversationId, newMembers } = action.payload;
       const index = state.conversations.findIndex(
         (conv) => conv._id === conversationId
       );
+      if (!Array.isArray(newMembers)) {
+        newMembers = [newMembers];
+      }
       if (index !== -1) {
         for (const newMember of newMembers) {
           const memberIndex = state.conversations[index].members.findIndex(

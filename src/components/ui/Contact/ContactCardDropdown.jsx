@@ -18,13 +18,13 @@ const ContactCardDropdown = ({
 }) => {
 
   return (
-    <DropdownMenu className="z-50">
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="p-2 text-gray-400 bg-white rounded-full hover:text-gray-600 focus:outline-none">
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="z-[9999] w-56">
+      <DropdownMenuContent className="z-[200] w-56">
         <DropdownMenuItem onClick={onViewInfo}>
           <span>View info</span>
         </DropdownMenuItem>
