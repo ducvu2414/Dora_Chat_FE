@@ -35,6 +35,8 @@ import {
   updateChannel,
   updateMessage,
   updateAvatarGroupConversation,
+  acceptMultipleJoinRequests,
+  rejectJoinRequests,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -286,10 +288,34 @@ const MainLayout = () => {
         });
       }
     );
+    const handleAcceptJoinRequest = ({ members, notifyMessage }) => {
+      startTransition(() => {
+        dispatch(
+          acceptMultipleJoinRequests({
+            conversationId: notifyMessage.conversationId,
+            newMembers: members,
+          })
+        );
+        handleNewMessage(notifyMessage);
+      });
+    };
+    const handleRejectJoinRequest = ({ conversationId, requestingUserId }) => {
+      startTransition(() => {
+        dispatch(
+          rejectJoinRequests({
+            conversationId,
+            userIds: [requestingUserId],
+          })
+        );
+      });
+    };
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
-
+    socket.on(SOCKET_EVENTS.ACCEPT_JOIN_REQUEST, handleAcceptJoinRequest);
+    socket.on(SOCKET_EVENTS.REJECT_JOIN_REQUEST, handleRejectJoinRequest);
     return () => {
       socket.off(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
+      socket.off(SOCKET_EVENTS.ACCEPT_JOIN_REQUEST, handleAcceptJoinRequest);
+      socket.off(SOCKET_EVENTS.REJECT_JOIN_REQUEST, handleRejectJoinRequest);
     };
   }, [dispatch, conversations]);
 
