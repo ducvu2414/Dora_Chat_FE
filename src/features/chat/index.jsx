@@ -56,12 +56,20 @@ export default function ChatSingle() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
   const [replyMessage, setReplyMessage] = useState(null);
+  const [isChannelInitialized, setIsChannelInitialized] = useState(false);
 
   const isInitialMount = useRef(true);
   const previousConversationId = useRef(conversationId);
   const loadingConversationId = useRef(null);
   const previousChannelId = useRef(activeChannel);
   const loadingChannelId = useRef(null);
+  const currentActiveChannelRef = useRef(activeChannel);
+
+  const isSendingMessage = useRef(false);
+
+  useEffect(() => {
+    currentActiveChannelRef.current = activeChannel;
+  }, [activeChannel]);
 
   const clearChannelCache = useCallback(
     (channelId) => {
@@ -119,6 +127,14 @@ export default function ChatSingle() {
     }
   };
 
+  const handleChannelChange = useCallback(
+    (newChannelId) => {
+      setActiveChannel(newChannelId);
+      currentActiveChannelRef.current = newChannelId;
+    },
+    [activeChannel]
+  );
+
   useEffect(() => {
     if (previousConversationId.current !== conversationId) {
       if (previousConversationId.current && member) {
@@ -152,9 +168,11 @@ export default function ChatSingle() {
       setMessageSkip(100);
       setHasMoreMessages(true);
       setIsLoadingMessages(true);
+      setIsChannelInitialized(false);
       if (conversationCache.has(conversationId)) {
         const cachedData = conversationCache.get(conversationId);
         setActiveChannel(cachedData.activeChannel);
+        currentActiveChannelRef.current = cachedData.activeChannel;
         setIsMember(cachedData.isMember);
         setMember(cachedData.member);
         setMembers(cachedData.members);
@@ -206,8 +224,11 @@ export default function ChatSingle() {
         setIsMember(isMemberRes.data);
         setMembers(membersRes.data);
 
-        if (!activeChannel && channelsRes.length > 0) {
-          setActiveChannel(channelsRes[0]?._id || null);
+        if (!isChannelInitialized && channelsRes.length > 0) {
+          const firstChannelId = channelsRes[0]?._id || null;
+          setActiveChannel(firstChannelId);
+          currentActiveChannelRef.current = firstChannelId;
+          setIsChannelInitialized(true);
         }
 
         if (conversation && !conversation.type) {
@@ -246,7 +267,7 @@ export default function ChatSingle() {
     } else {
       setIsLoadingMessages(false);
     }
-  }, [conversationId, dispatch, conversation]);
+  }, [conversationId, dispatch, conversation, activeChannel, isChannelInitialized]);
 
   useEffect(() => {
     if (!activeChannel || !conversationId || !conversation?.type) return;
@@ -296,6 +317,8 @@ export default function ChatSingle() {
   }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   useEffect(() => {
+    if (isSendingMessage.current) return;
+
     if (conversationId && activeChannel) {
       const cacheKey = `${conversationId}_${activeChannel}`;
       channelMessagesCache.set(cacheKey, conversationMessages);
@@ -320,13 +343,6 @@ export default function ChatSingle() {
     setLinks(links);
   }, [conversationMessages]);
 
-  useEffect(() => {
-    if (conversationId && activeChannel && conversationMessages.length > 0) {
-      const cacheKey = `${conversationId}_${activeChannel}`;
-      channelMessagesCache.set(cacheKey, conversationMessages);
-    }
-  }, [conversationId, activeChannel, conversationMessages]);
-
   const handleSendMessage = async ({
     content,
     type,
@@ -336,7 +352,8 @@ export default function ChatSingle() {
     replyMessageId,
     location,
   }) => {
-    const channelId = activeChannel;
+    const channelId = currentActiveChannelRef.current || activeChannel;
+    isSendingMessage.current = true;
     try {
       if (type === "TEXT") {
         await messageApi.sendTextMessage({
@@ -382,6 +399,10 @@ export default function ChatSingle() {
         message: error.response?.data.message || "Error sending message",
       });
       throw error;
+    } finally {
+      setTimeout(() => {
+        isSendingMessage.current = false;
+      }, 500);
     }
   };
 
@@ -390,8 +411,10 @@ export default function ChatSingle() {
   };
 
   const handleCreateVote = async (vote) => {
+    const channelId = currentActiveChannelRef.current || activeChannel;
+
     const newVote = {
-      memberId: member.data._id,
+      memberId: channelId,
       conversationId: conversationId,
       channelId: channels[0]?.id,
       content: vote.content,
@@ -495,9 +518,12 @@ export default function ChatSingle() {
 
       clearChannelCache(channelId);
 
-      setActiveChannel((prev) =>
-        prev === channelId ? channels[0]?.id || null : prev
-      );
+      if (activeChannel === channelId) {
+        const remainingChannels = channels.filter((ch) => ch._id !== channelId);
+        const newActiveChannel = remainingChannels[0]?._id || null;
+        setActiveChannel(newActiveChannel);
+        currentActiveChannelRef.current = newActiveChannel;
+      }
     } catch (error) {
       console.error("Error deleting channel", error);
       AlertMessage({
@@ -525,6 +551,7 @@ export default function ChatSingle() {
             conversationId
           );
           setActiveChannel(newChannel._id);
+          currentActiveChannelRef.current = newChannel._id;
         }
       } else {
         await channelApi.updateChannel(
@@ -569,7 +596,7 @@ export default function ChatSingle() {
               activeTab={activeChannel}
               handleDetail={setShowDetail}
               conversation={conversation}
-              onChannelChange={setActiveChannel}
+              onChannelChange={handleChannelChange}
               onDeleteChannel={handleDeleteChannel}
               onAddChannel={handleAddChannel}
             />

@@ -6,7 +6,6 @@ import Call from "@assets/chat/call.svg";
 import DetailChatIcon from "@assets/chat/detail_chat.svg";
 import VideoCall from "@assets/chat/video_call.svg";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSelector } from "react-redux";
 import { AlertMessage } from "@/components/ui/alert-message";
@@ -86,12 +85,6 @@ export default function HeaderSignleChat({
       });
     }
   };
-
-  useEffect(() => {
-   if (activeTab) {
-      onChannelChange(activeTab)
-    }
-  }, [activeTab, onChannelChange]);
 
   return (
     <div className="relative z-10 flex flex-col w-full h-auto shadow-md ">

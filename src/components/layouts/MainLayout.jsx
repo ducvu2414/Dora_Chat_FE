@@ -144,18 +144,21 @@ const MainLayout = () => {
     }
     const handleNewMessage = (message) => {
       console.log("📩 New message:", message);
-      startTransition(() => {
-        dispatch(
-          addMessage({ conversationId: message.conversationId, message })
-        );
+      const currentPath = location.pathname;
+      const isCurrentConversation = currentPath.includes(
+        message.conversationId
+      );
+      dispatch(addMessage({ conversationId: message.conversationId, message }));
+      if (!isCurrentConversation) {
         dispatch(
           updateConversation({
             conversationId: message.conversationId,
             lastMessage: message,
           })
         );
-      });
+      }
     };
+
     socket.on(SOCKET_EVENTS.MESSAGE_RECALLED, (data) => {
       startTransition(() => {
         console.log("Received recall message:", data);
@@ -317,7 +320,7 @@ const MainLayout = () => {
       socket.off(SOCKET_EVENTS.ACCEPT_JOIN_REQUEST, handleAcceptJoinRequest);
       socket.off(SOCKET_EVENTS.REJECT_JOIN_REQUEST, handleRejectJoinRequest);
     };
-  }, [dispatch, conversations]);
+  }, [dispatch, conversations, location.pathname]);
 
   // Lắng nghe socket cho user connection
   useEffect(() => {
