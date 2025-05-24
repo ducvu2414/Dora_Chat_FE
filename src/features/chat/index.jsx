@@ -63,6 +63,16 @@ export default function ChatSingle() {
   const previousChannelId = useRef(activeChannel);
   const loadingChannelId = useRef(null);
 
+  const clearChannelCache = useCallback(
+    (channelId) => {
+      if (conversationId && channelId) {
+        const cacheKey = `${conversationId}_${channelId}`;
+        channelMessagesCache.delete(cacheKey);
+      }
+    },
+    [conversationId]
+  );
+
   const loadMoreMessages = async () => {
     if (loadingMore || !conversationId || !activeChannel) return;
 
@@ -121,6 +131,16 @@ export default function ChatSingle() {
           files,
           links,
         });
+      }
+
+      if (previousConversationId.current) {
+        const keysToDelete = [];
+        for (const key of channelMessagesCache.keys()) {
+          if (key.startsWith(previousConversationId.current)) {
+            keysToDelete.push(key);
+          }
+        }
+        keysToDelete.forEach((key) => channelMessagesCache.delete(key));
       }
 
       setActiveChannel(null);
@@ -274,6 +294,13 @@ export default function ChatSingle() {
     fetchChannelMessages();
     previousChannelId.current = activeChannel;
   }, [activeChannel, conversationId, dispatch, conversation?.type]);
+
+  useEffect(() => {
+    if (conversationId && activeChannel) {
+      const cacheKey = `${conversationId}_${activeChannel}`;
+      channelMessagesCache.set(cacheKey, conversationMessages);
+    }
+  }, [conversationId, activeChannel, conversationMessages]);
 
   useEffect(() => {
     if (!conversationMessages.length) return;
@@ -466,8 +493,7 @@ export default function ChatSingle() {
       );
       dispatch(deleteChannel({ channelId }));
 
-      const cacheKey = `${conversationId}_${channelId}`;
-      channelMessagesCache.delete(cacheKey);
+      clearChannelCache(channelId);
 
       setActiveChannel((prev) =>
         prev === channelId ? channels[0]?.id || null : prev
