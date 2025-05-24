@@ -51,11 +51,25 @@ export default function LoginPage() {
       AlertMessage({ type: "success", message: "Log in successfully!" });
       navigate("/home");
     } catch (error) {
-      console.error("Login failed:", error);
-      AlertMessage({
-        type: "error",
-        message: "Login failed. Please try again.",
-      });
+      if (error.response) {
+        const { status, data } = error.response;
+        const message = data?.message || "Login failed. Please check your information again.";
+
+        if (status === 400 && message.includes("chưa được kích hoạt")) {
+          navigate("/signup/otp", { state: { email: username } });
+          AlertMessage({
+            type: "warning",
+            message: "Your account is not activated. Please enter the OTP code sent to your email.",
+          });
+        } else {
+          AlertMessage({ type: "error", message });
+        }
+      } else {
+        AlertMessage({
+          type: "error",
+          message: "Login failed. Please try again.",
+        });
+      }
     } finally {
       setLoading(false);
     }
