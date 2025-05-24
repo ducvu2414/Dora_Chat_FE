@@ -36,9 +36,11 @@ export default function LinkList({ limit, links }) {
         >
           <img src={Link} alt="icon" className="p-3 bg-white rounded-md" />
           <div>
-            <p className="text-sm font-medium">{file.name}</p>
+            <p className="text-sm font-medium text-start">{file.name}</p>
             <p className="text-xs text-[#086DC0] font-light text-start">
-              {file.link}
+              {file.link.length > 15
+                ? file.link.slice(0, 37) + "..."
+                : file.link}
             </p>
           </div>
         </li>

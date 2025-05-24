@@ -22,7 +22,7 @@ export default function PictureList({ limit, imagesVideos }) {
   return (
     <>
       {previewImage && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-[1000]">
           <div className="relative">
             <div
               onClick={() => setPreviewImage(null)}
@@ -39,7 +39,7 @@ export default function PictureList({ limit, imagesVideos }) {
         </div>
       )}
       {previewVideo && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
           <div className="relative">
             <div
               onClick={() => setPreviewVideo(null)}
