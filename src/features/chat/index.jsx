@@ -10,6 +10,8 @@ import {
   setPinMessages,
   setChannels,
   deleteChannel,
+  addMessage,
+  updateConversation,
 } from "../../features/chat/chatSlice";
 import ChatBox from "./components/ChatBox";
 import DetailChat from "./components/DetailChat";
@@ -415,8 +417,9 @@ export default function ChatSingle() {
     const channelId = currentActiveChannelRef.current || activeChannel;
     isSendingMessage.current = true;
     try {
+      let newMessage = null;
       if (type === "TEXT") {
-        await messageApi.sendTextMessage({
+        const resSend = await messageApi.sendTextMessage({
           conversationId,
           content,
           channelId,
@@ -424,34 +427,55 @@ export default function ChatSingle() {
           tagPositions,
           replyMessageId,
         });
+        newMessage = resSend;
       } else if (type === "IMAGE") {
-        await messageApi.sendImageMessage(
+        const resSend = await messageApi.sendImageMessage(
           conversationId,
           files,
           channelId,
           replyMessageId
         );
+        newMessage = resSend;
       } else if (type === "FILE") {
-        await messageApi.sendFileMessage(
+        const resSend = await messageApi.sendFileMessage(
           conversationId,
           files[0],
           channelId,
           replyMessageId
         );
+        newMessage = resSend;
       } else if (type === "VIDEO") {
-        await messageApi.sendVideoMessage(
+        const resSend = await messageApi.sendVideoMessage(
           conversationId,
           files[0],
           channelId,
           replyMessageId
         );
+        newMessage = resSend;
       } else if (type === "LOCATION") {
-        await messageApi.sendLocationMessage({
+        const resSend = await messageApi.sendLocationMessage({
           conversationId,
           location,
           channelId,
         });
+        newMessage = resSend;
       }
+
+      const cacheKey = `${conversationId}_${channelId}`;
+      const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+      channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
+      dispatch(
+        addMessage({
+          conversationId,
+          message: newMessage,
+        })
+      );
+      dispatch(
+        updateConversation({
+          conversationId: newMessage.conversationId,
+          lastMessage: newMessage,
+        })
+      );
     } catch (error) {
       console.error("Error sending message", error);
       AlertMessage({
