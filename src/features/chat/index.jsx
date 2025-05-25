@@ -64,8 +64,27 @@ export default function ChatSingle() {
   const previousChannelId = useRef(activeChannel);
   const loadingChannelId = useRef(null);
   const currentActiveChannelRef = useRef(activeChannel);
-
   const isSendingMessage = useRef(false);
+  const previousActiveChannelRef = useRef(null);
+
+  const debugCache = useCallback(() => {
+    console.log("=== CACHE DEBUG ===");
+    console.log("Current conversationId:", conversationId);
+    console.log("Current activeChannel:", activeChannel);
+    console.log(
+      "Previous activeChannel ref:",
+      previousActiveChannelRef.current
+    );
+    console.log("Cache contents:");
+    for (const [key, value] of channelMessagesCache.entries()) {
+      console.log(`  ${key}: ${value.length} messages`);
+    }
+    console.log("Conversation cache:");
+    for (const [key, value] of conversationCache.entries()) {
+      console.log(`  ${key}:`, value);
+    }
+    console.log("==================");
+  }, [conversationId, activeChannel]);
 
   useEffect(() => {
     currentActiveChannelRef.current = activeChannel;
@@ -137,22 +156,33 @@ export default function ChatSingle() {
 
   useEffect(() => {
     if (previousConversationId.current !== conversationId) {
-      if (previousConversationId.current && member) {
-        conversationCache.set(previousConversationId.current, {
-          activeChannel,
+      const oldConversationId = previousConversationId.current;
+      const oldActiveChannel = previousActiveChannelRef.current;
+
+      if (oldConversationId && member && oldActiveChannel) {
+        const oldCacheKey = `${oldConversationId}_${oldActiveChannel}`;
+        const currentMessages = messages[oldConversationId] || [];
+
+        if (currentMessages.length > 0) {
+          channelMessagesCache.set(oldCacheKey, currentMessages);
+        }
+
+        const oldConvData = {
+          activeChannel: oldActiveChannel,
           isMember,
           member,
           members,
           photosVideos,
           files,
           links,
-        });
+        };
+        conversationCache.set(oldConversationId, oldConvData);
       }
 
-      if (previousConversationId.current) {
+      if (oldConversationId) {
         const keysToDelete = [];
         for (const key of channelMessagesCache.keys()) {
-          if (key.startsWith(previousConversationId.current)) {
+          if (key.startsWith(oldConversationId + "_")) {
             keysToDelete.push(key);
           }
         }
@@ -160,6 +190,9 @@ export default function ChatSingle() {
       }
 
       setActiveChannel(null);
+      currentActiveChannelRef.current = null;
+      previousActiveChannelRef.current = null;
+
       setIsMember(undefined);
       setPhotosVideos([]);
       setFiles([]);
@@ -169,17 +202,16 @@ export default function ChatSingle() {
       setHasMoreMessages(true);
       setIsLoadingMessages(true);
       setIsChannelInitialized(false);
+
       if (conversationCache.has(conversationId)) {
         const cachedData = conversationCache.get(conversationId);
-        setActiveChannel(cachedData.activeChannel);
-        currentActiveChannelRef.current = cachedData.activeChannel;
+
         setIsMember(cachedData.isMember);
         setMember(cachedData.member);
         setMembers(cachedData.members);
-        setPhotosVideos(cachedData.photosVideos);
-        setFiles(cachedData.files);
-        setLinks(cachedData.links);
-      } else {
+        setPhotosVideos(cachedData.photosVideos || []);
+        setFiles(cachedData.files || []);
+        setLinks(cachedData.links || []);
         setIsLoadingMessages(false);
       }
 
@@ -224,10 +256,11 @@ export default function ChatSingle() {
         setIsMember(isMemberRes.data);
         setMembers(membersRes.data);
 
-        if (!isChannelInitialized && channelsRes.length > 0) {
+        if (channelsRes.length > 0) {
           const firstChannelId = channelsRes[0]?._id || null;
           setActiveChannel(firstChannelId);
           currentActiveChannelRef.current = firstChannelId;
+          previousActiveChannelRef.current = firstChannelId;
           setIsChannelInitialized(true);
         }
 
@@ -261,13 +294,15 @@ export default function ChatSingle() {
       }
     };
 
-    if (!conversationCache.has(conversationId) || isInitialMount.current) {
-      fetchData();
-      isInitialMount.current = false;
-    } else {
-      setIsLoadingMessages(false);
+    fetchData();
+    isInitialMount.current = false;
+  }, [conversationId, dispatch, conversation]);
+
+  useEffect(() => {
+    if (activeChannel) {
+      previousActiveChannelRef.current = activeChannel;
     }
-  }, [conversationId, dispatch, conversation, activeChannel, isChannelInitialized]);
+  }, [activeChannel]);
 
   useEffect(() => {
     if (!activeChannel || !conversationId || !conversation?.type) return;
@@ -319,9 +354,17 @@ export default function ChatSingle() {
   useEffect(() => {
     if (isSendingMessage.current) return;
 
-    if (conversationId && activeChannel) {
+    if (conversationId && activeChannel && conversationMessages.length > 0) {
       const cacheKey = `${conversationId}_${activeChannel}`;
-      channelMessagesCache.set(cacheKey, conversationMessages);
+      const existingCache = channelMessagesCache.get(cacheKey);
+
+      // Chỉ update cache nếu messages thực sự thay đổi
+      if (
+        !existingCache ||
+        existingCache.length !== conversationMessages.length
+      ) {
+        channelMessagesCache.set(cacheKey, conversationMessages);
+      }
     }
   }, [conversationId, activeChannel, conversationMessages]);
 
@@ -569,6 +612,20 @@ export default function ChatSingle() {
       });
     }
   };
+
+  const clearAllCache = useCallback(() => {
+    console.log("🧹 Clearing all cache");
+    channelMessagesCache.clear();
+    conversationCache.clear();
+  }, []);
+
+  // Expose function để test
+  window.clearChatCache = clearAllCache;
+  window.debugChatCache = debugCache;
+
+  useEffect(() => {
+    debugCache();
+  }, [conversationId, activeChannel, debugCache]);
 
   if (!conversation || isLoadingMessages) {
     return (
