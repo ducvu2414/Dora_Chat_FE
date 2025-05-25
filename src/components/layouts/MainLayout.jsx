@@ -291,12 +291,12 @@ const MainLayout = () => {
         });
       }
     );
-    const handleAcceptJoinRequest = ({ members, notifyMessage }) => {
+    const handleAcceptJoinRequest = ({ newMembers, notifyMessage }) => {
       startTransition(() => {
         dispatch(
           acceptMultipleJoinRequests({
             conversationId: notifyMessage.conversationId,
-            newMembers: members,
+            newMembers,
           })
         );
         handleNewMessage(notifyMessage);

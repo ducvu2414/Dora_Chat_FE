@@ -274,6 +274,7 @@ const chatSlice = createSlice({
     },
     acceptMultipleJoinRequests: (state, action) => {
       let { conversationId, newMembers } = action.payload;
+      console.log(newMembers);
       const index = state.conversations.findIndex(
         (conv) => conv._id === conversationId
       );
@@ -283,12 +284,13 @@ const chatSlice = createSlice({
       if (index !== -1) {
         for (const newMember of newMembers) {
           const memberIndex = state.conversations[index].members.findIndex(
-            (m) => m._id === newMember._id
+            (m) => {
+              console.log("newMember", newMember);
+              return m === newMember._id;
+            }
           );
-          if (memberIndex !== -1) {
-            state.conversations[index].members[memberIndex] = newMember;
-          } else {
-            state.conversations[index].members.push(newMember);
+          if (memberIndex === -1) {
+            state.conversations[index].members.push(newMember._id);
           }
           state.conversations[index].joinRequests = state.conversations[
             index
@@ -296,6 +298,7 @@ const chatSlice = createSlice({
             (request) => request._id !== newMember.userId._id
           );
         }
+        console.log({ ...state.conversations[index].members }); // In được dữ liệu
       }
     },
     rejectJoinRequests: (state, action) => {
@@ -314,6 +317,10 @@ const chatSlice = createSlice({
           state.conversations[index].joinRequests = [];
         }
       }
+      console.log(
+        `Rejected join requests for conversation ${conversationId}:`,
+        ...state.conversations[index].joinRequests
+      );
     },
   },
 });
