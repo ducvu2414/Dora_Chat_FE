@@ -56,7 +56,8 @@ export default function ChatSingle() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
   const [replyMessage, setReplyMessage] = useState(null);
-  const [isChannelInitialized, setIsChannelInitialized] = useState(false);
+  const [latestFetchedConversationId, setLatestFetchedConversationId] =
+    useState(null);
 
   const isInitialMount = useRef(true);
   const previousConversationId = useRef(conversationId);
@@ -148,11 +149,28 @@ export default function ChatSingle() {
 
   const handleChannelChange = useCallback(
     (newChannelId) => {
+      const validChannel = channels.find((ch) => ch._id === newChannelId);
+      const isFromCorrectConversation =
+        latestFetchedConversationId === conversationId;
+
+      if (!validChannel || !isFromCorrectConversation) return;
+
       setActiveChannel(newChannelId);
-      currentActiveChannelRef.current = newChannelId;
     },
-    [activeChannel]
+    [conversationId, channels, latestFetchedConversationId]
   );
+
+  useEffect(() => {
+    if (
+      !conversationId ||
+      !channels?.length ||
+      latestFetchedConversationId !== conversationId
+    )
+      return;
+
+    const defaultChannel = channels[0]?._id || null;
+    setActiveChannel(defaultChannel);
+  }, [conversationId, channels, latestFetchedConversationId]);
 
   useEffect(() => {
     if (previousConversationId.current !== conversationId) {
@@ -201,7 +219,6 @@ export default function ChatSingle() {
       setMessageSkip(100);
       setHasMoreMessages(true);
       setIsLoadingMessages(true);
-      setIsChannelInitialized(false);
 
       if (conversationCache.has(conversationId)) {
         const cachedData = conversationCache.get(conversationId);
@@ -261,7 +278,6 @@ export default function ChatSingle() {
           setActiveChannel(firstChannelId);
           currentActiveChannelRef.current = firstChannelId;
           previousActiveChannelRef.current = firstChannelId;
-          setIsChannelInitialized(true);
         }
 
         if (conversation && !conversation.type) {
@@ -282,6 +298,7 @@ export default function ChatSingle() {
           member: memberRes,
           members: membersRes.data,
         });
+        setLatestFetchedConversationId(conversationId);
       } catch (error) {
         console.error("Error fetching data", error);
         AlertMessage({

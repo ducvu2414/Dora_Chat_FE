@@ -9,7 +9,6 @@ import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 import { AlertMessage } from "@/components/ui/alert-message";
 import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
-import { useSelector } from "react-redux";
 
 export default function MessageInput({
   conversation,
@@ -37,11 +36,6 @@ export default function MessageInput({
   const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const conversationId = conversation?._id;
-  const messages = useSelector(
-    (state) => state.chat.messages[conversationId] || []
-  );
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -200,34 +194,7 @@ export default function MessageInput({
         });
       }
 
-      let tempMessage = null;
-      const activeChannel = conversation.type
-        ? conversation.channels?.[0]?._id
-        : null;
-      const tempMessageId = `temp-${Date.now()}`;
-
       if (plainText.trim()) {
-        tempMessage = {
-          _id: tempMessageId,
-          content: plainText.trim(),
-          type: "TEXT",
-          tags,
-          tagPositions,
-          replyMessageId: replyMessage?.messageId,
-          memberId: {
-            _id: member._id,
-            name: member.name,
-            avatar: member.avatar,
-            userId: member.userId,
-          },
-          conversationId: conversation._id,
-          channelId: activeChannel,
-          createdAt: new Date().toISOString(),
-          isTemp: true,
-        };
-
-        const updatedMessages = [...messages, tempMessage];
-
         await onSend({
           content: plainText.trim(),
           type: "TEXT",
