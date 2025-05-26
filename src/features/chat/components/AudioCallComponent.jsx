@@ -257,14 +257,11 @@ export default function AudioCallComponent() {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
       {isConnecting && (
-        <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
-          <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center mb-4">
-            <Mic className="h-12 w-12 text-white" />
-          </div>
-          <h2 className="text-white text-2xl font-semibold mb-2">
-            Đang kết nối...
-          </h2>
-        </div>
+        <ConnectingOverlay
+          avatar={partner[0]?.avatar}
+          partnerName={partner[0]?.name}
+          onCancel={handleEndCall}
+        />
       )}
 
       {/* Local audio muting */}
