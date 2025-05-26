@@ -67,8 +67,8 @@ const messageApi = {
     const res = await axios.post(`/api/messages/video`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    console.log("res", res.data);
-    return res.data;
+    console.log("res", res);
+    return res;
   },
 
   convertTextToSpeech: async (text, speaker_id = 1, speed = 1.0) => {

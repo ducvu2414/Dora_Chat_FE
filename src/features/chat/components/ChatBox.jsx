@@ -75,12 +75,28 @@ const ChatBox = forwardRef(
           className="flex-1 overflow-y-auto space-y-2 p-4 max-h-[calc(100vh-210px)]"
         >
           {messages.map((msg, index) => {
+            const currentUserId = msg.memberId?.userId;
+            const prevUserId =
+              index > 0 ? messages[index - 1].memberId?.userId : null;
+            const nextUserId =
+              index < messages.length - 1
+                ? messages[index + 1].memberId?.userId
+                : null;
+
             const isFirstInGroup =
               index === 0 ||
-              messages[index - 1].memberId.userId !== msg.memberId.userId;
+              !prevUserId ||
+              !currentUserId ||
+              prevUserId !== currentUserId;
             const isLastInGroup =
               index === messages.length - 1 ||
-              messages[index + 1].memberId.userId !== msg.memberId.userId;
+              !nextUserId ||
+              !currentUserId ||
+              nextUserId !== currentUserId;
+
+            if (!msg.memberId || !currentUserId) {
+              return null;
+            }
 
             return (
               <div key={msg._id} ref={(el) => setMessageRef(msg._id, el)}>

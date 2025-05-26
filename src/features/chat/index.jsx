@@ -415,6 +415,17 @@ export default function ChatSingle() {
     location,
   }) => {
     const channelId = currentActiveChannelRef.current || activeChannel;
+
+    // Kiểm tra member trước khi gửi tin nhắn
+    if (!member?.data?._id) {
+      console.error("Member data not available")
+      AlertMessage({
+        type: "error",
+        message: "Unable to send message. Please try again.",
+      })
+      return
+    }
+
     isSendingMessage.current = true;
     try {
       let newMessage = null;
@@ -461,10 +472,14 @@ export default function ChatSingle() {
         newMessage = resSend;
       }
 
+      if (!newMessage) {
+        throw new Error("Failed to create message")
+      }
+
       const cacheKey = `${conversationId}_${channelId}`;
       const cachedMessages = channelMessagesCache.get(cacheKey) || [];
       channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
-      if (type === "IMAGE") {
+      if (type === "IMAGE" && Array.isArray(newMessage)) {
         newMessage.forEach((msg) => {
           channelMessagesCache.set(cacheKey, [...cachedMessages, msg]);
           dispatch(
