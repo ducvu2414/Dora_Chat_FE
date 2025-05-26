@@ -51,7 +51,7 @@ export const SOCKET_EVENTS = {
   REJECT_JOIN_REQUEST: "reject-join-request",
   MEMBER_REMOVED: "member-removed",
   MEMBER_ADDED: "member-added",
-
+  JOIN_REQUEST_APPROVED: "join-request-approved",
   DELETE_CONVERSATION: "delete-conversation",
   TRANSFER_ADMIN: "transfer-admin",
   // Typing indicators
