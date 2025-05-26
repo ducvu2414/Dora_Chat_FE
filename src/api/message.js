@@ -47,7 +47,7 @@ const messageApi = {
     const res = await axios.post(`/api/messages/file`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return res.data;
+    return res;
   },
   deleteMessageForMe: async (messageId, conversationId) => {
     const response = await axios.delete(`/api/messages/${messageId}/only`, {
