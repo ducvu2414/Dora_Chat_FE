@@ -13,6 +13,11 @@ import { useNavigate } from "react-router-dom";
 import { REACT_ICONS } from "../../../utils/constant";
 import { MapPin } from "lucide-react";
 import LocationModal from "@/components/ui/location-modal";
+import { DocViewerPlus } from "react-doc-viewer-plus";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
+import ZipPreview from "./ZipPreview";
+
 
 export default function MessageItem({
   msg,
@@ -40,6 +45,8 @@ export default function MessageItem({
   const [hoveredReaction, setHoveredReaction] = useState(null); // Trạng thái hover cho reaction
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationData, setLocationData] = useState(null);
+  const [visible, setVisible] = useState(false);
+
 
   const timeoutRef = useRef(null);
 
@@ -110,17 +117,13 @@ export default function MessageItem({
     if (["mp4", "mov", "avi", "webm"].includes(ext)) return "Video";
     if (["pdf"].includes(ext)) return "PDF";
     if (["doc", "docx"].includes(ext)) return "Word";
-    if (["xls", "xlsx", "csv"].includes(ext)) return "Excel";
+    if (["xls", "xlsx"].includes(ext)) return "Excel";
+    if (["pptx", "ppt"].includes(ext)) return "Powerpoint";
     if (["zip", "rar", "7z"].includes(ext)) return "Lưu trữ";
-    if (["mp3", "wav", "ogg"].includes(ext)) return "Âm thanh";
+    if (["mp3", "wav", "ogg", "m4a"].includes(ext)) return "Âm thanh";
     return "Tệp khác";
   };
 
-  const handleOpenInNewTab = () => {
-    const url = encodeURIComponent(msg.content);
-    const name = encodeURIComponent(msg.content?.split("/").pop());
-    window.open(`/preview?url=${url}&name=${name}`, "_blank");
-  };
 
   const handleHover = () => {
     if (timeoutRef.current) {
@@ -142,17 +145,17 @@ export default function MessageItem({
     const isFriend = friendRes === true ? true : friendRes.data;
     isFriend
       ? navigate("/friend-information", {
-          state: {
-            userData: userRes,
-            isSentRequest: isFriend ? true : false,
-          },
-        })
+        state: {
+          userData: userRes,
+          isSentRequest: isFriend ? true : false,
+        },
+      })
       : navigate("/other-people-information", {
-          state: {
-            userData: userRes,
-            isSentRequest: isFriend ? true : false,
-          },
-        });
+        state: {
+          userData: userRes,
+          isSentRequest: isFriend ? true : false,
+        },
+      });
   };
   // Tìm tin nhắn gốc từ replyMessageId
   const repliedMessage = msg.replyMessageId
@@ -244,7 +247,7 @@ export default function MessageItem({
           setLocationData({ lat, lng });
           setShowLocationModal(true);
         }
-        
+
       } catch (error) {
         console.error("Error parsing location data:", error);
       }
@@ -279,9 +282,8 @@ export default function MessageItem({
       ) : (
         <div
           key={msg._id}
-          className={`flex items-end gap-2 pt-1 pb-1 ${
-            isMe ? "flex-row-reverse" : "justify-start"
-          }  mb-4`}
+          className={`flex items-end gap-2 pt-1 pb-1 ${isMe ? "flex-row-reverse" : "justify-start"
+            }  mb-4`}
         >
           {showAvatar ? (
             <img
@@ -300,9 +302,8 @@ export default function MessageItem({
             onMouseLeave={handleNonHover}
           >
             <div
-              className={`absolute top-3 ${
-                isMe ? "left-[-30px]" : "right-[-30px]"
-              }`}
+              className={`absolute top-3 ${isMe ? "left-[-30px]" : "right-[-30px]"
+                }`}
             >
               {!msg.isDeleted && (isHovered || menuOpen) && (
                 <MessageActionsMenu
@@ -397,25 +398,45 @@ export default function MessageItem({
               </div>
             ) : isFile ? (
               <div className="px-3 py-[14px] rounded-2xl flex flex-col items-center gap-2 bg-[#EFF8FF]">
-                <div className="w-[120px] h-[120px] bg-[#F5F5F5] rounded-md flex items-center justify-center text-[#086DC0] text-sm">
-                  File
-                </div>
+
                 <a
                   href={msg.content}
                   download
                   className="flex items-center text-[#086DC0] text-sm hover:underline"
                 >
                   <AiOutlinePaperClip size={20} className="mr-1" />
-                  {msg.fileName || "Download file"}
+                  {msg.fileName || "Tải xuống file"}
                 </a>
+
+                {
+                  getFileTypeLabel(msg.content) === "Âm thanh" ? (
+                    <AudioPlayer
+                      src={msg.content}
+                      controls
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setVisible(true)}
+                        className="flex items-center text-[#086DC0] text-sm hover:underline"
+                      >
+                        {"Xem trước file"}
+                      </button>
+
+                      <DocViewerPlus
+                        previewFile={{
+                          fileUrl: msg.content,
+                          fileName: msg.fileName || "File",
+                        }}
+                        visibleViewerPlus={visible}
+                        onVisibleChange={() => setVisible(!visible)}
+                      />
+                    </>
+                  )}
+
                 <span className="text-xs text-gray-500">
-                  Type: {getFileTypeLabel(msg.content)}
-                </span>
-                <span
-                  onClick={handleOpenInNewTab}
-                  className="text-xs text-[#086DC0] hover:underline cursor-pointer"
-                >
-                  Preview
+                  Loại: {getFileTypeLabel(msg.content)}
                 </span>
               </div>
             ) : isVote ? (
@@ -462,13 +483,12 @@ export default function MessageItem({
             ) : (
               <p
                 className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${
-              msg.isDeleted
-                ? "bg-gray-100 text-gray-400 italic"
-                : isMe
-                ? "bg-[#EFF8FF] text-[#000000] ml-auto"
-                : "bg-[#F5F5F5] text-[#000000]"
-            }
+            ${msg.isDeleted
+                    ? "bg-gray-100 text-gray-400 italic"
+                    : isMe
+                      ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+                      : "bg-[#F5F5F5] text-[#000000]"
+                  }
             ${isLink ? "text-[#086DC0] hover:underline cursor-pointer" : ""}
               
 `}
@@ -479,103 +499,103 @@ export default function MessageItem({
                 }}
               >
                 {msg.tags?.length > 0 &&
-                msg.tagPositions?.length > 0 &&
-                !msg.isDeleted
+                  msg.tagPositions?.length > 0 &&
+                  !msg.isDeleted
                   ? (() => {
-                      const parts = [];
-                      let lastIndex = 0;
+                    const parts = [];
+                    let lastIndex = 0;
 
-                      msg.tagPositions.forEach((tagPos, index) => {
-                        // Text bình thường trước tag (nếu có)
-                        if (tagPos.start > lastIndex) {
-                          parts.push(
-                            <span key={`text-${index}`}>
-                              {msg.content.slice(lastIndex, tagPos.start)}
-                            </span>
+                    msg.tagPositions.forEach((tagPos, index) => {
+                      // Text bình thường trước tag (nếu có)
+                      if (tagPos.start > lastIndex) {
+                        parts.push(
+                          <span key={`text-${index}`}>
+                            {msg.content.slice(lastIndex, tagPos.start)}
+                          </span>
+                        );
+                      }
+
+                      // Tag highlight màu xanh + in đậm
+                      parts.push(
+                        <span
+                          key={`tag-${index}`}
+                          className="font-semibold text-blue-500 cursor-pointer hover:underline"
+                          onClick={() => handleTagClick(tagPos.memberId)}
+                        >
+                          {msg.content.slice(tagPos.start, tagPos.end)}
+                        </span>
+                      );
+
+                      // Cập nhật vị trí đã xử lý
+                      lastIndex = tagPos.end;
+                    });
+
+                    // Text sau tag cuối cùng (nếu có)
+                    if (lastIndex < msg.content.length) {
+                      parts.push(
+                        <span key="text-last">
+                          {msg.content.slice(lastIndex)}
+                        </span>
+                      );
+                    }
+
+                    // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
+                    const fullText = parts
+                      .map((part) => {
+                        if (typeof part === "string") return part;
+                        return part.props.children;
+                      })
+                      .join("");
+
+                    if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
+                      const trimmedLength = MAX_TEXT_LENGTH;
+                      const trimmedParts = [];
+                      let currentLength = 0;
+
+                      for (let part of parts) {
+                        const partText =
+                          typeof part === "string"
+                            ? part
+                            : part.props.children;
+                        const remainingLength = trimmedLength - currentLength;
+
+                        if (remainingLength <= 0) break;
+
+                        if (partText.length <= remainingLength) {
+                          trimmedParts.push(part);
+                          currentLength += partText.length;
+                        } else {
+                          const trimmedText = partText.slice(
+                            0,
+                            remainingLength
                           );
-                        }
 
-                        // Tag highlight màu xanh + in đậm
-                        parts.push(
-                          <span
-                            key={`tag-${index}`}
-                            className="font-semibold text-blue-500 cursor-pointer hover:underline"
-                            onClick={() => handleTagClick(tagPos.memberId)}
-                          >
-                            {msg.content.slice(tagPos.start, tagPos.end)}
-                          </span>
-                        );
-
-                        // Cập nhật vị trí đã xử lý
-                        lastIndex = tagPos.end;
-                      });
-
-                      // Text sau tag cuối cùng (nếu có)
-                      if (lastIndex < msg.content.length) {
-                        parts.push(
-                          <span key="text-last">
-                            {msg.content.slice(lastIndex)}
-                          </span>
-                        );
-                      }
-
-                      // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
-                      const fullText = parts
-                        .map((part) => {
-                          if (typeof part === "string") return part;
-                          return part.props.children;
-                        })
-                        .join("");
-
-                      if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
-                        const trimmedLength = MAX_TEXT_LENGTH;
-                        const trimmedParts = [];
-                        let currentLength = 0;
-
-                        for (let part of parts) {
-                          const partText =
-                            typeof part === "string"
-                              ? part
-                              : part.props.children;
-                          const remainingLength = trimmedLength - currentLength;
-
-                          if (remainingLength <= 0) break;
-
-                          if (partText.length <= remainingLength) {
-                            trimmedParts.push(part);
-                            currentLength += partText.length;
+                          if (typeof part === "string") {
+                            trimmedParts.push(trimmedText);
                           } else {
-                            const trimmedText = partText.slice(
-                              0,
-                              remainingLength
+                            trimmedParts.push(
+                              <span
+                                key={`trimmed-${part.key}`}
+                                className={part.props.className}
+                              >
+                                {trimmedText}
+                              </span>
                             );
-
-                            if (typeof part === "string") {
-                              trimmedParts.push(trimmedText);
-                            } else {
-                              trimmedParts.push(
-                                <span
-                                  key={`trimmed-${part.key}`}
-                                  className={part.props.className}
-                                >
-                                  {trimmedText}
-                                </span>
-                              );
-                            }
-
-                            currentLength += remainingLength;
-                            break;
                           }
-                        }
 
-                        return trimmedParts;
+                          currentLength += remainingLength;
+                          break;
+                        }
                       }
 
-                      return parts;
-                    })()
+                      return trimmedParts;
+                    }
+
+                    return parts;
+                  })()
                   : expanded
-                  ? msg.content
-                  : msg.content.slice(0, MAX_TEXT_LENGTH)}
+                    ? msg.content
+                    : msg.content.slice(0, MAX_TEXT_LENGTH)}
 
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
                   <span
@@ -591,9 +611,8 @@ export default function MessageItem({
             {renderReactions()}
             {showTime && (
               <span
-                className={`text-xs text-[#959595F3] mt-2 ${
-                  isMe ? "self-end" : ""
-                }`}
+                className={`text-xs text-[#959595F3] mt-2 ${isMe ? "self-end" : ""
+                  }`}
               >
                 {dayjs(msg.createdAt).fromNow()}
               </span>
@@ -605,7 +624,7 @@ export default function MessageItem({
         <LocationModal
           isOpen={showLocationModal}
           onClose={() => setShowLocationModal(false)}
-          onSend={() => {}}
+          onSend={() => { }}
           initialLocation={locationData}
           position={locationData}
         />

@@ -190,3 +190,7 @@ input:-webkit-autofill:active {
 .emoji-picker-container * {
   all: revert;
 }
+
+iframe {
+  height: 600px !important;
+}
