@@ -29,12 +29,32 @@ export default function GroupCallComponent() {
         callFrameRef.current.destroy();
         callFrameRef.current = null;
       }
+
+      // 🟡 GỌI API /leave-room
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          `${API}/api/daily/leave-room`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log("Đã rời call và xoá dữ liệu trên server.");
+      } catch (err) {
+        console.error("Lỗi khi gọi API leave-room:", err);
+      }
+
     } catch (err) {
       console.error("Lỗi khi dọn dẹp Daily:", err);
     }
+
     dispatch(endCall());
     setMeetingEnded(true);
   };
+
 
   // Dọn dẹp khi component unmount
   useEffect(() => {
@@ -133,10 +153,11 @@ export default function GroupCallComponent() {
           roomUrl,
         });
       } catch (err) {
+        console.log(err);
         if (err.response && err.response.status === 409) {
           AlertMessage({
             type: "error",
-            message: "Bạn đang tham gia một cuộc gọi khác. Vui lòng thoát trước khi tham gia phòng mới.",
+            message: "Bạn đang tham gia một cuộc gọi khác.",
           });
           navigate("/home");
         } else {
