@@ -436,6 +436,7 @@ export default function ChatSingle() {
           replyMessageId
         );
         newMessage = resSend;
+        console.log("Image message sent:", resSend);
       } else if (type === "FILE") {
         const resSend = await messageApi.sendFileMessage(
           conversationId,
@@ -464,6 +465,7 @@ export default function ChatSingle() {
       const cacheKey = `${conversationId}_${channelId}`;
       const cachedMessages = channelMessagesCache.get(cacheKey) || [];
       channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
+      console.log(`Message sent `, newMessage);
       dispatch(
         addMessage({
           conversationId,

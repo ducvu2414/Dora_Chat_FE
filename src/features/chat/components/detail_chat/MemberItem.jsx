@@ -1,56 +1,121 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
-import { MoreVertical, UserPlus, MessageSquare, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
 import InfoContent from "@components/ui/Info/InfoContent";
 import { Modal } from "@/components/ui/modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
-export default function MemberItem({
-  members,
-  onAddFriend,
-  onMessage,
-  onRemove,
-  managers,
-  leader,
-}) {
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+function usePositionCheck() {
+  const [position, setPosition] = useState("bottom");
+  const ref = useRef(null);
 
-  const toggleDropdown = (id) => {
-    setOpenDropdownId(openDropdownId === id ? null : id);
+  const checkPosition = () => {
+    if (!ref.current || typeof window === "undefined") return;
+    const rect = ref.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const dropdownHeight = 150;
+    setPosition(spaceBelow < dropdownHeight ? "top" : "bottom");
   };
+
+  return [ref, position, checkPosition];
+}
+
+function MemberRow({
+  member,
+  onRemove,
+  leader,
+  managers,
+  toggleDropdown,
+  openDropdownId,
+}) {
+  const [dropdownRef, dropdownPosition, checkPosition] = usePositionCheck();
+
+  return (
+    <div
+      ref={dropdownRef}
+      onClick={() => toggleDropdown("info", member._id)}
+      className="relative flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
+    >
+      {member._id === leader && (
+        <FontAwesomeIcon
+          icon={faCrown}
+          size="xs"
+          style={{ color: "#FFD43B" }}
+          className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
+        />
+      )}
+      {member._id !== leader && managers.includes(member._id) && (
+        <FontAwesomeIcon
+          icon={faCrown}
+          size="xs"
+          style={{ color: "#ebe9e6" }}
+          className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
+        />
+      )}
+      <div className="flex items-center gap-2">
+        <img
+          src={member.avatar}
+          alt="icon"
+          className="w-12 h-12 rounded-full"
+        />
+        <p className="text-sm font-medium">{member.name}</p>
+      </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          checkPosition();
+          toggleDropdown("menu", member._id);
+        }}
+        className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
+
+      <Dropdown
+        isOpen={openDropdownId === member._id}
+        onClose={() => toggleDropdown("close")}
+        align="left"
+        verticalAlign={dropdownPosition}
+      >
+        <DropdownItem
+          icon={Trash2}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(member);
+            toggleDropdown("close");
+          }}
+        >
+          Remove from group
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  );
+}
+
+export default function MemberItem({ members, onRemove, managers, leader }) {
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
   const [info, setInfo] = useState(null);
 
-  const handleShowInfo = (id) => {
-    setShowInfo(!showInfo);
-    setInfo(id);
-  };
-
-  const usePositionCheck = () => {
-    const [position, setPosition] = useState("bottom");
-    const ref = useRef(null);
-
-    const checkPosition = () => {
-      if (!ref.current || typeof window === "undefined") return;
-
-      const rect = ref.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const dropdownHeight = 150; // Ước lượng chiều cao dropdown 130px
-
-      setPosition(spaceBelow < dropdownHeight ? "top" : "bottom");
-    };
-
-    return [ref, position, checkPosition];
+  const toggleDropdown = (type, id = null) => {
+    if (type === "menu") {
+      setOpenDropdownId(openDropdownId === id ? null : id);
+    } else if (type === "info") {
+      setShowInfo(!showInfo);
+      setInfo(id);
+    } else {
+      setOpenDropdownId(null);
+    }
   };
 
   return (
     <div>
       {showInfo && (
         <Modal
-          onClose={handleShowInfo}
+          onClose={toggleDropdown}
           isOpen={showInfo}
           title={"Thông tin tài khoản"}
         >
@@ -58,73 +123,17 @@ export default function MemberItem({
         </Modal>
       )}
       {members.map((member) => {
-        const [dropdownRef, dropdownPosition, checkPosition] =
-          usePositionCheck();
-
+        if (!member._id) return null;
         return (
-          <div
+          <MemberRow
             key={member._id}
-            ref={dropdownRef}
-            onClick={() => handleShowInfo(member._id)}
-            className="relative flex items-center  justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
-          >
-            {member._id === leader && (
-              <FontAwesomeIcon
-                icon={faCrown}
-                size="xs"
-                style={{ color: "#FFD43B" }} // Leader: vàng
-                className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
-              />
-            )}
-            {member._id !== leader && managers.includes(member._id) && (
-              <FontAwesomeIcon
-                icon={faCrown}
-                size="xs"
-                style={{ color: "#ebe9e6" }} // Manager: trắng ngà
-                className="absolute left-2 top-2 bg-white rounded-full p-[1px]"
-              />
-            )}
-            <div className="flex items-center gap-2">
-              <img
-                src={member.avatar}
-                alt="icon"
-                className="w-12 h-12 rounded-full"
-              />
-              <p className="text-sm font-medium">{member.name}</p>
-            </div>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                checkPosition();
-                toggleDropdown(member._id);
-              }}
-              className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
-            >
-              <MoreVertical className="w-5 h-5" />
-            </button>
-
-            {/* Dropdown menu */}
-            <Dropdown
-              isOpen={openDropdownId === member._id}
-              onClose={() => setOpenDropdownId(null)}
-              align="left"
-              verticalAlign={dropdownPosition}
-            >
-              {/* <DropdownItem icon={UserPlus} onClick={() => onAddFriend(member)}>
-                Kết bạn
-              </DropdownItem>
-              <DropdownItem
-                icon={MessageSquare}
-                onClick={() => onMessage(member)}
-              >
-                Nhắn tin
-              </DropdownItem> */}
-              <DropdownItem icon={Trash2} onClick={() => onRemove(member)}>
-                Remove from group
-              </DropdownItem>
-            </Dropdown>
-          </div>
+            member={member}
+            onRemove={onRemove}
+            leader={leader}
+            managers={managers}
+            toggleDropdown={toggleDropdown}
+            openDropdownId={openDropdownId}
+          />
         );
       })}
     </div>

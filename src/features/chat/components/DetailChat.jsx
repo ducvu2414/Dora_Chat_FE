@@ -46,6 +46,7 @@ export default function DetailChat({
           conversationId={conversation._id}
           managers={conversation?.managerIds}
           leader={conversation?.leaderId}
+          members={conversation?.members}
         />
       )}
       {activeTab.tab === "request" && (

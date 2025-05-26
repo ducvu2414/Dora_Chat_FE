@@ -50,10 +50,6 @@ export default function MainDetail({
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [quantityMember, setQuantityMember] = useState(
-    sessionStorage.getItem(`memberCount_${conversation._id}`)
-  );
-  const [members, setMembers] = useState([]);
   const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [memberFilter, setMemberFilter] = useState([]);
@@ -123,6 +119,7 @@ export default function MainDetail({
         selectedUserIds
       );
       console.log("Selected user IDs:", responseAddMembers);
+      setIsOpenAddUser(false);
     } catch (error) {
       console.error("Error forwarding message:", error);
       AlertMessage({
@@ -228,42 +225,23 @@ export default function MainDetail({
             });
           }
         });
-        const membersInGroup = await memberApi.getMembers(conversation._id);
         const memberLoginNow = await memberApi.getByConversationIdAndUserId(
           conversation._id,
           JSON.parse(localStorage.getItem("user"))._id
         );
-        const formattedMembers = membersInGroup.data.map((member) => ({
+        const formattedMembers = conversation.members.map((member) => ({
           id: member._id,
           name: member.name,
           avatar: member.avatar,
           active: member.active,
         }));
 
-        setMembers(formattedMembers);
         setMemberLoginNow(memberLoginNow.data);
         setMemberFilter(
           formattedMembers.filter(
             (member) => member.id !== memberLoginNow.data._id
           )
         );
-        // quantity member
-        const activeMemberCount = membersInGroup.data.reduce((acc, member) => {
-          if (member.active) {
-            acc += 1;
-          }
-          return acc;
-        }, 0);
-        const cachedMemberCount = sessionStorage.getItem(
-          `memberCount_${conversation._id}`
-        );
-        if (!cachedMemberCount || cachedMemberCount !== activeMemberCount) {
-          sessionStorage.setItem(
-            `memberCount_${conversation._id}`,
-            activeMemberCount
-          );
-          setQuantityMember(cachedMemberCount);
-        }
 
         setFriends(friendsData);
       } catch (error) {
@@ -317,7 +295,7 @@ export default function MainDetail({
   const handleLeaveChat = async () => {
     try {
       if (conversation.type) {
-        const isLastMember = members.length === 1;
+        const isLastMember = conversation.members.length === 1;
         const isLeader = conversation.leaderId === memberLoginNow._id;
         if (isLastMember || !isLeader) {
           setIsConfirmLeave(true);
@@ -434,7 +412,7 @@ export default function MainDetail({
         <UserSelectionModal
           buttonText={"Confirm"}
           onSubmit={handleAddManager}
-          users={members}
+          users={conversation.members}
         />
         ))
       </Modal>
@@ -541,7 +519,7 @@ export default function MainDetail({
               <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
                 <img src={Member} />
               </div>
-              <p className="text-[#086DC0] ml-2">Members ({quantityMember})</p>
+              <p className="text-[#086DC0] ml-2">Members ({conversation.members.filter((member) => member.active !== false).length})</p>
               <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
                 <img src={ArrowRight} />
               </div>

@@ -49,6 +49,8 @@ export const SOCKET_EVENTS = {
   TOGGLE_JOIN_APPROVAL: "toggle-join-approval",
   ACCEPT_JOIN_REQUEST: "accept-join-request",
   REJECT_JOIN_REQUEST: "reject-join-request",
+  MEMBER_REMOVED: "member-removed",
+  MEMBER_ADDED: "member-added",
 
   DELETE_CONVERSATION: "delete-conversation",
   TRANSFER_ADMIN: "transfer-admin",

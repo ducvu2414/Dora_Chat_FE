@@ -18,7 +18,10 @@ const chatSlice = createSlice({
     addConversation: (state, action) => {
       const conversation = action.payload;
       // Kiểm tra xem conversation đã tồn tại chưa
-      if (!state.conversations.some((conv) => conv._id === conversation._id)) {
+      const index = state.conversations.findIndex(
+        (conv) => conv._id === conversation._id
+      );
+      if (index !== -1) {
         state.conversations.unshift(conversation); // Thêm vào đầu danh sách
         state.unread[conversation._id] = conversation.unreadCount || 0;
       }
@@ -58,6 +61,39 @@ const chatSlice = createSlice({
         if (memberIndex !== -1) {
           conversation.members[memberIndex].name = name;
         }
+      }
+    },
+    removeMemberFromConversation: (state, action) => {
+      const { conversationId, memberId } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        const memberIndex = conversation.members.findIndex(
+          (member) => member._id === memberId
+        );
+        if (memberIndex !== -1) {
+          conversation.members[memberIndex].active = false;
+        }
+      }
+    },
+    addMemberToConversation: (state, action) => {
+      const { conversationId, addedMembers } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        addedMembers.forEach((member) => {
+          // Kiểm tra xem thành viên đã tồn tại trong cuộc trò chuyện chưa
+          const index = conversation.members.findIndex(
+            (m) => m._id === member._id
+          );
+          if (index === -1) {
+            conversation.members.push(member);
+          } else {
+            conversation.members[index].active = true;
+          }
+        });
       }
     },
     setMessages: (state, action) => {
@@ -356,5 +392,7 @@ export const {
   toggleJoinApproval,
   acceptMultipleJoinRequests,
   rejectJoinRequests,
+  removeMemberFromConversation,
+  addMemberToConversation,
 } = chatSlice.actions;
 export default chatSlice.reducer;

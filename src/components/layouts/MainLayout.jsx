@@ -37,6 +37,8 @@ import {
   updateAvatarGroupConversation,
   acceptMultipleJoinRequests,
   rejectJoinRequests,
+  removeMemberFromConversation,
+  addMemberToConversation,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -686,6 +688,26 @@ const MainLayout = () => {
       );
     };
 
+    const handleRemoveMember = (data) => {
+      dispatch(
+        removeMemberFromConversation({
+          conversationId: data.conversationId,
+          memberId: data.memberId,
+        })
+      );
+    };
+
+    const handleAddMember = (data) => {
+      dispatch(
+        addMemberToConversation({
+          conversationId: data.conversationId,
+          addedMembers: data.addedMembers,
+        })
+      );
+      console.log("handleAddMember", data);
+    };
+
+    
     // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
@@ -711,6 +733,8 @@ const MainLayout = () => {
       SOCKET_EVENTS.UPDATE_AVATAR_GROUP_CONVERSATION,
       handleUpdateAvatarGroupConversation
     );
+    socket.on(SOCKET_EVENTS.MEMBER_REMOVED, handleRemoveMember);
+    socket.on(SOCKET_EVENTS.MEMBER_ADDED, handleAddMember);
 
     return () => {
       socket.off(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
@@ -736,6 +760,8 @@ const MainLayout = () => {
         SOCKET_EVENTS.UPDATE_AVATAR_GROUP_CONVERSATION,
         handleUpdateAvatarGroupConversation
       );
+      socket.off(SOCKET_EVENTS.MEMBER_REMOVED, handleRemoveMember);
+      socket.off(SOCKET_EVENTS.MEMBER_ADDED, handleAddMember);
     };
   }, [socket]);
 
