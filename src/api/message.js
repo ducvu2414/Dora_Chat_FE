@@ -35,7 +35,7 @@ const messageApi = {
     const res = await axios.post(`/api/messages/images`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return res.data;
+    return res;
   },
 
   async sendFileMessage(conversationId, file, channelId, replyMessageId) {
