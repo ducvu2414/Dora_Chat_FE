@@ -639,11 +639,10 @@ export default function ChatSingle() {
 
   const handleCreateVote = async (vote) => {
     const channelId = currentActiveChannelRef.current || activeChannel;
-
     const newVote = {
-      memberId: channelId,
+      memberId: member.data._id,
       conversationId: conversationId,
-      channelId: channels[0]?.id,
+      channelId: channelId,
       content: vote.content,
       isMultipleChoice: vote.isMultipleChoice,
       isAnonymous: vote.isAnonymous,
