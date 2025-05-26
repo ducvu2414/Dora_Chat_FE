@@ -16,7 +16,6 @@ import LocationModal from "@/components/ui/location-modal";
 import { DocViewerPlus } from "react-doc-viewer-plus";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-import ZipPreview from "./ZipPreview";
 
 
 export default function MessageItem({
