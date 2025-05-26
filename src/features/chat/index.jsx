@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Spinner } from "@/page/Spinner";
 import {
   markRead,
@@ -26,11 +26,13 @@ import VoteModal from "@/components/ui/vote-modal";
 import { AlertMessage } from "@/components/ui/alert-message";
 
 const conversationCache = new Map();
-const channelMessagesCache = new Map();
+const channelMessagesCache = new Map(); // Cache cho group conversations (có channels)
+const individualMessagesCache = new Map(); // Cache cho individual conversations (không có channels)
 
 export default function ChatSingle() {
   const { id: conversationId } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { messages, unread, pinMessages, conversations, channels } =
     useSelector((state) => state.chat);
 
@@ -74,12 +76,17 @@ export default function ChatSingle() {
     console.log("=== CACHE DEBUG ===");
     console.log("Current conversationId:", conversationId);
     console.log("Current activeChannel:", activeChannel);
+    console.log("Conversation type:", conversation?.type);
     console.log(
       "Previous activeChannel ref:",
       previousActiveChannelRef.current
     );
-    console.log("Cache contents:");
+    console.log("Channel Messages Cache contents:");
     for (const [key, value] of channelMessagesCache.entries()) {
+      console.log(`  ${key}: ${value.length} messages`);
+    }
+    console.log("Individual Messages Cache contents:");
+    for (const [key, value] of individualMessagesCache.entries()) {
       console.log(`  ${key}: ${value.length} messages`);
     }
     console.log("Conversation cache:");
@@ -87,7 +94,7 @@ export default function ChatSingle() {
       console.log(`  ${key}:`, value);
     }
     console.log("==================");
-  }, [conversationId, activeChannel]);
+  }, [conversationId, activeChannel, conversation?.type]);
 
   useEffect(() => {
     currentActiveChannelRef.current = activeChannel;
@@ -103,16 +110,37 @@ export default function ChatSingle() {
     [conversationId]
   );
 
+  // const clearIndividualCache = useCallback((convId) => {
+  //   if (convId) {
+  //     individualMessagesCache.delete(convId);
+  //   }
+  // }, []);
+
   const loadMoreMessages = async () => {
-    if (loadingMore || !conversationId || !activeChannel) return;
+    if (loadingMore || !conversationId) return;
+
+    // Kiểm tra loại conversation để quyết định cách load messages
+    const isGroupConversation = conversation?.type;
+
+    if (isGroupConversation && !activeChannel) return;
 
     setLoadingMore(true);
 
     try {
-      const res = await messageApi.fetchMessagesByChannelId(activeChannel, {
-        skip: messageSkip,
-        limit: 100,
-      });
+      let res;
+      if (isGroupConversation) {
+        // Load messages cho group conversation (theo channel)
+        res = await messageApi.fetchMessagesByChannelId(activeChannel, {
+          skip: messageSkip,
+          limit: 100,
+        });
+      } else {
+        // Load messages cho individual conversation
+        res = await messageApi.fetchMessages(conversationId, {
+          skip: messageSkip,
+          limit: 100,
+        });
+      }
 
       const existingIds = new Set(
         messages[conversationId]?.map((msg) => msg._id)
@@ -129,12 +157,22 @@ export default function ChatSingle() {
           })
         );
 
-        const cacheKey = `${conversationId}_${activeChannel}`;
-        const cachedMessages = channelMessagesCache.get(cacheKey) || [];
-        channelMessagesCache.set(cacheKey, [
-          ...uniqueMessages,
-          ...cachedMessages,
-        ]);
+        // Update cache
+        if (isGroupConversation) {
+          const cacheKey = `${conversationId}_${activeChannel}`;
+          const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+          channelMessagesCache.set(cacheKey, [
+            ...uniqueMessages,
+            ...cachedMessages,
+          ]);
+        } else {
+          const cachedMessages =
+            individualMessagesCache.get(conversationId) || [];
+          individualMessagesCache.set(conversationId, [
+            ...uniqueMessages,
+            ...cachedMessages,
+          ]);
+        }
 
         setMessageSkip((prev) => prev + uniqueMessages.length);
       }
@@ -166,25 +204,40 @@ export default function ChatSingle() {
     if (
       !conversationId ||
       !channels?.length ||
-      latestFetchedConversationId !== conversationId
+      latestFetchedConversationId !== conversationId ||
+      !conversation?.type // Chỉ set activeChannel cho group conversations
     )
       return;
 
     const defaultChannel = channels[0]?._id || null;
     setActiveChannel(defaultChannel);
-  }, [conversationId, channels, latestFetchedConversationId]);
+  }, [
+    conversationId,
+    channels,
+    latestFetchedConversationId,
+    conversation?.type,
+  ]);
 
   useEffect(() => {
     if (previousConversationId.current !== conversationId) {
       const oldConversationId = previousConversationId.current;
       const oldActiveChannel = previousActiveChannelRef.current;
+      const oldConversation = conversations.find(
+        (conv) => conv._id === oldConversationId
+      );
 
-      if (oldConversationId && member && oldActiveChannel) {
-        const oldCacheKey = `${oldConversationId}_${oldActiveChannel}`;
+      if (oldConversationId && member) {
         const currentMessages = messages[oldConversationId] || [];
 
         if (currentMessages.length > 0) {
-          channelMessagesCache.set(oldCacheKey, currentMessages);
+          if (oldConversation?.type && oldActiveChannel) {
+            // Cache cho group conversation
+            const oldCacheKey = `${oldConversationId}_${oldActiveChannel}`;
+            channelMessagesCache.set(oldCacheKey, currentMessages);
+          } else if (!oldConversation?.type) {
+            // Cache cho individual conversation
+            individualMessagesCache.set(oldConversationId, currentMessages);
+          }
         }
 
         const oldConvData = {
@@ -199,14 +252,21 @@ export default function ChatSingle() {
         conversationCache.set(oldConversationId, oldConvData);
       }
 
+      // Clear old caches
       if (oldConversationId) {
-        const keysToDelete = [];
-        for (const key of channelMessagesCache.keys()) {
-          if (key.startsWith(oldConversationId + "_")) {
-            keysToDelete.push(key);
+        if (oldConversation?.type) {
+          // Clear channel caches for group conversation
+          const keysToDelete = [];
+          for (const key of channelMessagesCache.keys()) {
+            if (key.startsWith(oldConversationId + "_")) {
+              keysToDelete.push(key);
+            }
           }
+          keysToDelete.forEach((key) => channelMessagesCache.delete(key));
+        } else {
+          // Clear individual cache
+          individualMessagesCache.delete(oldConversationId);
         }
-        keysToDelete.forEach((key) => channelMessagesCache.delete(key));
       }
 
       setActiveChannel(null);
@@ -237,12 +297,16 @@ export default function ChatSingle() {
       previousConversationId.current = conversationId;
       previousChannelId.current = null;
     }
-  }, [conversationId]);
+  }, [conversationId, conversations]);
 
   useEffect(() => {
     if (!conversationId || loadingConversationId.current === conversationId)
       return;
 
+    if (!conversation) {
+      navigate("/home");
+      return;
+    }
     const fetchData = async () => {
       loadingConversationId.current = conversationId;
 
@@ -275,19 +339,26 @@ export default function ChatSingle() {
         setIsMember(isMemberRes.data);
         setMembers(membersRes.data);
 
-        if (channelsRes.length > 0) {
+        if (conversation?.type && channelsRes.length > 0) {
+          // Group conversation - set active channel
           const firstChannelId = channelsRes[0]?._id || null;
           setActiveChannel(firstChannelId);
           currentActiveChannelRef.current = firstChannelId;
           previousActiveChannelRef.current = firstChannelId;
-        }
+        } else if (!conversation?.type) {
+          // Individual conversation - load messages directly
+          const cachedMessages = individualMessagesCache.get(conversationId);
 
-        if (conversation && !conversation.type) {
-          const messagesRes = await messageApi.fetchMessages(conversationId, {
-            skip: 0,
-            limit: 100,
-          });
-          dispatch(setMessages({ conversationId, messages: messagesRes }));
+          if (cachedMessages) {
+            dispatch(setMessages({ conversationId, messages: cachedMessages }));
+          } else {
+            const messagesRes = await messageApi.fetchMessages(conversationId, {
+              skip: 0,
+              limit: 100,
+            });
+            dispatch(setMessages({ conversationId, messages: messagesRes }));
+            individualMessagesCache.set(conversationId, messagesRes);
+          }
         }
 
         if (unread[conversationId] > 0) {
@@ -315,7 +386,7 @@ export default function ChatSingle() {
 
     fetchData();
     isInitialMount.current = false;
-  }, [conversationId, dispatch, conversation]);
+  }, [conversationId, dispatch, conversation, navigate]);
 
   useEffect(() => {
     if (activeChannel) {
@@ -333,7 +404,6 @@ export default function ChatSingle() {
       const cachedMessages = channelMessagesCache.get(cacheKey);
 
       if (cachedMessages) {
-        console.log("Using cached messages for channel:", activeChannel);
         dispatch(setMessages({ conversationId, messages: cachedMessages }));
         setIsLoadingMessages(false);
         return;
@@ -373,19 +443,31 @@ export default function ChatSingle() {
   useEffect(() => {
     if (isSendingMessage.current) return;
 
-    if (conversationId && activeChannel && conversationMessages.length > 0) {
-      const cacheKey = `${conversationId}_${activeChannel}`;
-      const existingCache = channelMessagesCache.get(cacheKey);
+    if (conversationId && conversationMessages.length > 0) {
+      if (conversation?.type && activeChannel) {
+        // Update cache cho group conversation
+        const cacheKey = `${conversationId}_${activeChannel}`;
+        const existingCache = channelMessagesCache.get(cacheKey);
 
-      // Chỉ update cache nếu messages thực sự thay đổi
-      if (
-        !existingCache ||
-        existingCache.length !== conversationMessages.length
-      ) {
-        channelMessagesCache.set(cacheKey, conversationMessages);
+        if (
+          !existingCache ||
+          existingCache.length !== conversationMessages.length
+        ) {
+          channelMessagesCache.set(cacheKey, conversationMessages);
+        }
+      } else if (!conversation?.type) {
+        // Update cache cho individual conversation
+        const existingCache = individualMessagesCache.get(conversationId);
+
+        if (
+          !existingCache ||
+          existingCache.length !== conversationMessages.length
+        ) {
+          individualMessagesCache.set(conversationId, conversationMessages);
+        }
       }
     }
-  }, [conversationId, activeChannel, conversationMessages]);
+  }, [conversationId, activeChannel, conversationMessages, conversation?.type]);
 
   useEffect(() => {
     if (!conversationMessages.length) return;
@@ -418,12 +500,11 @@ export default function ChatSingle() {
 
     // Kiểm tra member trước khi gửi tin nhắn
     if (!member?.data?._id) {
-      console.error("Member data not available")
       AlertMessage({
         type: "error",
         message: "Unable to send message. Please try again.",
-      })
-      return
+      });
+      return;
     }
 
     isSendingMessage.current = true;
@@ -473,15 +554,44 @@ export default function ChatSingle() {
       }
 
       if (!newMessage) {
-        throw new Error("Failed to create message")
+        throw new Error("Failed to create message");
       }
 
-      const cacheKey = `${conversationId}_${channelId}`;
-      const cachedMessages = channelMessagesCache.get(cacheKey) || [];
-      channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
-      if ((type === "IMAGE" && Array.isArray(newMessage)) || (type === "VIDEO" && Array.isArray(newMessage))) {
+      // Update cache
+      if (conversation?.type && channelId) {
+        // Group conversation
+        const cacheKey = `${conversationId}_${channelId}`;
+        const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+        channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
+      } else if (!conversation?.type) {
+        // Individual conversation
+        const cachedMessages =
+          individualMessagesCache.get(conversationId) || [];
+        individualMessagesCache.set(conversationId, [
+          ...cachedMessages,
+          newMessage,
+        ]);
+      }
+
+      if (
+        (type === "IMAGE" && Array.isArray(newMessage)) ||
+        (type === "VIDEO" && Array.isArray(newMessage))
+      ) {
         newMessage.forEach((msg) => {
-          channelMessagesCache.set(cacheKey, [...cachedMessages, msg]);
+          // Update cache cho từng message trong array
+          if (conversation?.type && channelId) {
+            const cacheKey = `${conversationId}_${channelId}`;
+            const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+            channelMessagesCache.set(cacheKey, [...cachedMessages, msg]);
+          } else if (!conversation?.type) {
+            const cachedMessages =
+              individualMessagesCache.get(conversationId) || [];
+            individualMessagesCache.set(conversationId, [
+              ...cachedMessages,
+              msg,
+            ]);
+          }
+
           dispatch(
             addMessage({
               conversationId,
@@ -495,19 +605,20 @@ export default function ChatSingle() {
             })
           );
         });
+      } else {
+        dispatch(
+          addMessage({
+            conversationId,
+            message: newMessage,
+          })
+        );
+        dispatch(
+          updateConversation({
+            conversationId: newMessage.conversationId,
+            lastMessage: newMessage,
+          })
+        );
       }
-      dispatch(
-        addMessage({
-          conversationId,
-          message: newMessage,
-        })
-      );
-      dispatch(
-        updateConversation({
-          conversationId: newMessage.conversationId,
-          lastMessage: newMessage,
-        })
-      );
     } catch (error) {
       console.error("Error sending message", error);
       AlertMessage({
@@ -689,6 +800,7 @@ export default function ChatSingle() {
   const clearAllCache = useCallback(() => {
     console.log("🧹 Clearing all cache");
     channelMessagesCache.clear();
+    individualMessagesCache.clear();
     conversationCache.clear();
   }, []);
 
@@ -700,7 +812,23 @@ export default function ChatSingle() {
     debugCache();
   }, [conversationId, activeChannel, debugCache]);
 
-  if (!conversation || isLoadingMessages) {
+  if (!conversation) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen bg-white">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">Conversation not found</p>
+          <button
+            onClick={() => navigate("/home")}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Go to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoadingMessages) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-white">
         <Spinner />
