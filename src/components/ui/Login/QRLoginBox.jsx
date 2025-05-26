@@ -48,11 +48,11 @@ export const QRLoginBox = () => {
       try {
         const res = await authApi.checkQRStatus(sessionId);
         console.log(res);
-        if (res.status === "VERIFIED") {
-          console.log("✅ Đã xác thực ", res);
-          const { user, accessToken: token, refreshToken } = res;
 
-          // Cập nhật vào Redux
+        if (res.status === "VERIFIED") {
+          const { user, token, refreshToken } = res;
+
+          // Cập nhật Redux
           dispatch(setCredentials({ user, token, refreshToken }));
 
           // Lưu vào localStorage
