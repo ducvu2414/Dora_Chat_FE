@@ -21,7 +21,7 @@ const chatSlice = createSlice({
       const index = state.conversations.findIndex(
         (conv) => conv._id === conversation._id
       );
-      if (index !== -1) {
+      if (index !== 1) {
         state.conversations.unshift(conversation); // Thêm vào đầu danh sách
         state.unread[conversation._id] = conversation.unreadCount || 0;
       }

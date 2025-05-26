@@ -117,9 +117,9 @@ export default function MemberItem({ members, onRemove, managers, leader }) {
         <Modal
           onClose={toggleDropdown}
           isOpen={showInfo}
-          title={"Thông tin tài khoản"}
+          title={"Information"}
         >
-          <InfoContent info={info} />
+          <InfoContent info={info}  />
         </Modal>
       )}
       {members.map((member) => {
