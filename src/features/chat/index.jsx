@@ -479,7 +479,7 @@ export default function ChatSingle() {
       const cacheKey = `${conversationId}_${channelId}`;
       const cachedMessages = channelMessagesCache.get(cacheKey) || [];
       channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
-      if (type === "IMAGE" && Array.isArray(newMessage)) {
+      if ((type === "IMAGE" && Array.isArray(newMessage)) || (type === "VIDEO" && Array.isArray(newMessage))) {
         newMessage.forEach((msg) => {
           channelMessagesCache.set(cacheKey, [...cachedMessages, msg]);
           dispatch(
