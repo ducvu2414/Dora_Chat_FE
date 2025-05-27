@@ -71,6 +71,7 @@ export default function ChatSingle() {
   const currentActiveChannelRef = useRef(activeChannel);
   const isSendingMessage = useRef(false);
   const previousActiveChannelRef = useRef(null);
+  const lastFetchedChannelIdRef = useRef(null);
 
   const debugCache = useCallback(() => {
     console.log("=== CACHE DEBUG ===");
@@ -243,13 +244,16 @@ export default function ChatSingle() {
     )
       return;
 
-    const defaultChannel = channels[0]?._id || null;
-    setActiveChannel(defaultChannel);
+    if (!activeChannel) {
+      const defaultChannel = channels[0]?._id || null;
+      setActiveChannel(defaultChannel);
+    }
   }, [
     conversationId,
     channels,
     latestFetchedConversationId,
     conversation?.type,
+    activeChannel,
   ]);
 
   useEffect(() => {
@@ -376,10 +380,10 @@ export default function ChatSingle() {
 
         if (conversation?.type && channelsRes.length > 0) {
           // Group conversation - set active channel
-          const firstChannelId = channelsRes[0]?._id || null;
-          setActiveChannel(firstChannelId);
-          currentActiveChannelRef.current = firstChannelId;
-          previousActiveChannelRef.current = firstChannelId;
+            const firstChannelId = channelsRes[0]?._id || null;
+            setActiveChannel(firstChannelId);
+            currentActiveChannelRef.current = firstChannelId;
+            previousActiveChannelRef.current = firstChannelId;
         } else if (!conversation?.type) {
           // Individual conversation - load messages directly
           const cachedMessages = individualMessagesCache.get(conversationId);
@@ -455,6 +459,7 @@ export default function ChatSingle() {
           }
         );
         dispatch(setMessages({ conversationId, messages: messagesRes }));
+        lastFetchedChannelIdRef.current = activeChannel;
         channelMessagesCache.set(cacheKey, messagesRes);
         setMessageSkip(100);
         setHasMoreMessages(true);
@@ -557,45 +562,63 @@ export default function ChatSingle() {
       });
 
       cache.set(cacheKey, updatedMessages);
-      console.log("✅ Updated vote cache with voter info:", cacheKey);
     }, 200); // Đợi socket update xong
   };
 
   useEffect(() => {
-    if (isSendingMessage.current) return;
+    if (!activeChannel || !conversationId || !conversation?.type) return;
+    if (previousChannelId.current === activeChannel) return;
+    if (loadingChannelId.current === activeChannel) return;
 
-    if (conversationId && conversationMessages.length > 0) {
-      if (conversation?.type && activeChannel) {
-        // Update cache cho group conversation
-        const cacheKey = `${conversationId}_${activeChannel}`;
-        const existingCache = channelMessagesCache.get(cacheKey);
+    const channelId = activeChannel; // 🧊 "Đóng băng" giá trị
 
-        if (!existingCache) {
-          channelMessagesCache.set(cacheKey, conversationMessages);
-        } else if (existingCache.length < conversationMessages.length) {
-          // Chỉ thêm messages mới, không overwrite toàn bộ
-          const newMessages = conversationMessages.slice(existingCache.length);
-          channelMessagesCache.set(cacheKey, [
-            ...existingCache,
-            ...newMessages,
-          ]);
-        }
-      } else if (!conversation?.type) {
-        // Update cache cho individual conversation
-        const existingCache = individualMessagesCache.get(conversationId);
+    const fetchChannelMessages = async () => {
+      const cacheKey = `${conversationId}_${channelId}`;
+      const cachedMessages = channelMessagesCache.get(cacheKey);
 
-        if (!existingCache) {
-          individualMessagesCache.set(conversationId, conversationMessages);
-        } else if (existingCache.length < conversationMessages.length) {
-          const newMessages = conversationMessages.slice(existingCache.length);
-          individualMessagesCache.set(conversationId, [
-            ...existingCache,
-            ...newMessages,
-          ]);
-        }
+      if (cachedMessages) {
+        dispatch(setMessages({ conversationId, messages: cachedMessages }));
+        lastFetchedChannelIdRef.current = channelId;
+        setIsLoadingMessages(false);
+        return;
       }
-    }
-  }, [conversationId, activeChannel, conversationMessages, conversation?.type]);
+
+      try {
+        loadingChannelId.current = channelId;
+        setIsLoadingMessages(true);
+        const messagesRes = await messageApi.fetchMessagesByChannelId(
+          channelId,
+          {
+            skip: 0,
+            limit: 100,
+          }
+        );
+
+        // Chỉ dispatch nếu channelId vẫn còn là active
+        if (currentActiveChannelRef.current === channelId) {
+          dispatch(setMessages({ conversationId, messages: messagesRes }));
+          lastFetchedChannelIdRef.current = channelId;
+        }
+
+        channelMessagesCache.set(cacheKey, messagesRes);
+        setMessageSkip(100);
+        setHasMoreMessages(true);
+      } catch (error) {
+        console.error("Error fetching channel messages", error);
+        AlertMessage({
+          type: "error",
+          message:
+            error.response?.data.message || "Error fetching channel messages",
+        });
+      } finally {
+        setIsLoadingMessages(false);
+        loadingChannelId.current = null;
+      }
+    };
+
+    fetchChannelMessages();
+    previousChannelId.current = channelId;
+  }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   useEffect(() => {
     if (!conversationMessages.length) return;
@@ -690,15 +713,26 @@ export default function ChatSingle() {
         // Group conversation
         const cacheKey = `${conversationId}_${channelId}`;
         const cachedMessages = channelMessagesCache.get(cacheKey) || [];
-        channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
+        const isDuplicate = cachedMessages.some(
+          (msg) => msg._id === newMessage._id
+        );
+
+        if (!isDuplicate) {
+          channelMessagesCache.set(cacheKey, [...cachedMessages, newMessage]);
+        }
       } else if (!conversation?.type) {
         // Individual conversation
         const cachedMessages =
           individualMessagesCache.get(conversationId) || [];
-        individualMessagesCache.set(conversationId, [
-          ...cachedMessages,
-          newMessage,
-        ]);
+        const isDuplicate = cachedMessages.some(
+          (msg) => msg._id === newMessage._id
+        );
+        if (!isDuplicate) {
+          individualMessagesCache.set(conversationId, [
+            ...cachedMessages,
+            newMessage,
+          ]);
+        }
       }
 
       if (

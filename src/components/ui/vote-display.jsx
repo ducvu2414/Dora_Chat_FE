@@ -135,14 +135,6 @@ export default function VoteDisplay({
     );
   };
 
-  // ✅ DEBUG: Log để kiểm tra data
-  console.log("🔍 VoteDisplay Debug:", {
-    vote: vote,
-    member: member,
-    selectedOptions: selectedOptions,
-    currentUserVoteIds: getCurrentUserVoteIds(),
-  });
-
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border w-72 w-full">
       {/* vote Content */}
