@@ -815,7 +815,7 @@ export default function ChatSingle() {
         channelMessagesCache.set(cacheKey, updatedCache);
       }
     } catch (error) {
-      console.error("❌ Error creating vote:", error);
+      console.error("Error creating vote:", error);
       AlertMessage({
         type: "error",
         message: error.response?.data?.message || "Error creating vote",
@@ -859,10 +859,7 @@ export default function ChatSingle() {
     try {
       const resVote = await voteApi.lockVote(vote._id, member.data._id);
 
-      console.log("🔍 Original vote:", vote);
-      console.log("🔍 API response resVote:", resVote);
-
-      // ✅ FIX: Merge resVote với message gốc thay vì replace
+      // Merge resVote với message gốc thay vì replace
       const updatedVoteMessage = {
         ...vote, // Giữ nguyên tất cả fields của message gốc
         lockedVote: resVote.lockedVote || { lockedStatus: true }, // Chỉ update lockedVote
@@ -871,55 +868,26 @@ export default function ChatSingle() {
         ...(resVote.options && { options: resVote.options }),
       };
 
-      console.log("🔍 Updated vote message:", updatedVoteMessage);
-
-      // ✅ FIX: Update Redux store với merged message
-      dispatch(
-        setMessages({
-          conversationId,
-          messages: conversationMessages.map((msg) =>
-            msg._id === vote._id ? updatedVoteMessage : msg
-          ),
-        })
-      );
-
-      // ✅ FIX: Update cache với validation
       setTimeout(() => {
-        // Validate cache key
         const channelId = currentActiveChannelRef.current || activeChannel;
         const cacheKey =
           conversation?.type && channelId
             ? `${conversationId}_${channelId}`
             : conversationId;
 
-        console.log("🔍 Cache key:", cacheKey);
-        console.log("🔍 Conversation type:", conversation?.type);
-        console.log("🔍 Channel ID:", channelId);
-
         const cache = conversation?.type
           ? channelMessagesCache
           : individualMessagesCache;
         const cachedMessages = cache.get(cacheKey) || [];
 
-        console.log("🔍 Cached messages before update:", cachedMessages.length);
-
-        // ✅ FIX: Update cache với merged message
         const updatedMessages = cachedMessages.map((msg) => {
           if (msg._id === vote._id) {
-            console.log("🔍 Found vote message in cache, updating...");
             return updatedVoteMessage; // Use merged message
           }
           return msg;
         });
 
         cache.set(cacheKey, updatedMessages);
-        console.log("✅ Updated vote lock status in cache:", vote._id);
-        console.log("🔍 Cached messages after update:", updatedMessages.length);
-
-        // ✅ DEBUG: Verify cache content
-        const verifyCache = cache.get(cacheKey);
-        const voteInCache = verifyCache?.find((msg) => msg._id === vote._id);
-        console.log("🔍 Vote in cache after update:", voteInCache);
       }, 200);
     } catch (error) {
       console.error("Error locking vote:", error);
