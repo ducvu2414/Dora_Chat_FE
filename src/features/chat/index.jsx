@@ -639,6 +639,10 @@ export default function ChatSingle() {
 
   const handleCreateVote = async (vote) => {
     const channelId = currentActiveChannelRef.current || activeChannel;
+
+    // Thêm dòng này để tránh cache sync conflict
+    isSendingMessage.current = true;
+
     const newVote = {
       memberId: member.data._id,
       conversationId: conversationId,
@@ -652,7 +656,50 @@ export default function ChatSingle() {
       })),
     };
 
-    await voteApi.createVote(newVote);
+    try {
+      const resVote = await voteApi.createVote(newVote);
+
+      // Kiểm tra resVote có hợp lệ không
+      if (!resVote || !resVote._id) {
+        return;
+      }
+
+      // Dispatch trước khi update cache
+      dispatch(
+        addMessage({
+          conversationId: resVote.conversationId,
+          message: resVote,
+        })
+      );
+
+      dispatch(
+        updateConversation({
+          conversationId: resVote.conversationId,
+          lastMessage: resVote,
+        })
+      );
+
+      // Sau đó mới update cache
+      if (conversation?.type && channelId) {
+        const cacheKey = `${conversationId}_${channelId}`;
+        const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+        const updatedCache = [...cachedMessages, resVote];
+
+        channelMessagesCache.set(cacheKey, updatedCache);
+      }
+
+    } catch (error) {
+      console.error("❌ Error creating vote:", error);
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Error creating vote",
+      });
+    } finally {
+      // Reset flag sau một khoảng thời gian ngắn
+      setTimeout(() => {
+        isSendingMessage.current = false;
+      }, 1000);
+    }
   };
 
   const handleUpdateVote = async (vote) => {
