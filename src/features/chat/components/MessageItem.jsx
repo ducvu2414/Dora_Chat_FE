@@ -198,6 +198,15 @@ export default function MessageItem({
       </div>
     );
   };
+
+  const truncateFileName = (fileName, maxLength = 40) => {
+    if (!fileName) return "";
+    return fileName.length > maxLength
+      ? fileName.slice(0, maxLength) + "..."
+      : fileName;
+  };
+
+
   // Hiển thị reactions và tooltip khi hover
   const renderReactions = () => {
     if (!msg.reacts || msg.reacts.length === 0) return null;
@@ -404,7 +413,7 @@ export default function MessageItem({
                   className="flex items-center text-[#086DC0] text-sm hover:underline"
                 >
                   <AiOutlinePaperClip size={20} className="mr-1" />
-                  {msg.fileName || "Tải xuống file"}
+                  {truncateFileName(msg.fileName || "Tải xuống file")}
                 </a>
 
                 {
