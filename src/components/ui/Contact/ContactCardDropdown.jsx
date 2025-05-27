@@ -28,7 +28,7 @@ const ContactCardDropdown = ({
         <DropdownMenuItem onClick={onViewInfo}>
           <span>View info</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={onSetNickname}
           className="flex items-center cursor-pointer"
         >
@@ -40,7 +40,7 @@ const ContactCardDropdown = ({
           className="flex items-center text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
         >
           <span className="text-red-500">Delete contact</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

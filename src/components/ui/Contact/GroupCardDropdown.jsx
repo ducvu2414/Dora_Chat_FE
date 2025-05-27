@@ -27,7 +27,7 @@ const GroupCardDropdown = ({ onLeaveGroup }) => {
                 <DropdownMenuItem
                     onClick={onLeaveGroup}
                 >
-                    <span className="text-red">Leave group</span>
+                    <span className="text-red"> </span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
