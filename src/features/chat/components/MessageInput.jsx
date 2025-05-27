@@ -3,13 +3,18 @@ import { useState, useRef, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PictureIcon from "@assets/chat/picture_icon.svg";
+import PauseIcon from "@assets/chat/pause.svg";
+import MicroIcon from "@assets/chat/micro.svg";
+
+import PlayIcon from "@assets/chat/play.svg";
+import StopIcon from "@assets/chat/stop.svg";
 import EmojiIcon from "@assets/chat/emoji_icon.svg";
 import SendIcon from "@assets/chat/send_icon.svg";
 import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-react
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 import { AlertMessage } from "@/components/ui/alert-message";
 import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
-
+import convertWebmToMp3 from "../../../utils/convertFile";
 export default function MessageInput({
   conversation,
   onSend,
@@ -36,7 +41,18 @@ export default function MessageInput({
   const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  //audio
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingTimeout, setRecordingTimeout] = useState(null);
+  const [recordingTime, setRecordingTime] = useState("00:00");
+  const [recordingStartTime, setRecordingStartTime] = useState(null);
+  const [recordingTimer, setRecordingTimer] = useState(null);
+  const [totalPausedTime, setTotalPausedTime] = useState(0);
+  const [pauseStartTime, setPauseStartTime] = useState(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -66,6 +82,136 @@ export default function MessageInput({
       }
     }
   }, [isMember, isLoading, inputMode]);
+  // Hàm format thời gian
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // Hàm bắt đầu timer
+  const startTimer = () => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor(
+        (now - recordingStartTime - totalPausedTime) / 1000
+      );
+      setRecordingTime(formatTime(elapsed));
+    }, 1000);
+    setRecordingTimer(timer);
+  };
+
+  // Hàm dừng timer
+  const stopTimer = () => {
+    if (recordingTimer) {
+      clearInterval(recordingTimer);
+      setRecordingTimer(null);
+    }
+  };
+  // Cập nhật hàm startRecording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const webmBlob = new Blob(chunks, { type: "audio/webm" });
+        const mp3File = await convertWebmToMp3(webmBlob);
+        setIsMessageLoading(true);
+        try {
+          await onSend({
+            type: "FILE",
+            files: [mp3File],
+            replyMessageId: replyMessage?.messageId,
+          });
+        } catch (e) {
+          console.error("Send error", e);
+        } finally {
+          setIsMessageLoading(false);
+        }
+        // Reset states
+        setIsRecording(false);
+        setIsPaused(false);
+        setAudioChunks([]);
+        setRecordingTime("00:00");
+        setRecordingStartTime(null);
+        setTotalPausedTime(0);
+        setPauseStartTime(null);
+        stopTimer();
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setAudioChunks(chunks);
+      setIsRecording(true);
+
+      // Khởi tạo timer
+      const now = Date.now();
+      setRecordingStartTime(now);
+      setTotalPausedTime(0);
+      setRecordingTime("00:00");
+      startTimer();
+
+      // Auto stop sau 60 giây
+      const timeout = setTimeout(() => stopRecording(), 60000);
+      setRecordingTimeout(timeout);
+    } catch (err) {
+      console.error("Recording error:", err);
+    }
+  };
+
+  // Cập nhật hàm pauseRecording
+  const pauseRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.pause();
+      setPauseStartTime(Date.now());
+      stopTimer();
+      setIsPaused(true);
+    }
+  };
+
+  // Cập nhật hàm resumeRecording
+  const resumeRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === "paused") {
+      mediaRecorder.resume();
+
+      // Cộng thời gian đã pause vào tổng thời gian pause
+      const pauseDuration = Date.now() - pauseStartTime;
+      setTotalPausedTime((prev) => prev + pauseDuration);
+      setPauseStartTime(null);
+
+      startTimer();
+      setIsPaused(false);
+    }
+  };
+
+  // Cập nhật hàm stopRecording
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      clearTimeout(recordingTimeout);
+      stopTimer();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (recordingTimer) {
+        clearInterval(recordingTimer);
+      }
+      if (recordingTimeout) {
+        clearTimeout(recordingTimeout);
+      }
+    };
+  }, [recordingTimer, recordingTimeout]);
 
   const filteredMembers =
     members && Array.isArray(members)
@@ -605,6 +751,39 @@ export default function MessageInput({
     <div className="relative flex flex-col w-full">
       {/* Hiển thị tin nhắn đang reply */}
       {renderReplyPreview()}
+
+      {/* Recording Status Bar - Hiển thị khi đang ghi âm */}
+      {isRecording && (
+        <div className="flex items-center justify-between p-3 mx-3 mb-2 border border-red-200 rounded-lg bg-gradient-to-r from-red-50 to-pink-50 animate-pulse">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+              <div className="absolute top-0 left-0 w-4 h-4 bg-red-500 rounded-full opacity-30 animate-ping"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-red-700">
+                {isPaused ? "Recording Paused" : "Recording..."}
+              </span>
+              <span className="text-xs text-red-500">{recordingTime}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex space-x-1">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1 bg-red-400 rounded-full animate-bounce`}
+                  style={{
+                    height: `${Math.random() * 16 + 8}px`,
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Previews (chỉ hiển thị 1 trong 2: image hoặc video) */}
       {(imagePreviews.length > 0 ||
         videoPreviews.length > 0 ||
@@ -731,8 +910,9 @@ export default function MessageInput({
           )}
         </div>
       )}
+
       <div className="flex items-center p-3 border-t">
-        {inputMode === "normal" && (
+        {inputMode === "normal" && !isRecording && (
           <>
             <Button
               size="icon"
@@ -752,13 +932,14 @@ export default function MessageInput({
           </>
         )}
 
+        {/* Input Container - Ẩn khi đang ghi âm */}
         <div
           ref={inputContainerRef}
           className={`flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative
            focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-300
-           transition-opacity duration-150 ${
+           transition-all duration-300 ${
              isTransitioning ? "opacity-0" : "opacity-100"
-           }`}
+           } ${isRecording ? "opacity-50 pointer-events-none" : ""}`}
         >
           {inputMode === "restricted" ? (
             <input
@@ -771,15 +952,17 @@ export default function MessageInput({
             <>
               <div className="relative w-full">
                 {/* Placeholder giả */}
-                {input.trim() === "" && (
+                {input.trim() === "" && !isRecording && (
                   <div className="absolute text-sm text-gray-400 -translate-y-1/2 pointer-events-none select-none left-4 top-1/2">
-                    Type a message...
+                    {isRecording
+                      ? "Recording in progress..."
+                      : "Type a message..."}
                   </div>
                 )}
 
                 <div
                   ref={editableRef}
-                  contentEditable
+                  contentEditable={!isRecording}
                   onInput={handleInputChange}
                   onKeyDown={handleKeyDown}
                   suppressContentEditableWarning={true}
@@ -792,32 +975,112 @@ export default function MessageInput({
                 />
               </div>
 
-              <label className="cursor-pointer hover:opacity-70">
-                <img src={PictureIcon} className="p-2" alt="Picture" />
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  className="hidden"
-                  multiple
-                  ref={imageInputRef}
-                  onChange={handleImageOrVideoSelect}
-                  disabled={isMessageLoading}
-                />
-              </label>
-              <button
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
-              >
-                <img src={EmojiIcon} alt="Emoji" />
-              </button>
+              {!isRecording && (
+                <>
+                  <label className="cursor-pointer hover:opacity-70">
+                    <img src={PictureIcon} className="p-2" alt="Picture" />
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      className="hidden"
+                      multiple
+                      ref={imageInputRef}
+                      onChange={handleImageOrVideoSelect}
+                      disabled={isMessageLoading}
+                    />
+                  </label>
+                  <button
+                    onClick={() => setShowEmojiPicker((prev) => !prev)}
+                    className="px-2 bg-inherit hover:border-transparent hover:opacity-70"
+                  >
+                    <img src={EmojiIcon} alt="Emoji" />
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
+
+        {/* Recording Controls */}
         {inputMode === "normal" && (
+          <div className="flex items-center gap-2 ml-3">
+            {!isRecording ? (
+              <div
+                onClick={startRecording}
+                className="relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-lg cursor-pointer group bg-gradient-to-r from-red-500 to-red-600 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-200"
+              >
+                <img
+                  src={MicroIcon}
+                  alt="Start Recording"
+                  className="w-5 h-5"
+                />
+
+                <div className="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 left-1/2 group-hover:opacity-100 whitespace-nowrap">
+                  Start Recording
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {isPaused ? (
+                  <div
+                    onClick={resumeRecording}
+                    className="relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-md cursor-pointer group bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-200"
+                  >
+                    <img src={PlayIcon} alt="Resume" />
+                    <div
+                      className={`absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 left-1/2 group-hover:opacity-100 whitespace-nowrap
+                      ${
+                        isMessageLoading
+                          ? "opacity-50 cursor-not-allowed pointer-events-none"
+                          : ""
+                      }`}
+                    >
+                      Resume
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={pauseRecording}
+                    className={`relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-md cursor-pointer group bg-gradient-to-r from-yellow-500 to-yellow-600 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-200
+                      ${
+                        isMessageLoading
+                          ? "opacity-50 cursor-not-allowed pointer-events-none"
+                          : ""
+                      }`}
+                  >
+                    <img src={PauseIcon} alt="Pause" />
+                    <div className="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 left-1/2 group-hover:opacity-100 whitespace-nowrap">
+                      Pause
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  onClick={stopRecording}
+                  className={`relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-md cursor-pointer group bg-gradient-to-r from-blue-400 to-blue-600 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-200 ${
+                    isMessageLoading
+                      ? "opacity-50 cursor-not-allowed pointer-events-none"
+                      : ""
+                  }}`}
+                >
+                  <img src={StopIcon} alt="Stop" />
+                  <div className="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 left-1/2 group-hover:opacity-100 whitespace-nowrap">
+                    Stop & Send
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Send Button - Ẩn khi đang ghi âm */}
+        {inputMode === "normal" && !isRecording && (
           <div
-            onClick={handleSend}
-            className={`px-4 py-2 ml-1 duration-200 ease-in-out cursor-pointer hover:translate-x-2 ${
-              isMessageLoading ? "opacity-50" : ""
+            onClick={!isMessageLoading ? handleSend : undefined}
+            className={`px-4 py-2 ml-1 duration-200 ease-in-out hover:translate-x-2 cursor-pointer${
+              isMessageLoading
+                ? "opacity-50 cursor-not-allowed pointer-events-none"
+                : ""
             }`}
           >
             <img src={SendIcon} alt="Send" />

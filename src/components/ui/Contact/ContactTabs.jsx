@@ -9,9 +9,7 @@ export function ContactTabs({ activeTab, onTabChange }) {
     const tabs = [
         { id: 'friend-list', label: 'Friend list', count: friendList.length },
         { id: 'friend-requests', label: 'Friend requests', count: friendRequests.length },
-        { id: 'sent-requests', label: 'Sent requests', count: sentRequests.length },
-        { id: 'group-list', label: 'Group list', count: 3 },
-        { id: 'group-requests', label: 'Group requests', count: 1 }
+        { id: 'sent-requests', label: 'Sent requests', count: sentRequests.length }
     ];
 
     return (

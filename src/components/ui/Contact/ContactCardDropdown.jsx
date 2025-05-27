@@ -24,7 +24,7 @@ const ContactCardDropdown = ({
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="z-[200] w-56">
+      <DropdownMenuContent className="z-[100] w-56">
         <DropdownMenuItem onClick={onViewInfo}>
           <span>View info</span>
         </DropdownMenuItem>
