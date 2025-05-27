@@ -59,10 +59,9 @@ export function AddGroupModal({ onClose, isOpen }) {
   const handleCreateGroup = async () => {
     try {
       setLoading(true);
-      await conversationApi.createGroupConversation(
-        groupName,
-        selectedFriends
-      );
+      await conversationApi.createGroupConversation(groupName, selectedFriends);
+      // reload page
+      window.location.reload();
     } catch (err) {
       console.error("Error creating group:", err);
       AlertMessage({
