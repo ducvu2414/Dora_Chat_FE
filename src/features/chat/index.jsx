@@ -380,10 +380,12 @@ export default function ChatSingle() {
 
         if (conversation?.type && channelsRes.length > 0) {
           // Group conversation - set active channel
+          if (!activeChannel) {
             const firstChannelId = channelsRes[0]?._id || null;
             setActiveChannel(firstChannelId);
             currentActiveChannelRef.current = firstChannelId;
             previousActiveChannelRef.current = firstChannelId;
+          }
         } else if (!conversation?.type) {
           // Individual conversation - load messages directly
           const cachedMessages = individualMessagesCache.get(conversationId);
@@ -425,7 +427,7 @@ export default function ChatSingle() {
 
     fetchData();
     isInitialMount.current = false;
-  }, [conversationId, dispatch, conversation, navigate]);
+  }, [conversationId, dispatch, navigate]);
 
   useEffect(() => {
     if (activeChannel) {
