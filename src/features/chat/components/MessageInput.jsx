@@ -38,6 +38,7 @@ export default function MessageInput({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   //audio
   const [mediaRecorder, setMediaRecorder] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [audioChunks, setAudioChunks] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
