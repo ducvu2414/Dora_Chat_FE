@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
 import InfoContent from "@components/ui/Info/InfoContent";
 import { Modal } from "@/components/ui/modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
+import memberApi from "@/api/member";
 
 function usePositionCheck() {
   const [position, setPosition] = useState("bottom");
@@ -99,6 +100,33 @@ export default function MemberItem({ members, onRemove, managers, leader }) {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
   const [info, setInfo] = useState(null);
+  const [resolvedMembers, setResolvedMembers] = useState([]);
+
+  useEffect(() => {
+    const fetchMembersIfNeeded = async () => {
+      // Nếu mảng là object (có ._id) → dùng luôn
+      if (members.length > 0 && typeof members[0] === "object") {
+        setResolvedMembers(members);
+        return;
+      }
+
+      // Ngược lại: là mảng string ID → gọi API từng người
+      if (members.length > 0 && typeof members[0] === "string") {
+        try {
+          const fetches = await Promise.all(
+            members.map((id) => memberApi.getByMemberId(id))
+          );
+
+          const mappedMembers = fetches.map((res) => res.data || res); // phòng trường hợp API bọc trong .data
+          setResolvedMembers(mappedMembers);
+        } catch (error) {
+          console.error("Error fetching member details:", error);
+        }
+      }
+    };
+
+    fetchMembersIfNeeded();
+  }, [members]);
 
   const toggleDropdown = (type, id = null) => {
     if (type === "menu") {
@@ -114,15 +142,11 @@ export default function MemberItem({ members, onRemove, managers, leader }) {
   return (
     <div>
       {showInfo && (
-        <Modal
-          onClose={toggleDropdown}
-          isOpen={showInfo}
-          title={"Information"}
-        >
-          <InfoContent info={info}  />
+        <Modal onClose={toggleDropdown} isOpen={showInfo} title={"Information"}>
+          <InfoContent info={info} />
         </Modal>
       )}
-      {members.map((member) => {
+      {resolvedMembers.map((member) => {
         if (!member._id) return null;
         return (
           <MemberRow
