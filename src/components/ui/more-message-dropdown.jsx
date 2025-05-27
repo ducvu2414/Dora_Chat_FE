@@ -210,7 +210,10 @@ function LocationModal({ isOpen, onClose, onSend }) {
             className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
             aria-label="Close"
           >
+            <span className="flex items-center justify-center w-5 h-5 text-gray-600">
+
             <X className="w-5 h-5" />
+            </span>
           </button>
         </div>
 
