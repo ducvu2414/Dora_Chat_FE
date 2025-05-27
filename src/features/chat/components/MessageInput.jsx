@@ -9,7 +9,7 @@ import EmojiPicker from "emoji-picker-react"; // dùng thư viện emoji-picker-
 import MoreMessageDropdown from "@/components/ui/more-message-dropdown";
 import { AlertMessage } from "@/components/ui/alert-message";
 import { AiOutlineClose, AiOutlinePaperClip } from "react-icons/ai";
-
+import convertWebmToMp3 from "../../../utils/convertFile";
 export default function MessageInput({
   conversation,
   onSend,
@@ -36,6 +36,13 @@ export default function MessageInput({
   const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  //audio
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingTimeout, setRecordingTimeout] = useState(null);
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -66,6 +73,65 @@ export default function MessageInput({
       }
     }
   }, [isMember, isLoading, inputMode]);
+  // hanlde record audio
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const webmBlob = new Blob(chunks, { type: "audio/webm" });
+        const mp3File = await convertWebmToMp3(webmBlob);
+
+        await onSend({
+          type: "FILE",
+          files: [mp3File],
+          replyMessageId: replyMessage?.messageId,
+        });
+
+        setIsRecording(false);
+        setIsPaused(false);
+        setAudioChunks([]);
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setAudioChunks(chunks);
+      setIsRecording(true);
+
+      const timeout = setTimeout(() => stopRecording(), 60000);
+      setRecordingTimeout(timeout);
+    } catch (err) {
+      console.error("Recording error:", err);
+    }
+  };
+  // pause and resume recording
+  const pauseRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === "paused") {
+      mediaRecorder.resume();
+      setIsPaused(false);
+    }
+  };
+  // stop recording
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      clearTimeout(recordingTimeout);
+    }
+  };
 
   const filteredMembers =
     members && Array.isArray(members)
@@ -751,7 +817,6 @@ export default function MessageInput({
             />
           </>
         )}
-
         <div
           ref={inputContainerRef}
           className={`flex-1 flex h-12 border rounded-[32px] items-center bg-[#F6F6F6] px-4 relative
@@ -813,6 +878,43 @@ export default function MessageInput({
             </>
           )}
         </div>
+        {inputMode === "normal" && (
+          <div className="flex items-center gap-2 mr-2">
+            {!isRecording ? (
+              <button
+                onClick={startRecording}
+                className="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-700"
+              >
+                🎙 Start
+              </button>
+            ) : (
+              <>
+                {isPaused ? (
+                  <button
+                    onClick={resumeRecording}
+                    className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                  >
+                    ▶️ Resume
+                  </button>
+                ) : (
+                  <button
+                    onClick={pauseRecording}
+                    className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                  >
+                    ⏸ Pause
+                  </button>
+                )}
+                <button
+                  onClick={stopRecording}
+                  className="px-3 py-1 text-white bg-green-600 rounded hover:bg-green-700"
+                >
+                  ⏹ Stop
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {inputMode === "normal" && (
           <div
             onClick={handleSend}
