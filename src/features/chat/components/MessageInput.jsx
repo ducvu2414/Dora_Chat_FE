@@ -1064,7 +1064,7 @@ export default function MessageInput({
                   }}`}
                 >
                   <img src={StopIcon} alt="Stop" />
-                  <div className="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 left-1/2 group-hover:opacity-100 whitespace-nowrap">
+                  <div className="absolute left-0 px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 bg-black rounded opacity-0 -top-10 group-hover:opacity-100 whitespace-nowrap">
                     Stop & Send
                   </div>
                 </div>
