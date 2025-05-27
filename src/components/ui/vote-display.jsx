@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { Button } from "./button";
@@ -18,19 +19,25 @@ export default function VoteDisplay({
     return acc + (option.members ? option.members.length : 0);
   }, 0);
 
-  const currentUserVoteIds = vote.options.reduce((acc, option) => {
-    const userVote = option.members?.find(
-      (memberTemp) => memberTemp.memberId === member?._id
-    );
-    if (userVote) {
-      acc.push(option._id);
+  const getCurrentUserVoteIds = () => {
+    if (!vote?.options || !member?._id) {
+      return [];
     }
-    return acc;
-  }, []);
 
-  const [selectedOptions, setSelectedOptions] = useState([
-    ...currentUserVoteIds,
-  ]);
+    const userVoteIds = vote.options.reduce((acc, option) => {
+      const userVote = option.members?.find(
+        (memberTemp) => memberTemp.memberId === member._id
+      );
+      if (userVote) {
+        acc.push(option._id);
+      }
+      return acc;
+    }, []);
+
+    return userVoteIds;
+  };
+
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const [viewingResults, setViewingResults] = useState(showResults);
   const [showSettings, setShowSettings] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
@@ -42,6 +49,12 @@ export default function VoteDisplay({
     return () => setIsMounted(false);
   }, []);
 
+  // useEffect để sync selectedOptions khi vote hoặc member thay đổi
+  useEffect(() => {
+    const currentUserVoteIds = getCurrentUserVoteIds();
+    setSelectedOptions([...currentUserVoteIds]);
+  }, [vote, member]);
+
   useEffect(() => {
     if (vote.lockedVote.lockedStatus) {
       setViewingResults(true);
@@ -50,6 +63,7 @@ export default function VoteDisplay({
 
   // Thêm hàm kiểm tra xem selectedOptions có khác với giá trị ban đầu không
   const hasSelectionChanged = () => {
+    const currentUserVoteIds = getCurrentUserVoteIds();
     if (selectedOptions.length !== currentUserVoteIds.length) return true;
     return !selectedOptions.every((optionId) =>
       currentUserVoteIds.includes(optionId)
@@ -74,7 +88,8 @@ export default function VoteDisplay({
   };
 
   const handleCancel = () => {
-    setSelectedOptions(currentUserVoteIds);
+    const currentUserVoteIds = getCurrentUserVoteIds();
+    setSelectedOptions([...currentUserVoteIds]);
     setViewingResults(false);
   };
 
@@ -119,6 +134,14 @@ export default function VoteDisplay({
       document.body
     );
   };
+
+  // ✅ DEBUG: Log để kiểm tra data
+  console.log("🔍 VoteDisplay Debug:", {
+    vote: vote,
+    member: member,
+    selectedOptions: selectedOptions,
+    currentUserVoteIds: getCurrentUserVoteIds(),
+  });
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border w-72 w-full">
@@ -182,10 +205,7 @@ export default function VoteDisplay({
                                   onMouseLeave={hideTooltip}
                                 >
                                   <img
-                                    src={
-                                      voter.avatar ||
-                                      "/placeholder.svg?height=32&width=32"
-                                    }
+                                    src={voter.avatar}
                                     alt={voter.name || "Member"}
                                     className="w-6 h-6 rounded-full border-2 border-white object-cover"
                                   />
@@ -272,10 +292,7 @@ export default function VoteDisplay({
                               onMouseLeave={hideTooltip}
                             >
                               <img
-                                src={
-                                  voter.avatar ||
-                                  "/placeholder.svg?height=32&width=32"
-                                }
+                                src={voter.avatar}
                                 alt={voter.name || "Member"}
                                 className="w-6 h-6 rounded-full border-2 border-white object-cover"
                               />

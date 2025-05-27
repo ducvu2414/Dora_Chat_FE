@@ -96,6 +96,40 @@ export default function ChatSingle() {
     console.log("==================");
   }, [conversationId, activeChannel, conversation?.type]);
 
+  const syncCacheWithReduxStore = useCallback(
+    (conversationId, channelId = null) => {
+      const currentMessages = messages[conversationId] || [];
+
+      if (currentMessages.length === 0) return;
+
+      if (conversation?.type && channelId) {
+        // Group conversation
+        const cacheKey = `${conversationId}_${channelId}`;
+        const cachedMessages = channelMessagesCache.get(cacheKey) || [];
+
+        // Chỉ update cache nếu Redux store có data mới hơn
+        if (currentMessages.length >= cachedMessages.length) {
+          channelMessagesCache.set(cacheKey, [...currentMessages]);
+          console.log("🔄 Synced channel cache with Redux store:", cacheKey);
+        }
+      } else if (!conversation?.type) {
+        // Individual conversation
+        const cachedMessages =
+          individualMessagesCache.get(conversationId) || [];
+
+        // Chỉ update cache nếu Redux store có data mới hơn
+        if (currentMessages.length >= cachedMessages.length) {
+          individualMessagesCache.set(conversationId, [...currentMessages]);
+          console.log(
+            "🔄 Synced individual cache with Redux store:",
+            conversationId
+          );
+        }
+      }
+    },
+    [messages, conversation?.type]
+  );
+
   useEffect(() => {
     currentActiveChannelRef.current = activeChannel;
   }, [activeChannel]);
@@ -227,6 +261,7 @@ export default function ChatSingle() {
       );
 
       if (oldConversationId && member) {
+        syncCacheWithReduxStore(oldConversationId, oldActiveChannel);
         const currentMessages = messages[oldConversationId] || [];
 
         if (currentMessages.length > 0) {
@@ -440,6 +475,98 @@ export default function ChatSingle() {
     previousChannelId.current = activeChannel;
   }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
+  const onSelected = (optionIds, vote) => {
+    console.log("Selected optionIds:", optionIds);
+    console.log("Vote data:", vote);
+    const user = JSON.parse(localStorage.getItem("user"));
+    const reqSelectVoteOption = {
+      memberId: member.data._id,
+      memberInfo: {
+        name: user.name,
+        avatar: user.avatar,
+        avatarColor: "black",
+      },
+    };
+
+    // array of optionIds selected by memberId in vote.options (optionIds in dbs by memberId)
+    const selectedOptionIds = vote.options.reduce((acc, option) => {
+      const userVote = option.members?.find(
+        (memberTemp) => memberTemp.memberId === member.data._id
+      );
+      if (userVote) {
+        acc.push(option._id);
+      }
+      return acc;
+    }, []);
+
+    // array of optionIds of selectedOptionIds that optionIds does not have (deselected)
+    const optionIdsNotHave = selectedOptionIds.filter(
+      (optionId) => !optionIds.includes(optionId)
+    );
+
+    // array of optionIds of optionIds that selectedOptionIds does not have (selected)
+    const optionIdsHave = optionIds.filter(
+      (optionId) => !selectedOptionIds.includes(optionId)
+    );
+
+    optionIdsHave.forEach(async (optionId) => {
+      await voteApi.selectVoteOption(vote._id, optionId, reqSelectVoteOption);
+    });
+
+    optionIdsNotHave.forEach(async (optionId) => {
+      await voteApi.deselectVoteOption(vote._id, optionId, member.data._id);
+    });
+
+    // ✅ FIX: Update cache với structure đúng và tránh bị overwrite
+    setTimeout(() => {
+      const cacheKey = conversation?.type
+        ? `${conversationId}_${currentActiveChannelRef.current}`
+        : conversationId;
+
+      const cache = conversation?.type
+        ? channelMessagesCache
+        : individualMessagesCache;
+
+      const cachedMessages = cache.get(cacheKey) || [];
+
+      const updatedMessages = cachedMessages.map((msg) => {
+        if (msg._id === vote._id) {
+          return {
+            ...msg,
+            options: msg.options.map((option) => {
+              if (optionIdsHave.includes(option._id)) {
+                // ✅ FIX: Structure đúng cho vote-display.jsx
+                const newMember = {
+                  memberId: member.data._id,
+                  name: user.name, // ← Đúng structure
+                  avatar: user.avatar, // ← Đúng structure
+                  avatarColor: "black",
+                };
+
+                return {
+                  ...option,
+                  members: [...(option.members || []), newMember],
+                };
+              } else if (optionIdsNotHave.includes(option._id)) {
+                return {
+                  ...option,
+                  members: (option.members || []).filter(
+                    (m) => m.memberId !== member.data._id
+                  ),
+                };
+              }
+              return option;
+            }),
+          };
+        }
+        return msg;
+      });
+
+      cache.set(cacheKey, updatedMessages);
+      console.log("✅ Updated vote cache with voter info:", cacheKey);
+    }, 200); // Đợi socket update xong
+  };
+
   useEffect(() => {
     if (isSendingMessage.current) return;
 
@@ -449,21 +576,28 @@ export default function ChatSingle() {
         const cacheKey = `${conversationId}_${activeChannel}`;
         const existingCache = channelMessagesCache.get(cacheKey);
 
-        if (
-          !existingCache ||
-          existingCache.length !== conversationMessages.length
-        ) {
+        if (!existingCache) {
           channelMessagesCache.set(cacheKey, conversationMessages);
+        } else if (existingCache.length < conversationMessages.length) {
+          // Chỉ thêm messages mới, không overwrite toàn bộ
+          const newMessages = conversationMessages.slice(existingCache.length);
+          channelMessagesCache.set(cacheKey, [
+            ...existingCache,
+            ...newMessages,
+          ]);
         }
       } else if (!conversation?.type) {
         // Update cache cho individual conversation
         const existingCache = individualMessagesCache.get(conversationId);
 
-        if (
-          !existingCache ||
-          existingCache.length !== conversationMessages.length
-        ) {
+        if (!existingCache) {
           individualMessagesCache.set(conversationId, conversationMessages);
+        } else if (existingCache.length < conversationMessages.length) {
+          const newMessages = conversationMessages.slice(existingCache.length);
+          individualMessagesCache.set(conversationId, [
+            ...existingCache,
+            ...newMessages,
+          ]);
         }
       }
     }
@@ -591,7 +725,6 @@ export default function ChatSingle() {
               msg,
             ]);
           }
-
           dispatch(
             addMessage({
               conversationId,
@@ -687,7 +820,6 @@ export default function ChatSingle() {
 
         channelMessagesCache.set(cacheKey, updatedCache);
       }
-
     } catch (error) {
       console.error("❌ Error creating vote:", error);
       AlertMessage({
@@ -726,47 +858,6 @@ export default function ChatSingle() {
         member.data._id,
         optionId
       );
-    });
-  };
-
-  const onSelected = (optionIds, vote) => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const reqSelectVoteOption = {
-      memberId: member.data._id,
-      memberInfo: {
-        name: user.name,
-        avatar: user.avatar,
-        avatarColor: "black",
-      },
-    };
-
-    // array of optionIds selected by memberId in vote.options (optionIds in dbs by memberId)
-    const selectedOptionIds = vote.options.reduce((acc, option) => {
-      const userVote = option.members?.find(
-        (memberTemp) => memberTemp.memberId === member.data._id
-      );
-      if (userVote) {
-        acc.push(option._id);
-      }
-      return acc;
-    }, []);
-
-    // array of optionIds of selectedOptionIds that optionIds does not have (deselected)
-    const optionIdsNotHave = selectedOptionIds.filter(
-      (optionId) => !optionIds.includes(optionId)
-    );
-
-    // array of optionIds of optionIds that selectedOptionIds does not have (selected)
-    const optionIdsHave = optionIds.filter(
-      (optionId) => !selectedOptionIds.includes(optionId)
-    );
-
-    optionIdsHave.forEach(async (optionId) => {
-      await voteApi.selectVoteOption(vote._id, optionId, reqSelectVoteOption);
-    });
-
-    optionIdsNotHave.forEach(async (optionId) => {
-      await voteApi.deselectVoteOption(vote._id, optionId, member.data._id);
     });
   };
 
