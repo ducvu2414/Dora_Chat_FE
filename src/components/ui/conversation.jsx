@@ -142,9 +142,8 @@ export const Conversation = memo(function Conversation({
   return (
     <div className="relative">
       <div
-        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${
-          isActive ? "bg-blue-100" : "hover:bg-gray-100"
-        }`}
+        className={`h-15 flex items-center gap-3 p-3 rounded-2xl cursor-pointer relative ${isActive ? "bg-blue-100" : "hover:bg-gray-100"
+          }`}
         onClick={handleClick}
         onMouseEnter={handleConversationEnter}
         onMouseLeave={handleConversationLeave}
@@ -197,7 +196,7 @@ export const Conversation = memo(function Conversation({
             ) : (
               <GroupCardDropdown
                 onViewInfo={() => console.log("View info")}
-                onLeaveGroup={() => console.log("Leave group")}
+                onLeaveGroup={() => console.log(" ")}
               />
             )}
           </div>
