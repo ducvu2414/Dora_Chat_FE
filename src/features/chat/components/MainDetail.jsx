@@ -309,6 +309,7 @@ export default function MainDetail({
   };
 
   const handleButtonClick = () => {
+    if (!conversation.type) return;
     fileInputRef.current.click();
   };
 
@@ -452,7 +453,7 @@ export default function MainDetail({
             alt="Avatar"
             onClick={handleButtonClick}
           />
-          
+
           {conversation.type && (
             <input
               type="file"
