@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2, UserMinus } from "lucide-react";
 import { Dropdown, DropdownItem } from "@ui/dropdown";
 import InfoContent from "@components/ui/Info/InfoContent";
 import { Modal } from "@/components/ui/modal";
@@ -24,8 +24,10 @@ function usePositionCheck() {
 }
 
 function MemberRow({
+  memberLogin,
   member,
   onRemove,
+  onDemote,
   leader,
   managers,
   toggleDropdown,
@@ -64,16 +66,18 @@ function MemberRow({
         <p className="text-sm font-medium">{member.name}</p>
       </div>
 
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          checkPosition();
-          toggleDropdown("menu", member._id);
-        }}
-        className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
-      >
-        <MoreVertical className="w-5 h-5" />
-      </button>
+      {memberLogin._id !== member._id && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            checkPosition();
+            toggleDropdown("menu", member._id);
+          }}
+          className="p-1 bg-transparent border-none rounded-md hover:bg-gray-200"
+        >
+          <MoreVertical className="w-5 h-5" />
+        </button>
+      )}
 
       <Dropdown
         isOpen={openDropdownId === member._id}
@@ -91,12 +95,32 @@ function MemberRow({
         >
           Remove from group
         </DropdownItem>
+
+        {member._id !== leader && managers.includes(member._id) && (
+          <DropdownItem
+            icon={UserMinus}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDemote(member);
+              toggleDropdown("close");
+            }}
+          >
+            Demote to member
+          </DropdownItem>
+        )}
       </Dropdown>
     </div>
   );
 }
 
-export default function MemberItem({ members, onRemove, managers, leader }) {
+export default function MemberItem({
+  memberLogin,
+  members,
+  onRemove,
+  onDemote,
+  managers,
+  leader,
+}) {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
   const [info, setInfo] = useState(null);
@@ -151,8 +175,10 @@ export default function MemberItem({ members, onRemove, managers, leader }) {
         return (
           <MemberRow
             key={member._id}
+            memberLogin={memberLogin}
             member={member}
             onRemove={onRemove}
+            onDemote={onDemote}
             leader={leader}
             managers={managers}
             toggleDropdown={toggleDropdown}

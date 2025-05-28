@@ -7,7 +7,6 @@ import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Bell from "@assets/chat/bell.svg";
-import CheckDecentraliza from "@assets/chat/check_icon.svg";
 import Decentraliza from "@assets/chat/decentraliza.svg";
 import ApprovalIcon from "@assets/chat/approval_icon.svg";
 import Dissolve from "@assets/chat/dissolve_icon.svg";
@@ -31,6 +30,7 @@ import { ChooseModal } from "@/components/ui/choose-modal";
 import { Button } from "@/components/ui/button";
 import { AlertMessage } from "@/components/ui/alert-message";
 export default function MainDetail({
+  memberLogin,
   handleSetActiveTab,
   conversation,
   imagesVideos,
@@ -50,11 +50,9 @@ export default function MainDetail({
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [memberLoginNow, setMemberLoginNow] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [memberFilter, setMemberFilter] = useState([]);
   const [isHoverAvatar, setIsHoverAvatar] = useState(false);
-
   const fileInputRef = useRef(null);
   const [inviteLink, setInviteLink] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -225,10 +223,7 @@ export default function MainDetail({
             });
           }
         });
-        const memberLoginNow = await memberApi.getByConversationIdAndUserId(
-          conversation._id,
-          JSON.parse(localStorage.getItem("user"))._id
-        );
+
         const formattedMembers = conversation.members.map((member) => ({
           id: member._id,
           name: member.name,
@@ -236,11 +231,9 @@ export default function MainDetail({
           active: member.active,
         }));
 
-        setMemberLoginNow(memberLoginNow.data);
         setMemberFilter(
           formattedMembers.filter(
-            (member) =>
-              member.id !== memberLoginNow.data._id && member.active !== false
+            (member) => member.id !== memberLogin._id && member.active !== false
           )
         );
 
@@ -297,7 +290,7 @@ export default function MainDetail({
     try {
       if (conversation.type) {
         const isLastMember = conversation.members.length === 1;
-        const isLeader = conversation.leaderId === memberLoginNow._id;
+        const isLeader = conversation.leaderId === memberLogin._id;
         if (isLastMember || !isLeader) {
           setIsConfirmLeave(true);
         } else {
@@ -536,8 +529,8 @@ export default function MainDetail({
                 <img src={ArrowRight} />
               </div>
             </div>
-            {conversation.managerIds.includes(memberLoginNow?._id) ||
-            conversation.leaderId === memberLoginNow?._id ? (
+            {conversation.managerIds.includes(memberLogin?._id) ||
+            conversation.leaderId === memberLogin?._id ? (
               <div
                 className="flex items-center w-full mt-3 cursor-pointer"
                 onClick={() => handleSetActiveTab({ tab: "request" })}
@@ -635,8 +628,7 @@ export default function MainDetail({
         </div>
         <div className="w-full mt-3">
           {/* Header */}
-          {conversation.type &&
-          conversation.leaderId === memberLoginNow?._id ? (
+          {conversation.type && conversation.leaderId === memberLogin?._id ? (
             <div
               className="flex items-center cursor-pointer"
               onClick={() => setIsOpenSetting(!isOpenSetting)}

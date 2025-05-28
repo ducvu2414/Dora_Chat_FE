@@ -48,6 +48,13 @@ const conversationApi = {
       memberIds: members,
     });
   },
+  demoteManager: (conversationId, memberId) => {
+    return axios.delete(`/api/conversations/${conversationId}/managers`, {
+      data: {
+        managerId: memberId,
+      },
+    });
+  },
   //   markAsRead: (conversationId) => {
   //     return axios.put(`/api/messages/${conversationId}/mark-as-read`);
   //   },

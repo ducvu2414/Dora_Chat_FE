@@ -7,6 +7,7 @@ import { AlertMessage } from "@/components/ui/alert-message";
 import { useState, useEffect } from "react";
 
 export default function MemberList({
+  memberLogin,
   onBack,
   conversationId,
   managers,
@@ -39,7 +40,18 @@ export default function MemberList({
       });
     }
   };
-
+  const handleDemote = async (member) => {
+    try {
+      await conversationApi.demoteManager(conversationId, member._id);
+      managers = managers.filter((m) => m._id !== member._id);
+    } catch (error) {
+      console.error("Error demoting member:", error);
+      AlertMessage({
+        type: "error",
+        message: error.response?.data?.message || "Cannot demote member",
+      });
+    }
+  };
   return (
     <div>
       <div className="flex items-center mb-4">
@@ -55,8 +67,10 @@ export default function MemberList({
       </div>
       <div className="mt-4 overflow-auto h-[calc(100vh-7rem)]">
         <MemberItem
+          memberLogin={memberLogin}
           members={activeMembers}
           onRemove={handleRemove}
+          onDemote={handleDemote}
           managers={managers}
           leader={leader}
         />
