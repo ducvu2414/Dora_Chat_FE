@@ -1007,7 +1007,7 @@ export default function MessageInput({
             {!isRecording ? (
               <div
                 onClick={startRecording}
-                className="relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-lg cursor-pointer group bg-gradient-to-r from-red-500 to-red-600 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-200"
+                className="relative flex items-center justify-center w-8 h-8 transition-all duration-200 transform rounded-full shadow-lg cursor-pointer group bg-gradient-to-r from-blue-700 to-blue-400 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-200"
               >
                 <img
                   src={MicroIcon}

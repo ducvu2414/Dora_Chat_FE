@@ -4,17 +4,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 
 const ContactCardDropdown = ({
   onViewInfo,
-  onSetNickname,
-  onDelete,
 }) => {
 
   return (
