@@ -303,6 +303,7 @@ export default function MainDetail({
   };
 
   const handleButtonClick = () => {
+    if (!conversation.type) return;
     fileInputRef.current.click();
   };
 
@@ -446,14 +447,18 @@ export default function MainDetail({
             alt="Avatar"
             onClick={handleButtonClick}
           />
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          {isHoverAvatar && (
+
+          {conversation.type && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          )}
+
+          {conversation.type && isHoverAvatar && (
             <Button
               className="absolute bottom-0 right-0 w-16 h-16 p-1 text-white transition-colors rounded-full hover:opacity-90"
               onClick={handleButtonClick}

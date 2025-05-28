@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState, useEffect, useRef } from "react";
 import MessageActionsMenu from "./MessageActionsMenu";
-import { MdError } from "react-icons/md";
 import VoteDisplay from "@/components/ui/vote-display";
 import userApi from "../../../api/user";
 import friendApi from "../../../api/friend";
@@ -16,7 +15,6 @@ import LocationModal from "@/components/ui/location-modal";
 import { DocViewerPlus } from "react-doc-viewer-plus";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-
 
 export default function MessageItem({
   msg,
@@ -34,8 +32,6 @@ export default function MessageItem({
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
   const [previewImage, setPreviewImage] = useState(null);
   const [expanded, setExpanded] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [videoError, setVideoError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
@@ -45,7 +41,6 @@ export default function MessageItem({
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationData, setLocationData] = useState(null);
   const [visible, setVisible] = useState(false);
-
 
   const timeoutRef = useRef(null);
 
@@ -94,21 +89,6 @@ export default function MessageItem({
     }
   }, [msg?.content]);
 
-  const handleVideoLoad = () => {
-    setVideoLoaded(true);
-    setVideoError(false);
-  };
-
-  const handleVideoError = () => {
-    setVideoLoaded(false);
-    setVideoError(true);
-  };
-
-  useEffect(() => {
-    setVideoLoaded(true);
-    setVideoError(false);
-  }, [msg._id]);
-
   const getFileTypeLabel = (url = "") => {
     const ext = url.split(".").pop().toLowerCase();
     if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext))
@@ -123,7 +103,6 @@ export default function MessageItem({
     return "Tệp khác";
   };
 
-
   const handleHover = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -134,8 +113,8 @@ export default function MessageItem({
 
   const handleNonHover = () => {
     timeoutRef.current = setTimeout(() => {
-      setIsHovered(false);
-    }, 300);
+      if (!menuOpen) setIsHovered(false);
+    }, 400);
   };
 
   const handleTagClick = async (memberId) => {
@@ -144,17 +123,17 @@ export default function MessageItem({
     const isFriend = friendRes === true ? true : friendRes.data;
     isFriend
       ? navigate("/friend-information", {
-        state: {
-          userData: userRes,
-          isSentRequest: isFriend ? true : false,
-        },
-      })
+          state: {
+            userData: userRes,
+            isSentRequest: isFriend ? true : false,
+          },
+        })
       : navigate("/other-people-information", {
-        state: {
-          userData: userRes,
-          isSentRequest: isFriend ? true : false,
-        },
-      });
+          state: {
+            userData: userRes,
+            isSentRequest: isFriend ? true : false,
+          },
+        });
   };
   // Tìm tin nhắn gốc từ replyMessageId
   const repliedMessage = msg.replyMessageId
@@ -206,7 +185,6 @@ export default function MessageItem({
       : fileName;
   };
 
-
   // Hiển thị reactions và tooltip khi hover
   const renderReactions = () => {
     if (!msg.reacts || msg.reacts.length === 0) return null;
@@ -255,7 +233,6 @@ export default function MessageItem({
           setLocationData({ lat, lng });
           setShowLocationModal(true);
         }
-
       } catch (error) {
         console.error("Error parsing location data:", error);
       }
@@ -264,6 +241,15 @@ export default function MessageItem({
 
   return (
     <>
+      {isVideo && hoverVideoUrl && (
+        <video
+          src={hoverVideoUrl}
+          preload="auto"
+          muted
+          playsInline
+          className="hidden"
+        />
+      )}
       {previewImage && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
           <div className="relative">
@@ -290,8 +276,9 @@ export default function MessageItem({
       ) : (
         <div
           key={msg._id}
-          className={`flex items-end gap-2 pt-1 pb-1 ${isMe ? "flex-row-reverse" : "justify-start"
-            }  mb-4`}
+          className={`flex items-end gap-2 pt-1 pb-1 ${
+            isMe ? "flex-row-reverse" : "justify-start"
+          }  mb-4`}
         >
           {showAvatar ? (
             <img
@@ -310,8 +297,9 @@ export default function MessageItem({
             onMouseLeave={handleNonHover}
           >
             <div
-              className={`absolute top-3 ${isMe ? "left-[-30px]" : "right-[-30px]"
-                }`}
+              className={`absolute top-3 ${
+                isMe ? "left-[-30px]" : "right-[-30px]"
+              }`}
             >
               {!msg.isDeleted && (isHovered || menuOpen) && (
                 <MessageActionsMenu
@@ -344,69 +332,57 @@ export default function MessageItem({
                 onClick={() => setPreviewImage(msg.content)}
               />
             ) : isVideo ? (
-              <div className="relative">
-                {!videoLoaded && !videoError && (
-                  <div className="bg-gray-100 rounded-lg flex items-center justify-center w-[300px] h-[200px]">
-                    <div className="animate-pulse">Loading video...</div>
-                  </div>
-                )}
-
-                {videoError && (
-                  <div className="bg-gray-100 rounded-lg flex flex-col items-center justify-center w-[300px] h-[150px] p-4">
-                    <MdError size={32} className="mb-2 text-red-500" />
-                    <p className="text-sm text-center text-gray-600">
-                      Video could not be loaded
-                    </p>
-                  </div>
-                )}
-
-                {/* Container video */}
+              isVideo && (
                 <div
-                  className="relative"
+                  className="relative max-w-[468px] w-full h-auto"
                   onMouseEnter={handleHover}
                   onMouseLeave={handleNonHover}
                   onClick={() => setIsClicked(true)}
                 >
-                  {/* Hiển thị thumbnail khi không hover và chưa click */}
-                  {!isClicked && !isHovered && thumbnailUrl && (
-                    <img
-                      src={thumbnailUrl}
-                      className="max-w-[468px] max-h-[468px] object-contain rounded-lg cursor-pointer"
-                      alt="Image thumbnail"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "fallback-thumbnail.jpg"; // Fallback nếu thumbnail lỗi
-                      }}
-                    />
-                  )}
+                  {!isClicked ? (
+                    <>
+                      {/* Thumbnail và Video hover chồng lên nhau */}
+                      <img
+                        src={thumbnailUrl}
+                        alt="thumbnail"
+                        className={`w-full max-h-[468px] object-contain rounded-lg absolute top-0 left-0 transition-opacity duration-300 ${
+                          isHovered ? "opacity-0" : "opacity-100"
+                        }`}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "fallback-thumbnail.jpg";
+                        }}
+                      />
 
-                  {/* Hiển thị video hover khi hover và chưa click */}
-                  {!isClicked && isHovered && (
-                    <video
-                      src={hoverVideoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="max-w-[468px] max-h-[468px] object-contain rounded-lg cursor-pointer"
-                    />
-                  )}
-
-                  {/* Hiển thị video đầy đủ khi click */}
-                  {isClicked && (
+                      <video
+                        src={hoverVideoUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className={`w-full max-h-[468px] object-contain rounded-lg absolute top-0 left-0 transition-opacity duration-300 ${
+                          isHovered ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                      {/* Chiều cao giả để container không collapse */}
+                      <div className="invisible">
+                        <img
+                          src={thumbnailUrl}
+                          className="w-full max-h-[468px]"
+                        />
+                      </div>
+                    </>
+                  ) : (
                     <video
                       src={msg.content}
                       controls
-                      className="max-w-[468px] max-h-[468px] object-contain rounded-lg"
-                      onLoadedData={handleVideoLoad}
-                      onError={handleVideoError}
+                      className="w-full max-h-[468px] object-contain rounded-lg"
                     />
                   )}
                 </div>
-              </div>
+              )
             ) : isFile ? (
               <div className="px-3 py-[14px] rounded-2xl flex flex-col items-center gap-2 bg-[#EFF8FF]">
-
                 <a
                   href={msg.content}
                   download
@@ -416,32 +392,31 @@ export default function MessageItem({
                   {truncateFileName(msg.fileName || "Tải xuống file")}
                 </a>
 
-                {
-                  getFileTypeLabel(msg.content) === "Âm thanh" ? (
-                    <AudioPlayer
-                      src={msg.content}
-                      controls
-                      style={{ width: "100%" }}
-                    />
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => setVisible(true)}
-                        className="flex items-center text-[#086DC0] text-sm hover:underline"
-                      >
-                        {"Xem trước file"}
-                      </button>
+                {getFileTypeLabel(msg.content) === "Âm thanh" ? (
+                  <AudioPlayer
+                    src={msg.content}
+                    controls
+                    style={{ width: "100%" }}
+                  />
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setVisible(true)}
+                      className="flex items-center text-[#086DC0] text-sm hover:underline"
+                    >
+                      {"Xem trước file"}
+                    </button>
 
-                      <DocViewerPlus
-                        previewFile={{
-                          fileUrl: msg.content,
-                          fileName: msg.fileName || "File",
-                        }}
-                        visibleViewerPlus={visible}
-                        onVisibleChange={() => setVisible(!visible)}
-                      />
-                    </>
-                  )}
+                    <DocViewerPlus
+                      previewFile={{
+                        fileUrl: msg.content,
+                        fileName: msg.fileName || "File",
+                      }}
+                      visibleViewerPlus={visible}
+                      onVisibleChange={() => setVisible(!visible)}
+                    />
+                  </>
+                )}
 
                 <span className="text-xs text-gray-500">
                   Loại: {getFileTypeLabel(msg.content)}
@@ -491,12 +466,13 @@ export default function MessageItem({
             ) : (
               <p
                 className={`px-3 py-[14px] rounded-2xl text-sm break-words w-full
-            ${msg.isDeleted
-                    ? "bg-gray-100 text-gray-400 italic"
-                    : isMe
-                      ? "bg-[#EFF8FF] text-[#000000] ml-auto"
-                      : "bg-[#F5F5F5] text-[#000000]"
-                  }
+            ${
+              msg.isDeleted
+                ? "bg-gray-100 text-gray-400 italic"
+                : isMe
+                ? "bg-[#EFF8FF] text-[#000000] ml-auto"
+                : "bg-[#F5F5F5] text-[#000000]"
+            }
             ${isLink ? "text-[#086DC0] hover:underline cursor-pointer" : ""}
               
 `}
@@ -507,103 +483,103 @@ export default function MessageItem({
                 }}
               >
                 {msg.tags?.length > 0 &&
-                  msg.tagPositions?.length > 0 &&
-                  !msg.isDeleted
+                msg.tagPositions?.length > 0 &&
+                !msg.isDeleted
                   ? (() => {
-                    const parts = [];
-                    let lastIndex = 0;
+                      const parts = [];
+                      let lastIndex = 0;
 
-                    msg.tagPositions.forEach((tagPos, index) => {
-                      // Text bình thường trước tag (nếu có)
-                      if (tagPos.start > lastIndex) {
+                      msg.tagPositions.forEach((tagPos, index) => {
+                        // Text bình thường trước tag (nếu có)
+                        if (tagPos.start > lastIndex) {
+                          parts.push(
+                            <span key={`text-${index}`}>
+                              {msg.content.slice(lastIndex, tagPos.start)}
+                            </span>
+                          );
+                        }
+
+                        // Tag highlight màu xanh + in đậm
                         parts.push(
-                          <span key={`text-${index}`}>
-                            {msg.content.slice(lastIndex, tagPos.start)}
+                          <span
+                            key={`tag-${index}`}
+                            className="font-semibold text-blue-500 cursor-pointer hover:underline"
+                            onClick={() => handleTagClick(tagPos.memberId)}
+                          >
+                            {msg.content.slice(tagPos.start, tagPos.end)}
+                          </span>
+                        );
+
+                        // Cập nhật vị trí đã xử lý
+                        lastIndex = tagPos.end;
+                      });
+
+                      // Text sau tag cuối cùng (nếu có)
+                      if (lastIndex < msg.content.length) {
+                        parts.push(
+                          <span key="text-last">
+                            {msg.content.slice(lastIndex)}
                           </span>
                         );
                       }
 
-                      // Tag highlight màu xanh + in đậm
-                      parts.push(
-                        <span
-                          key={`tag-${index}`}
-                          className="font-semibold text-blue-500 cursor-pointer hover:underline"
-                          onClick={() => handleTagClick(tagPos.memberId)}
-                        >
-                          {msg.content.slice(tagPos.start, tagPos.end)}
-                        </span>
-                      );
+                      // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
+                      const fullText = parts
+                        .map((part) => {
+                          if (typeof part === "string") return part;
+                          return part.props.children;
+                        })
+                        .join("");
 
-                      // Cập nhật vị trí đã xử lý
-                      lastIndex = tagPos.end;
-                    });
+                      if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
+                        const trimmedLength = MAX_TEXT_LENGTH;
+                        const trimmedParts = [];
+                        let currentLength = 0;
 
-                    // Text sau tag cuối cùng (nếu có)
-                    if (lastIndex < msg.content.length) {
-                      parts.push(
-                        <span key="text-last">
-                          {msg.content.slice(lastIndex)}
-                        </span>
-                      );
-                    }
+                        for (let part of parts) {
+                          const partText =
+                            typeof part === "string"
+                              ? part
+                              : part.props.children;
+                          const remainingLength = trimmedLength - currentLength;
 
-                    // Nếu vượt quá MAX_TEXT_LENGTH thì cắt & thêm "Xem thêm"
-                    const fullText = parts
-                      .map((part) => {
-                        if (typeof part === "string") return part;
-                        return part.props.children;
-                      })
-                      .join("");
+                          if (remainingLength <= 0) break;
 
-                    if (!expanded && fullText.length > MAX_TEXT_LENGTH) {
-                      const trimmedLength = MAX_TEXT_LENGTH;
-                      const trimmedParts = [];
-                      let currentLength = 0;
-
-                      for (let part of parts) {
-                        const partText =
-                          typeof part === "string"
-                            ? part
-                            : part.props.children;
-                        const remainingLength = trimmedLength - currentLength;
-
-                        if (remainingLength <= 0) break;
-
-                        if (partText.length <= remainingLength) {
-                          trimmedParts.push(part);
-                          currentLength += partText.length;
-                        } else {
-                          const trimmedText = partText.slice(
-                            0,
-                            remainingLength
-                          );
-
-                          if (typeof part === "string") {
-                            trimmedParts.push(trimmedText);
+                          if (partText.length <= remainingLength) {
+                            trimmedParts.push(part);
+                            currentLength += partText.length;
                           } else {
-                            trimmedParts.push(
-                              <span
-                                key={`trimmed-${part.key}`}
-                                className={part.props.className}
-                              >
-                                {trimmedText}
-                              </span>
+                            const trimmedText = partText.slice(
+                              0,
+                              remainingLength
                             );
-                          }
 
-                          currentLength += remainingLength;
-                          break;
+                            if (typeof part === "string") {
+                              trimmedParts.push(trimmedText);
+                            } else {
+                              trimmedParts.push(
+                                <span
+                                  key={`trimmed-${part.key}`}
+                                  className={part.props.className}
+                                >
+                                  {trimmedText}
+                                </span>
+                              );
+                            }
+
+                            currentLength += remainingLength;
+                            break;
+                          }
                         }
+
+                        return trimmedParts;
                       }
 
-                      return trimmedParts;
-                    }
-
-                    return parts;
-                  })()
+                      return parts;
+                    })()
                   : expanded
-                    ? msg.content
-                    : msg.content.slice(0, MAX_TEXT_LENGTH)}
+                  ? msg.content
+                  : msg.content.slice(0, MAX_TEXT_LENGTH)}
 
                 {!msg.isDeleted && msg.content.length > MAX_TEXT_LENGTH && (
                   <span
@@ -619,8 +595,9 @@ export default function MessageItem({
             {renderReactions()}
             {showTime && (
               <span
-                className={`text-xs text-[#959595F3] mt-2 ${isMe ? "self-end" : ""
-                  }`}
+                className={`text-xs text-[#959595F3] mt-2 ${
+                  isMe ? "self-end" : ""
+                }`}
               >
                 {dayjs(msg.createdAt).fromNow()}
               </span>
@@ -632,7 +609,7 @@ export default function MessageItem({
         <LocationModal
           isOpen={showLocationModal}
           onClose={() => setShowLocationModal(false)}
-          onSend={() => { }}
+          onSend={() => {}}
           initialLocation={locationData}
           position={locationData}
         />
