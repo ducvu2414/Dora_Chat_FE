@@ -141,11 +141,7 @@ export default function MemberItem({ members, onRemove, managers, leader }) {
 
   return (
     <div>
-      {showInfo && (
-        <Modal onClose={toggleDropdown} isOpen={showInfo} title={"Information"}>
-          <InfoContent info={info} />
-        </Modal>
-      )}
+
       {resolvedMembers.map((member) => {
         if (!member._id) return null;
         return (
