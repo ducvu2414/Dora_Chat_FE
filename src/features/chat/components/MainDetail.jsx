@@ -7,7 +7,6 @@ import { Spinner } from "@/page/Spinner";
 import AddUser from "@assets/chat/add_user.svg";
 import ArrowRight from "@assets/chat/arrow_right.svg";
 import Bell from "@assets/chat/bell.svg";
-import CheckDecentraliza from "@assets/chat/check_icon.svg";
 import Decentraliza from "@assets/chat/decentraliza.svg";
 import ApprovalIcon from "@assets/chat/approval_icon.svg";
 import Dissolve from "@assets/chat/dissolve_icon.svg";
@@ -453,14 +452,18 @@ export default function MainDetail({
             alt="Avatar"
             onClick={handleButtonClick}
           />
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          {isHoverAvatar && (
+          
+          {conversation.type && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          )}
+
+          {conversation.type && isHoverAvatar && (
             <Button
               className="absolute bottom-0 right-0 w-16 h-16 p-1 text-white transition-colors rounded-full hover:opacity-90"
               onClick={handleButtonClick}
