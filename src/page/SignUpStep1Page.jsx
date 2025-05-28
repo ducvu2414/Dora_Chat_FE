@@ -14,31 +14,40 @@ export default function SignUpStep1Page() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+
+  const validateEmail = (email) => {
+    console.log("Validating email:", email);
+    if (!email || !email.trim()) {
+      return { valid: false, message: "Please enter your email address" };
+    }
+
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return { valid: false, message: "Please enter a valid email address" };
+    }
+
+    return { valid: true, email: email.trim() };
+  };
+
+
   async function handleSignUpStep1(e) {
     e.preventDefault();
-    setLoading(true);
-
-    if (!email) {
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
       AlertMessage({
         type: "error",
-        message: "Please enter your email address",
+        message: emailValidation.message,
       });
       setLoading(false);
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      AlertMessage({
-        type: "error",
-        message: "Please enter a valid email address",
-      });
-      setLoading(false);
-      return;
-    }
+    const trimmedEmail = emailValidation.email;
 
     try {
-      const response = await authApi.registerContact(email);
+      const response = await authApi.registerContact(trimmedEmail);
       if (!response || response.error) {
         AlertMessage({
           type: "error",
@@ -51,10 +60,9 @@ export default function SignUpStep1Page() {
           type: "success",
           message: "Verification code sent to your email!",
         });
-        navigate("/signup/info", { state: { email } });
+        navigate("/signup/info", { state: { email: trimmedEmail } });
       }
     } catch (error) {
-      console.log("Response data:", error.response);
 
       const errorMessage =
         error.response?.data?.message ||

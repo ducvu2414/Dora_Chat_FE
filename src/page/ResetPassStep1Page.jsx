@@ -18,7 +18,9 @@ export default function ResetPassStep1Page() {
     e.preventDefault();
     setLoading(true);
 
-    if (!email) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       AlertMessage({
         type: "error",
         message: "Please enter your email address",
@@ -27,8 +29,10 @@ export default function ResetPassStep1Page() {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(trimmedEmail.toLowerCase())) {
       AlertMessage({
         type: "error",
         message: "Please enter a valid email address",
@@ -38,8 +42,8 @@ export default function ResetPassStep1Page() {
     }
 
     try {
-      console.log("Email:", email);
-      const response = await authApi.verifyEmailResetPassword(email);
+      console.log("Email:", trimmedEmail);
+      const response = await authApi.verifyEmailResetPassword(trimmedEmail);
       console.log("API response:", response);
       if (!response || response.error) {
         AlertMessage({
@@ -53,10 +57,9 @@ export default function ResetPassStep1Page() {
           type: "success",
           message: "Verification code sent to your email!",
         });
-        navigate("/reset-password", { state: { email } });
+        navigate("/reset-password", { state: { email: trimmedEmail } });
       }
     } catch (error) {
-      console.log("Response data:", error.response);
 
       const errorMessage =
         error.response?.data?.message ||

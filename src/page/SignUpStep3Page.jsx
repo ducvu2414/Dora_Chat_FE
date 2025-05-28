@@ -18,18 +18,54 @@ export default function SignUpStep3Page() {
 
   const Max_Length = 6;
 
+  const validateEmail = (email) => {
+    if (!email || !email.trim()) {
+      return { valid: false, message: "Please enter your email address in step 1" };
+    }
+
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return { valid: false, message: "Please enter a valid email address" };
+    }
+
+    return { valid: true, email: email.trim() };
+  };
+
+  const validateOTP = (otp) => {
+    const otpRegex = /^[0-9]{6}$/;
+    if (!otpRegex.test(otp)) {
+      return { valid: false, message: "Invalid OTP. Please enter a 6-digit number." };
+    }
+    return { valid: true };
+  };
+
   async function handleSignUpStep3(e) {
     e.preventDefault();
-    if (otpCode.length !== Max_Length) {
-      AlertMessage({ type: "error", message: "Please enter a valid OTP code" });
+    setLoading(true);
+
+    // Validate OTP
+    const otpValidation = validateOTP(otpCode);
+    if (!otpValidation.valid) {
+      AlertMessage({ type: "error", message: otpValidation.message });
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
+    // Validate Email từ location
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      AlertMessage({ type: "error", message: emailValidation.message });
+      setLoading(false);
+      return;
+    }
+
+    const trimmedEmail = emailValidation.email;
 
     try {
       const response = await authApi.verifyOTP({
-        contact: email,
+        contact: trimmedEmail,
         otp: otpCode,
       });
       if (!response || response.error) {
@@ -59,8 +95,13 @@ export default function SignUpStep3Page() {
 
   const handleResendOTP = async () => {
     try {
-      const contact = email;
-      const response = await authApi.resendOTP({ contact });
+      const emailValidation = validateEmail(email);
+      if (!emailValidation.valid) {
+        AlertMessage({ type: "error", message: emailValidation.message });
+        return false;
+      }
+
+      const response = await authApi.resendOTP({ contact: emailValidation.email });
 
       if (!response || response.error) {
         AlertMessage({
