@@ -239,7 +239,8 @@ export default function MainDetail({
         setMemberLoginNow(memberLoginNow.data);
         setMemberFilter(
           formattedMembers.filter(
-            (member) => member.id !== memberLoginNow.data._id
+            (member) =>
+              member.id !== memberLoginNow.data._id && member.active !== false
           )
         );
 
@@ -387,34 +388,37 @@ export default function MainDetail({
         onClose={() => setIsOpenUser(false)}
         title="Choose a new team leader before leaving"
       >
-        loading ? (
-        <div className="flex justify-center my-8">
-          <Spinner />
-        </div>
-        ) : ( (
-        <UserSelectionModal
-          buttonText={"Confirm"}
-          onSubmit={handleDecentralize}
-          users={memberFilter}
-        />
-        ))
+        {loading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          <UserSelectionModal
+            buttonText={"Confirm"}
+            onSubmit={handleDecentralize}
+            users={memberFilter}
+            type="transfer"
+          />
+        )}
       </Modal>
       <Modal
         isOpen={isOpenManager}
         onClose={() => setIsOpenManager(false)}
         title="Adjust manager"
       >
-        loading ? (
-        <div className="flex justify-center my-8">
-          <Spinner />
-        </div>
-        ) : ( (
-        <UserSelectionModal
-          buttonText={"Confirm"}
-          onSubmit={handleAddManager}
-          users={conversation.members}
-        />
-        ))
+        {isLoading ? (
+          <div className="flex justify-center my-8">
+            <Spinner />
+          </div>
+        ) : (
+          <UserSelectionModal
+            buttonText={"Confirm"}
+            onSubmit={handleAddManager}
+            users={memberFilter.filter(
+              (member) => !conversation.managerIds.includes(member.id)
+            )}
+          />
+        )}
       </Modal>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-[#086DC0]">Details</p>
@@ -519,7 +523,15 @@ export default function MainDetail({
               <div className="flex items-center justify-center w-[26px] bg-white rounded-full h-[26px]">
                 <img src={Member} />
               </div>
-              <p className="text-[#086DC0] ml-2">Members ({conversation.members.filter((member) => member.active !== false).length})</p>
+              <p className="text-[#086DC0] ml-2">
+                Members (
+                {
+                  conversation.members.filter(
+                    (member) => member.active !== false
+                  ).length
+                }
+                )
+              </p>
               <div className="w-[30px] h-[30px] rounded-[9px] cursor-pointer ml-auto mr-1 bg-white flex items-center justify-center hover:opacity-75">
                 <img src={ArrowRight} />
               </div>
@@ -655,16 +667,6 @@ export default function MainDetail({
             transition={{ duration: 0.3 }}
             className="px-4 mt-2 overflow-hidden"
           >
-            <div className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75">
-              <img
-                src={CheckDecentraliza}
-                className="w-[18px] h-[18px] rounded-full bg-white p-[3px]"
-                alt="Icon"
-              />
-              <p className="text-[#F49300] font-bold text-sm ml-1">
-                {"Approve members (2)"}
-              </p>
-            </div>
             <div
               className="flex items-center p-1 mt-1 cursor-pointer hover:opacity-75"
               onClick={() => setIsOpenUser(true)}

@@ -11,14 +11,21 @@ export default function UserSelectionModal({
   initialSelectedUsers = [],
   users = [],
   message = null,
+  type = "add", // 'add', 'remove', or 'transfer'
 }) {
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState(initialSelectedUsers);
 
   const toggleSelectUser = (id) => {
-    setSelectedUsers((prev) =>
-      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
-    );
+    if (type === "transfer") {
+      // For 'transfer' type, only one user can be selected
+      setSelectedUsers([id]);
+    } else {
+      // For 'add' or 'remove', allow multiple selections
+      setSelectedUsers((prev) =>
+        prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+      );
+    }
   };
 
   const handleSubmit = () => {

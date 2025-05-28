@@ -173,9 +173,8 @@ export default function MessageActionsMenu({
       <div className="relative">
         {/* Button với cả hover và click */}
         <button
-          className={`p-1 rounded-full transition-colors duration-200 ${
-            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
-          }`}
+          className={`p-1 rounded-full transition-colors duration-200 ${isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+            }`}
           onClick={toggleMenu}
           ref={buttonRef}
           aria-label="Message actions"
@@ -186,30 +185,35 @@ export default function MessageActionsMenu({
         {/* Menu dropdown */}
         {isOpen && (
           <div
-            className={`absolute ${
-              showAbove ? "bottom-full mb-1" : "top-full mt-1"
-            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
+            className={`absolute ${showAbove ? "bottom-full mb-1" : "top-full mt-1"
+              } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
             ref={menuRef}
           >
-            <button
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
-              onClick={() => setShowReactions(!showReactions)}
-            >
-              React
-            </button>
-            <button
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
-              onClick={handleReply}
-            >
-              Reply
-            </button>
-            <button
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
-              onClick={handleForwardMessage}
-            >
-              Forward
-            </button>
-            {isMe && (
+            {type !== "VOTE" && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+                onClick={() => setShowReactions(!showReactions)}
+              >
+                React
+              </button>
+            )}
+            {type !== "VOTE" && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+                onClick={handleReply}
+              >
+                Reply
+              </button>
+            )}
+            {type !== "VOTE" && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+                onClick={handleForwardMessage}
+              >
+                Forward
+              </button>
+            )}
+            {isMe && type !== "VOTE" && (
               <button
                 className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
                 onClick={handleRecallMessage}
@@ -217,12 +221,14 @@ export default function MessageActionsMenu({
                 Retrieve
               </button>
             )}
-            <button
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
-              onClick={handleDeleteForMe}
-            >
-              Delete my side
-            </button>
+            {type !== "VOTE" && (
+              <button
+                className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
+                onClick={handleDeleteForMe}
+              >
+                Delete my side
+              </button>
+            )}
             <button
               className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 bg-transparent"
               onClick={handlePinMessage}

@@ -63,6 +63,7 @@ import { init, isConnected, socket } from "../../utils/socketClient";
 import IncomingCallModal from "../ui/IncomingCallModal";
 import callChannel from "../../utils/callChannel";
 import { AlertMessage } from "@/components/ui/alert-message";
+import memberApi from "../../api/member";
 
 const requests = [];
 
@@ -144,20 +145,29 @@ const MainLayout = () => {
       socket.emit(SOCKET_EVENTS.JOIN_CONVERSATIONS, conversationIds);
       console.log("Joined conversations:", conversationIds);
     }
-    const handleNewMessage = (message) => {
+    const handleNewMessage = async (message) => {
       console.log("📩 New message:", message);
       const currentPath = location.pathname;
-      const isCurrentConversation = currentPath.includes(
-        message.conversationId.toString()
-      );
-      dispatch(addMessage({ conversationId: message.conversationId, message }));
-      if (!isCurrentConversation) {
-        dispatch(
-          updateConversation({
-            conversationId: message.conversationId,
-            lastMessage: message,
-          })
+      const member = await memberApi.getByConversationIdAndUserId(
+        message.conversationId,
+        JSON.parse(localStorage.getItem("user"))._id
+      )
+      console.log("Member status:", member);
+
+      if (member.data.active) {
+
+        const isCurrentConversation = currentPath.includes(
+          message.conversationId.toString()
         );
+        dispatch(addMessage({ conversationId: message.conversationId, message }));
+        if (!isCurrentConversation) {
+          dispatch(
+            updateConversation({
+              conversationId: message.conversationId,
+              lastMessage: message,
+            })
+          );
+        }
       }
     };
 
