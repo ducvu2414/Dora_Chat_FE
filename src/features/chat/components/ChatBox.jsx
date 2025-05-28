@@ -6,13 +6,18 @@ import {
   useCallback,
   forwardRef,
   useImperativeHandle,
+  useState,
 } from "react";
 import MessageItem from "./MessageItem";
+import memberApi from "@/api/member";
+
 const ChatBox = forwardRef(
   (
     { messages, onReply, onSelected, member, onSave, onLock, onLoadMore },
     ref
   ) => {
+    const [enrichedMessages, setEnrichedMessages] = useState([]);
+
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
     const scrollToMessage = useCallback((messageId) => {
@@ -46,6 +51,37 @@ const ChatBox = forwardRef(
       }
     }, []);
 
+    useEffect(() => {
+      const enrichMessages = async () => {
+        const updated = await Promise.all(
+          messages.map(async (msg) => {
+            if (typeof msg.memberId === "object") return msg;
+
+            try {
+              const res = await memberApi.getByMemberId(msg.memberId);
+              return {
+                ...msg,
+                memberId: {
+                  _id: res.data._id,
+                  userId: res.data.userId,
+                  name: res.data.name,
+                  avatar: res.data.avatar,
+                },
+              };
+            } catch (err) {
+              console.error("Error fetching member:", err);
+              console.error("Failed to fetch member:", msg.memberId);
+              return msg;
+            }
+          })
+        );
+
+        setEnrichedMessages(updated);
+      };
+
+      if (messages.length > 0) enrichMessages();
+    }, [messages]);
+
     // Tự động cuộn xuống khi có tin nhắn mới
     useEffect(() => {
       if (chatContainerRef.current) {
@@ -74,13 +110,13 @@ const ChatBox = forwardRef(
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto space-y-2 p-4 max-h-[calc(100vh-210px)]"
         >
-          {messages.map((msg, index) => {
+          {enrichedMessages.map((msg, index) => {
             const currentUserId = msg.memberId?.userId;
             const prevUserId =
-              index > 0 ? messages[index - 1].memberId?.userId : null;
+              index > 0 ? enrichedMessages[index - 1]?.memberId?.userId : null;
             const nextUserId =
-              index < messages.length - 1
-                ? messages[index + 1].memberId?.userId
+              index < enrichedMessages.length - 1
+                ? enrichedMessages[index + 1]?.memberId?.userId
                 : null;
 
             const isFirstInGroup =
@@ -89,14 +125,12 @@ const ChatBox = forwardRef(
               !currentUserId ||
               prevUserId !== currentUserId;
             const isLastInGroup =
-              index === messages.length - 1 ||
+              index === enrichedMessages.length - 1 ||
               !nextUserId ||
               !currentUserId ||
               nextUserId !== currentUserId;
 
-            if (!msg.memberId || !currentUserId) {
-              return null;
-            }
+            if (!currentUserId) return null;
 
             return (
               <div key={msg._id} ref={(el) => setMessageRef(msg._id, el)}>
@@ -109,7 +143,7 @@ const ChatBox = forwardRef(
                   onSave={onSave}
                   onLock={onLock}
                   onReply={onReply}
-                  messages={messages}
+                  messages={enrichedMessages}
                   handleScrollToMessage={scrollToMessage}
                 />
               </div>

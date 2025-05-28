@@ -148,10 +148,10 @@ const MainLayout = () => {
       console.log("📩 New message:", message);
       const currentPath = location.pathname;
       const isCurrentConversation = currentPath.includes(
-        message.conversationId
+        message.conversationId.toString()
       );
       dispatch(addMessage({ conversationId: message.conversationId, message }));
-      if (!isCurrentConversation) {
+      if (isCurrentConversation) {
         dispatch(
           updateConversation({
             conversationId: message.conversationId,
@@ -706,8 +706,6 @@ const MainLayout = () => {
       );
       console.log("handleAddMember", data);
     };
-
-    
     // Register all event listeners
     socket.on(SOCKET_EVENTS.ACCEPT_FRIEND, handleAcceptFriend);
     socket.on(SOCKET_EVENTS.SEND_FRIEND_INVITE, handleFriendInvite);
