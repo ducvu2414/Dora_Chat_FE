@@ -55,7 +55,6 @@ export default function ChatSingle() {
   const [member, setMember] = useState(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [members, setMembers] = useState([]);
-  const chatBoxRef = useRef(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [messageSkip, setMessageSkip] = useState(100);
@@ -63,6 +62,7 @@ export default function ChatSingle() {
   const [latestFetchedConversationId, setLatestFetchedConversationId] =
     useState(null);
 
+  const chatBoxRef = useRef(null);
   const isInitialMount = useRef(true);
   const previousConversationId = useRef(conversationId);
   const loadingConversationId = useRef(null);
@@ -72,6 +72,7 @@ export default function ChatSingle() {
   const isSendingMessage = useRef(false);
   const previousActiveChannelRef = useRef(null);
   const lastFetchedChannelIdRef = useRef(null);
+  const lastSyncedRef = useRef({});
 
   const debugCache = useCallback(() => {
     console.log("=== CACHE DEBUG ===");
@@ -111,7 +112,6 @@ export default function ChatSingle() {
         // Chỉ update cache nếu Redux store có data mới hơn
         if (currentMessages.length >= cachedMessages.length) {
           channelMessagesCache.set(cacheKey, [...currentMessages]);
-          console.log("🔄 Synced channel cache with Redux store:", cacheKey);
         }
       } else if (!conversation?.type) {
         // Individual conversation
@@ -121,15 +121,28 @@ export default function ChatSingle() {
         // Chỉ update cache nếu Redux store có data mới hơn
         if (currentMessages.length >= cachedMessages.length) {
           individualMessagesCache.set(conversationId, [...currentMessages]);
-          console.log(
-            "🔄 Synced individual cache with Redux store:",
-            conversationId
-          );
         }
       }
     },
     [messages, conversation?.type]
   );
+
+  useEffect(() => {
+    if (conversationId && conversationMessages.length > 0) {
+      if (conversation?.type && activeChannel) {
+        const cacheKey = `${conversationId}_${activeChannel}`;
+
+        const currentSerialized = JSON.stringify(conversationMessages);
+        if (
+          !lastSyncedRef.current[cacheKey] ||
+          lastSyncedRef.current[cacheKey] !== currentSerialized
+        ) {
+          channelMessagesCache.set(cacheKey, conversationMessages);
+          lastSyncedRef.current[cacheKey] = currentSerialized;
+        }
+      }
+    }
+  }, [conversationId, activeChannel, conversationMessages, conversation?.type]);
 
   useEffect(() => {
     currentActiveChannelRef.current = activeChannel;

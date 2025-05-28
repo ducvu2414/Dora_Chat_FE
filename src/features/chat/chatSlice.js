@@ -281,13 +281,15 @@ const chatSlice = createSlice({
       }
     },
     updateMessage: (state, action) => {
-      const { conversationId, messageId, updates } = action.payload;
+      const { conversationId, message } = action.payload;
       const messages = state.messages[conversationId];
       if (messages) {
-        const index = messages.findIndex((msg) => msg._id === messageId);
+        const index = messages.findIndex((msg) => msg._id === message._id);
         if (index !== -1) {
-          Object.assign(messages[index], updates); // cập nhật các field mới
+          // update field reacts in stats.messages[conversationId][index]
+          messages[index].reacts = message.reacts;
         }
+        
       }
     },
     updateAvatarGroupConversation: (state, action) => {
