@@ -20,6 +20,8 @@ const ChatBox = forwardRef(
 
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
+    const firstRenderRef = useRef(true);
+
     const scrollToMessage = useCallback((messageId) => {
       const messageElement = messageRefs.current[messageId];
       if (messageElement) {
@@ -84,11 +86,16 @@ const ChatBox = forwardRef(
 
     // Tự động cuộn xuống khi có tin nhắn mới
     useEffect(() => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop =
-          chatContainerRef.current.scrollHeight;
+      if (!chatContainerRef.current) return;
+
+      const container = chatContainerRef.current;
+
+      container.scrollTop = container.scrollHeight;
+
+      if (firstRenderRef.current) {
+        firstRenderRef.current = false;
       }
-    }, [messages.length]);
+    }, [enrichedMessages.length]);
 
     useEffect(() => {
       const container = chatContainerRef.current;
