@@ -151,7 +151,7 @@ const MainLayout = () => {
         message.conversationId.toString()
       );
       dispatch(addMessage({ conversationId: message.conversationId, message }));
-      if (isCurrentConversation) {
+      if (!isCurrentConversation) {
         dispatch(
           updateConversation({
             conversationId: message.conversationId,
@@ -272,10 +272,7 @@ const MainLayout = () => {
         dispatch(
           updateMessage({
             conversationId: message.conversationId,
-            messageId: message._id,
-            updates: {
-              reacts: message.reacts,
-            },
+            message,
           })
         );
       });
