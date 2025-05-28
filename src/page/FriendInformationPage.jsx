@@ -48,8 +48,10 @@ export default function FriendInformationPage() {
   const conversation = conversations.find(
     (conv) =>
       conv.members.some((m) => m.userId === userId) &&
-      conv.members.some((m) => m.userId === userData._id)
+      conv.members.some((m) => m.userId === userData._id) &&
+      conv.members.length === 2
   );
+  console.log("Conversation test:", conversation);
 
   // Fetch all lists on mount
   useEffect(() => {
@@ -176,6 +178,7 @@ export default function FriendInformationPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-4 mb-4">
+                {console.log("Conversation:", conversation)}
                 <Button
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => navigate(`/chat/${conversation?._id}`)}
