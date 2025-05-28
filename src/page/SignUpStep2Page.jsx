@@ -35,40 +35,140 @@ export default function SignUpStep2Page() {
     return true;
   };
 
+  const validateEmail = (email) => {
+    if (!email || !email.trim()) {
+      return { valid: false, message: "Please enter your email address in step 1" };
+    }
+
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return { valid: false, message: "Please enter a valid email address" };
+    }
+
+    return { valid: true, email: email.trim() };
+  };
+
+  const validatePassword = (password) => {
+    if (!password || !password.trim()) {
+      return { valid: false, message: "Please enter your password" };
+    }
+
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return {
+        valid: false,
+        message:
+          "Password must have at least 8 characters, including uppercase, lowercase, number and special character.",
+      };
+    }
+
+    if (password.length > 50) {
+      return { valid: false, message: "Password cannot exceed 50 characters." };
+    }
+
+    return { valid: true };
+  };
+
+  const validateName = (name) => {
+    if (!name || !name.trim() || name.length > 50) {
+      return { valid: false, message: "Please enter a valid name (max 50 characters)." };
+    }
+
+    const nameRegex = /^[a-zA-ZÀ-ỹ\s'-]+$/;
+    if (!nameRegex.test(name.trim())) {
+      return { valid: false, message: "Name contains invalid characters." };
+    }
+
+    return { valid: true };
+  };
+
+  const validateRetypePassword = (password, retypePassword) => {
+    if (password !== retypePassword) {
+      return { valid: false, message: "Passwords do not match." };
+    }
+    return { valid: true };
+  };
+
+  const validateFormData = (formData) => {
+    const { firstName, lastName, password, retypePassword, gender, dateOfBirth } = formData;
+
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) return emailValidation;
+
+    const firstNameValidation = validateName(firstName);
+    if (!firstNameValidation.valid) return firstNameValidation;
+
+    const lastNameValidation = validateName(lastName);
+    if (!lastNameValidation.valid) return lastNameValidation;
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) return passwordValidation;
+
+    const retypeValidation = validateRetypePassword(password, retypePassword);
+    if (!retypeValidation.valid) return retypeValidation;
+
+    if (!gender) {
+      return { valid: false, message: "Please select your gender." };
+    }
+
+    const dateParts = dateOfBirth.split("-");
+    const dateObj = {
+      year: parseInt(dateParts[0]),
+      month: parseInt(dateParts[1]),
+      day: parseInt(dateParts[2]),
+    };
+
+    if (!validateDateOfBirth(dateObj)) {
+      return { valid: false, message: "Invalid date of birth. You must be at least 10 years old." };
+    }
+
+    return { valid: true, formattedDate: `${dateParts[0]}-${dateParts[1].padStart(2, "0")}-${dateParts[2].padStart(2, "0")}` };
+  };
+
+
   const handleSignUpStep2 = async (formData) => {
     setLoading(true);
+
+    const validation = validateFormData(formData);
+    if (!validation.valid) {
+      AlertMessage({ type: "error", message: validation.message });
+      setLoading(false);
+      return;
+    }
+
     try {
-      delete formData.retypepassword;
+      // delete formData.retypePassword;
 
-      const dateParts = formData.dateOfBirth.split("-");
-      const dateObj = {
-        year: parseInt(dateParts[0]),
-        month: parseInt(dateParts[1]),
-        day: parseInt(dateParts[2]),
-      };
+      // const dateParts = formData.dateOfBirth.split("-");
+      // const dateObj = {
+      //   year: parseInt(dateParts[0]),
+      //   month: parseInt(dateParts[1]),
+      //   day: parseInt(dateParts[2]),
+      // };
 
-      if (!validateDateOfBirth(dateObj)) {
-        AlertMessage({
-          type: "error",
-          message: "Invalid date of birth. You must be at least 10 years old.",
-        });
-        setLoading(false);
-        return;
-      }
+      // if (!validateDateOfBirth(dateObj)) {
+      //   AlertMessage({
+      //     type: "error",
+      //     message: "Invalid date of birth. You must be at least 10 years old.",
+      //   });
+      //   setLoading(false);
+      //   return;
+      // }
 
       // Format date to dd/MM/yyyy
-      const dateOfBirth = new Date(formData.dateOfBirth);
-      const formattedDate = `${dateOfBirth.getFullYear()}-${String(
-        dateOfBirth.getMonth() + 1
-      ).padStart(2, "0")}-${String(dateOfBirth.getDate()).padStart(2, "0")}`;
+      // const dateOfBirth = new Date(formData.dateOfBirth);
+      // const formattedDate = `${dateOfBirth.getFullYear()}-${String(
+      //   dateOfBirth.getMonth() + 1
+      // ).padStart(2, "0")}-${String(dateOfBirth.getDate()).padStart(2, "0")}`;
 
-      const submitData = {
-        ...formData,
-        dateOfBirth: formattedDate,
-        contact: email,
-      };
+      const { retypePassword, ...submitData } = formData;
+      submitData.dateOfBirth = validation.formattedDate;
+      submitData.contact = email;
 
-      console.log(submitData);
       const response = await authApi.submitInformation(submitData);
 
       if (!response || response.error) {
@@ -86,7 +186,6 @@ export default function SignUpStep2Page() {
         });
       }
     } catch (error) {
-      console.log("Response data:", error.response);
 
       const errorMessage =
         error.response?.data?.message ||

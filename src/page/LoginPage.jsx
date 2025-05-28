@@ -18,9 +18,59 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false);
 
+
+  const validateEmail = (email) => {
+    if (!email || !email.trim()) {
+      return { valid: false, message: "Please enter your email address in step 1" };
+    }
+
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return { valid: false, message: "Please enter a valid email address" };
+    }
+
+    return { valid: true, email: email.trim() };
+  };
+
+
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return {
+        valid: false,
+        message:
+          "Password must have at least 8 characters, including uppercase, lowercase, number and special character.",
+      };
+    }
+
+    if (password.length > 50) {
+      return { valid: false, message: "Password cannot exceed 50 characters." };
+    }
+
+    return { valid: true };
+  };
+
   const handleLogin = async ({ username, password }) => {
     if (!username || !password) {
       AlertMessage({ type: "error", message: "Please fill in all information" });
+      return;
+    }
+
+    // Kiểm tra email
+    const emailValidation = validateEmail(username);
+    if (!emailValidation.valid) {
+      AlertMessage({ type: "error", message: emailValidation.message });
+      return;
+    }
+
+    // Kiểm tra password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      AlertMessage({ type: "error", message: passwordValidation.message });
       return;
     }
 

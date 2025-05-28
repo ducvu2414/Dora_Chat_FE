@@ -15,18 +15,110 @@ export default function ResetPassStep2Page() {
   const email = location.state?.email;
   const [loading, setLoading] = useState(false);
 
+
+  const validateEmail = (email) => {
+    if (!email || !email.trim()) {
+      return { valid: false, message: "Please enter your email address in step 1" };
+    }
+
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return { valid: false, message: "Please enter a valid email address" };
+    }
+
+    return { valid: true, email: email.trim() };
+  };
+
+  const validateOTP = (otp) => {
+    const otpRegex = /^[0-9]{6}$/;
+    if (!otpRegex.test(otp)) {
+      return { valid: false, message: "Invalid OTP. Please enter a 6-digit number." };
+    }
+    return { valid: true };
+  };
+
+
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return {
+        valid: false,
+        message:
+          "Password must have at least 8 characters, including uppercase, lowercase, number and special character.",
+      };
+    }
+
+    if (password.length > 50) {
+      return { valid: false, message: "Password cannot exceed 50 characters." };
+    }
+
+    return { valid: true };
+  };
+
+  const validateResetFields = (otp, newPassword, retypePassword, email) => {
+    if (!otp || !newPassword || !email || !retypePassword) {
+      return { valid: false, message: "Please fill in all required fields." };
+    }
+
+    if (newPassword !== retypePassword) {
+      return { valid: false, message: "Passwords do not match." };
+    }
+
+    return { valid: true };
+  };
+
   const handleResetStep2 = async (formData) => {
     setLoading(true);
+
+    const otp = formData.otp?.trim();
+    const newPassword = formData.password?.trim();
+    const retypePassword = formData.retypePassword?.trim();
+    const trimmedEmail = email?.trim();
+
+    const fieldValidation = validateResetFields(otp, newPassword, retypePassword, trimmedEmail);
+    if (!fieldValidation.valid) {
+      AlertMessage({ type: "error", message: fieldValidation.message });
+      setLoading(false);
+      return;
+    }
+
+    // Validate OTP
+    const otpValidation = validateOTP(otp);
+    if (!otpValidation.valid) {
+      AlertMessage({ type: "error", message: otpValidation.message });
+      setLoading(false);
+      return;
+    }
+
+    // Validate Password
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.valid) {
+      AlertMessage({ type: "error", message: passwordValidation.message });
+      setLoading(false);
+      return;
+    }
+
+    // Validate Email
+    const emailValidation = validateEmail(trimmedEmail);
+    if (!emailValidation.valid) {
+      AlertMessage({ type: "error", message: emailValidation.message });
+      setLoading(false);
+      return;
+    }
+
     try {
-      delete formData.retypepassword;
+      delete formData.retypePassword;
 
       const submitData = {
-        otp: formData.otp,
-        newPassword: formData.password,
-        email: email,
+        otp,
+        newPassword,
+        email: trimmedEmail,
       };
 
-      console.log(submitData);
       const response = await authApi.resetPassword(submitData);
 
       if (!response || response.error) {
@@ -40,7 +132,6 @@ export default function ResetPassStep2Page() {
         navigate("/login");
       }
     } catch (error) {
-      console.log("Response data:", error.response);
 
       const errorMessage =
         error.response?.data?.message ||
