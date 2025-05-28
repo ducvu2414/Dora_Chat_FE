@@ -73,6 +73,7 @@ export const SOCKET_EVENTS = {
   ANSWER_CALL: "answer-call",
   RECEIVE_SIGNAL: "receive-signal",
   LEAVE_CALL: "leave-call",
+  GET_CURRENT_CALL: "get-current-call",
 
   // Call - Group call (Metered)
   GROUP_CALL_USER: "group-call-user",

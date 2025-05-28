@@ -69,19 +69,32 @@ export default function HeaderSignleChat({
       };
 
       console.log("🚀 1-1 Call payload", payload);
+      socket.emit(SOCKET_EVENTS.GET_CURRENT_CALL, (res) => {
+        console.log("🚀 currentCall từ Redis:", res);
 
-      if (type === "audio") {
-        socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);
-      } else {
-        socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_VIDEO, payload);
-      }
+        if (res?.currentCall) {
+          AlertMessage({
+            type: "error",
+            message:
+              "Bạn đang tham gia cuộc gọi nhóm khác\nVui lòng rời khỏi trước khi tham gia kênh mới.",
+          });
+          return;
+        }
 
-      navigate(`/call/${conversation._id}?type=${type}`, {
-        state: {
-          conversation,
-          initiator: true,
-          peerId,
-        },
+        // Không có currentCall -> Gửi yêu cầu call
+        if (type === "audio") {
+          socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_AUDIO, payload);
+        } else {
+          socket.emit(SOCKET_EVENTS.SUBSCRIBE_CALL_VIDEO, payload);
+        }
+
+        navigate(`/call/${conversation._id}?type=${type}`, {
+          state: {
+            conversation,
+            initiator: true,
+            peerId,
+          },
+        });
       });
     }
   };
