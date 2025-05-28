@@ -35,8 +35,10 @@ export default function ClassifyFormModal({
         if (res && Array.isArray(res)) {
           setColors(res);
 
-          if (isEditing && (initialData.colorId?._id || initialData.colorId)) {
+          if (isEditing) {
             setColorId(initialData.colorId?._id || initialData.colorId);
+            setName(initialData.name);
+            setSelectedConversations(initialData.conversationIds);
           } else if (!colorId && res.length > 0) {
             setColorId(res[0]._id);
           }
@@ -180,11 +182,10 @@ export default function ClassifyFormModal({
                       <button
                         key={color._id}
                         onClick={() => setColorId(color._id)}
-                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${
-                          colorId === color._id
-                            ? "border-black"
-                            : "border-transparent"
-                        }`}
+                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${colorId === color._id
+                          ? "border-black"
+                          : "border-transparent"
+                          }`}
                         style={{ backgroundColor: color.code }}
                         aria-label={`Chọn màu ${color.name || color.code}`}
                         disabled={isSubmitting}
