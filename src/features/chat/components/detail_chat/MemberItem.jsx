@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
 import { MoreVertical, Trash2, UserMinus } from "lucide-react";
@@ -165,11 +166,11 @@ export default function MemberItem({
 
   return (
     <div>
-      {showInfo && (
+      {/* {showInfo && (
         <Modal onClose={toggleDropdown} isOpen={showInfo} title={"Information"}>
           <InfoContent info={info} />
         </Modal>
-      )}
+      )} */}
       {resolvedMembers.map((member) => {
         if (!member._id) return null;
         return (
