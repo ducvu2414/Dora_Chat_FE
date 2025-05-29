@@ -12,6 +12,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
 import classifiesApi from "../../api/classifies";
 import {
+  demoteManager,
   toggleJoinApproval,
   setConversations,
   addMessage,
@@ -39,6 +40,7 @@ import {
   rejectJoinRequests,
   removeMemberFromConversation,
   addMemberToConversation,
+  addManager,
 } from "../../features/chat/chatSlice";
 import {
   setCallStarted,
@@ -146,20 +148,22 @@ const MainLayout = () => {
       console.log("Joined conversations:", conversationIds);
     }
     const handleNewMessage = async (message) => {
-      console.log("📩 New message:", message);
+      console.log("📩 New message socket:", message);
+      console.log("conversations:", message.conversationId);
       const currentPath = location.pathname;
       const member = await memberApi.getByConversationIdAndUserId(
         message.conversationId,
         JSON.parse(localStorage.getItem("user"))._id
-      )
+      );
       // console.log("Member status:", member);
 
       if (member.data.active) {
-
         const isCurrentConversation = currentPath.includes(
           message.conversationId.toString()
         );
-        dispatch(addMessage({ conversationId: message.conversationId, message }));
+        dispatch(
+          addMessage({ conversationId: message.conversationId, message })
+        );
         if (!isCurrentConversation) {
           dispatch(
             updateConversation({
@@ -228,7 +232,6 @@ const MainLayout = () => {
     });
     socket.on(SOCKET_EVENTS.TRANSFER_ADMIN, ({ newAdmin, notifyMessage }) => {
       startTransition(() => {
-        console.log("Received transfer admin:", newAdmin, notifyMessage);
         dispatch(
           updateLeader({
             conversationId: notifyMessage.conversationId,
@@ -246,6 +249,29 @@ const MainLayout = () => {
           addMessage({
             conversationId: notifyMessage.conversationId,
             message: notifyMessage,
+          })
+        );
+      });
+    });
+    socket.on(
+      SOCKET_EVENTS.UPDATE_MANAGERS,
+      ({ conversationId, addedManagers }) => {
+        startTransition(() => {
+          dispatch(
+            addManager({
+              conversationId: conversationId,
+              addedManagers: addedManagers,
+            })
+          );
+        });
+      }
+    );
+    socket.on(SOCKET_EVENTS.DEMOTE_MANAGER, ({ conversationId, managerId }) => {
+      startTransition(() => {
+        dispatch(
+          demoteManager({
+            conversationId: conversationId,
+            managerId: managerId,
           })
         );
       });

@@ -289,7 +289,6 @@ const chatSlice = createSlice({
           // update field reacts in stats.messages[conversationId][index]
           messages[index].reacts = message.reacts;
         }
-        
       }
     },
     updateAvatarGroupConversation: (state, action) => {
@@ -360,6 +359,32 @@ const chatSlice = createSlice({
         ...state.conversations[index].joinRequests
       );
     },
+    addManager: (state, action) => {
+      const { conversationId, addedManagers } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        addedManagers.forEach((manager) => {
+          const exists = conversation.managerIds.includes(manager.memberId);
+          if (!exists) {
+            conversation.managerIds.push(manager.memberId);
+          }
+        });
+      }
+    },
+    demoteManager: (state, action) => {
+      const { conversationId, managerId } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        const index = conversation.managerIds.indexOf(managerId);
+        if (index !== -1) {
+          conversation.managerIds.splice(index, 1);
+        }
+      }
+    },
   },
 });
 
@@ -378,6 +403,7 @@ export const {
   deleteAllMessages,
   markRead,
   updateLeader,
+  addManager,
   setPinMessages,
   addPinMessage,
   deletePinMessage,
@@ -396,5 +422,6 @@ export const {
   rejectJoinRequests,
   removeMemberFromConversation,
   addMemberToConversation,
+  demoteManager,
 } = chatSlice.actions;
 export default chatSlice.reducer;

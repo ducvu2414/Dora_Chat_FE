@@ -292,6 +292,11 @@ export default function UserInformation() {
       console.log(userInfoRequest);
       const userUpdated = await me.putProfile(userInfoRequest);
       console.log("User updates:", userUpdated);
+
+      const userData = JSON.parse(localStorage.getItem("user"));
+      userData.name = userUpdated.name;
+      localStorage.setItem("user", JSON.stringify(userData));
+
       AlertMessage({ type: "success", message: "Updated successful!" });
     } catch (error) {
       console.error("Update profile failed:", error);
@@ -302,6 +307,7 @@ export default function UserInformation() {
     } finally {
       setLoading(false);
     }
+    window.dispatchEvent(new Event("storage"));
   };
 
   const handleEditing = () => {
@@ -345,7 +351,7 @@ export default function UserInformation() {
     };
 
     generateQR();
-  }, []); 
+  }, []);
 
   return (
     <div className="flex w-full h-screen bg-gradient-to-b from-blue-50/50 to-white">
