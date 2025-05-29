@@ -1,30 +1,30 @@
 import axios from "./axiosClient";
 
 const memberApi = {
-    isMember: (conversationId, userId) => {
-        return axios.get("api/members/is-member", {
-            params: {
-                conversationId,
-                userId,
-            },
-        });
-    },
+  isMember: (conversationId, userId) => {
+    return axios.get("api/members/is-member", {
+      params: {
+        conversationId,
+        userId,
+      },
+    });
+  },
 
-    getMembers: (conversationId) => {
-        return axios.get(`api/members/${conversationId}`);
-    },
+  getMembers: (conversationId) => {
+    return axios.get(`api/members/${conversationId}`);
+  },
 
-    getByConversationIdAndUserId: (conversationId, userId) => {
-        return axios.get(`api/members/${conversationId}/${userId}`);
-    },
+  getByConversationIdAndUserId: (conversationId, userId) => {
+    return axios.get(`api/members/${conversationId}/${userId}`);
+  },
 
-    getByMemberId: (memberId) => {
-        return axios.get(`api/members/member/${memberId}`);
-    },
+  getByMemberId: (memberId) => {
+    return axios.get(`api/members/member/${memberId}`);
+  },
 
-    updateName: (conversationId, memberId, name) => {
-        return axios.patch(`api/members/${conversationId}/${memberId}`, { name });
-    },
-}
+  updateName: (conversationId, memberId, name) => {
+    return axios.patch(`api/members/${conversationId}/${memberId}`, { name });
+  },
+};
 
 export default memberApi;
