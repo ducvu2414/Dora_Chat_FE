@@ -74,30 +74,6 @@ export default function ChatSingle() {
   const lastFetchedChannelIdRef = useRef(null);
   const lastSyncedRef = useRef({});
 
-  const debugCache = useCallback(() => {
-    console.log("=== CACHE DEBUG ===");
-    console.log("Current conversationId:", conversationId);
-    console.log("Current activeChannel:", activeChannel);
-    console.log("Conversation type:", conversation?.type);
-    console.log(
-      "Previous activeChannel ref:",
-      previousActiveChannelRef.current
-    );
-    console.log("Channel Messages Cache contents:");
-    for (const [key, value] of channelMessagesCache.entries()) {
-      console.log(`  ${key}: ${value.length} messages`);
-    }
-    console.log("Individual Messages Cache contents:");
-    for (const [key, value] of individualMessagesCache.entries()) {
-      console.log(`  ${key}: ${value.length} messages`);
-    }
-    console.log("Conversation cache:");
-    for (const [key, value] of conversationCache.entries()) {
-      console.log(`  ${key}:`, value);
-    }
-    console.log("==================");
-  }, [conversationId, activeChannel, conversation?.type]);
-
   const syncCacheWithReduxStore = useCallback(
     (conversationId, channelId = null) => {
       const currentMessages = messages[conversationId] || [];
@@ -585,7 +561,7 @@ export default function ChatSingle() {
     if (previousChannelId.current === activeChannel) return;
     if (loadingChannelId.current === activeChannel) return;
 
-    const channelId = activeChannel; // 🧊 "Đóng băng" giá trị
+    const channelId = activeChannel;
 
     const fetchChannelMessages = async () => {
       const cacheKey = `${conversationId}_${channelId}`;
@@ -1025,11 +1001,6 @@ export default function ChatSingle() {
 
   // Expose function để test
   window.clearChatCache = clearAllCache;
-  window.debugChatCache = debugCache;
-
-  useEffect(() => {
-    debugCache();
-  }, [conversationId, activeChannel, debugCache]);
 
   if (!conversation) {
     return (
