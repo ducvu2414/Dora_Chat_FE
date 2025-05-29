@@ -201,7 +201,7 @@ function LocationModal({ isOpen, onClose, onSend }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-full max-w-lg p-4 bg-white rounded-lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Send Location</h3>
