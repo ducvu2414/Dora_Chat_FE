@@ -65,18 +65,20 @@ export default function ChatSingle() {
   const lastFetchedChannelIdRef = useRef(null);
   const lastSyncedRef = useRef({});
 
-  const conversationMessages = useMemo(() => {
-    return (
-      messages[conversationId]?.filter(
-        (msg) => msg.channelId === activeChannel
-      ) || []
-    );
-  }, [messages, conversationId, activeChannel]);
-
   const conversation = useMemo(
     () => conversations.find((conv) => conv._id === conversationId),
     [conversations, conversationId]
   );
+
+  const conversationMessages = useMemo(() => {
+    const allMessages = messages[conversationId] || [];
+    if (conversation?.type && activeChannel) {
+      // Group conversation: lọc theo channel
+      return allMessages.filter((msg) => msg.channelId === activeChannel);
+    }
+    // Individual conversation: không lọc
+    return allMessages;
+  }, [messages, conversationId, conversation?.type, activeChannel]);
 
   const syncCacheWithReduxStore = useCallback(
     (conversationId, channelId = null) => {
