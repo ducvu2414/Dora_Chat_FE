@@ -36,15 +36,6 @@ export default function ChatSingle() {
   const { messages, unread, pinMessages, conversations, channels } =
     useSelector((state) => state.chat);
 
-  const conversationMessages = useMemo(
-    () => messages[conversationId] || [],
-    [messages, conversationId]
-  );
-  const conversation = useMemo(
-    () => conversations.find((conv) => conv._id === conversationId),
-    [conversations, conversationId]
-  );
-
   const [activeChannel, setActiveChannel] = useState(null);
   const [isMember, setIsMember] = useState(undefined);
   const [photosVideos, setPhotosVideos] = useState([]);
@@ -73,6 +64,19 @@ export default function ChatSingle() {
   const previousActiveChannelRef = useRef(null);
   const lastFetchedChannelIdRef = useRef(null);
   const lastSyncedRef = useRef({});
+
+  const conversationMessages = useMemo(() => {
+    return (
+      messages[conversationId]?.filter(
+        (msg) => msg.channelId === activeChannel
+      ) || []
+    );
+  }, [messages, conversationId, activeChannel]);
+
+  const conversation = useMemo(
+    () => conversations.find((conv) => conv._id === conversationId),
+    [conversations, conversationId]
+  );
 
   const syncCacheWithReduxStore = useCallback(
     (conversationId, channelId = null) => {
