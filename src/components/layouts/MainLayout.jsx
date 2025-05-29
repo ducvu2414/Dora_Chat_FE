@@ -152,7 +152,7 @@ const MainLayout = () => {
         message.conversationId,
         JSON.parse(localStorage.getItem("user"))._id
       )
-      console.log("Member status:", member);
+      // console.log("Member status:", member);
 
       if (member.data.active) {
 
