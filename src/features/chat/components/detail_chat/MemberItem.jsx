@@ -165,11 +165,11 @@ export default function MemberItem({
 
   return (
     <div>
-      {showInfo && (
+      {/* {showInfo && (
         <Modal onClose={toggleDropdown} isOpen={showInfo} title={"Information"}>
           <InfoContent info={info} />
         </Modal>
-      )}
+      )} */}
       {resolvedMembers.map((member) => {
         if (!member._id) return null;
         return (
