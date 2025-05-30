@@ -215,7 +215,6 @@ export default function MainDetail({
 
         const friendsData = [];
         response.forEach(async (friend) => {
-          console.log(conversation._id, friend._id);
           if (!(await memberApi.isMember(conversation._id, friend._id)).data) {
             friendsData.push({
               id: friend._id,

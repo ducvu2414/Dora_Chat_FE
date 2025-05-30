@@ -35,11 +35,14 @@ function MemberRow({
   openDropdownId,
 }) {
   const [dropdownRef, dropdownPosition, checkPosition] = usePositionCheck();
-
   return (
     <div
       ref={dropdownRef}
-      onClick={() => toggleDropdown("info", member._id)}
+      onClick={() => {
+        if (memberLogin._id !== member._id) {
+          toggleDropdown("info", member._id);
+        }
+      }}
       className="relative flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-[#F0F0F0] rounded-[10px]"
     >
       {member._id === leader && (
@@ -64,7 +67,12 @@ function MemberRow({
           alt="icon"
           className="w-12 h-12 rounded-full"
         />
-        <p className="text-sm font-medium">{member.name}</p>
+        <p className="text-sm font-medium">
+          {member.name}
+          {memberLogin._id === member._id && (
+            <span className="ml-1 text-xs text-gray-500">(You)</span>
+          )}
+        </p>
       </div>
 
       {memberLogin._id !== member._id && (
@@ -154,6 +162,7 @@ export default function MemberItem({
   }, [members]);
 
   const toggleDropdown = (type, id = null) => {
+    console.log("Toggle dropdown:", type, id);
     if (type === "menu") {
       setOpenDropdownId(openDropdownId === id ? null : id);
     } else if (type === "info") {
@@ -166,11 +175,15 @@ export default function MemberItem({
 
   return (
     <div>
-      {/* {showInfo && (
-        <Modal onClose={toggleDropdown} isOpen={showInfo} title={"Information"}>
-          <InfoContent info={info} />
+      {showInfo && (
+        <Modal
+          onClose={() => setShowInfo(false)}
+          isOpen={showInfo}
+          title={"Information"}
+        >
+          <InfoContent info={info} memberLogin={memberLogin} />
         </Modal>
-      )} */}
+      )}
       {resolvedMembers.map((member) => {
         if (!member._id) return null;
         return (
