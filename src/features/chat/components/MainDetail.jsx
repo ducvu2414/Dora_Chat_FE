@@ -160,7 +160,7 @@ export default function MainDetail({
       setIsOpenUser(false);
       const responseTransferAdmin = await conversationApi.transferAdmin(
         conversation._id,
-        selectedUserId[0]
+        selectedUserId[0].id
       );
       console.log("Selected user IDs:", responseTransferAdmin);
     } catch (error) {
@@ -175,10 +175,11 @@ export default function MainDetail({
   const handleAddManager = async (selectedUserIds) => {
     try {
       setIsOpenManager(false);
+      const newManagerIds = selectedUserIds.map((user) => user.id);
       const responseAddManager =
         await conversationApi.addManagersToConversation(
           conversation._id,
-          selectedUserIds
+          newManagerIds
         );
       console.log("Selected user IDs:", responseAddManager);
     } catch (error) {

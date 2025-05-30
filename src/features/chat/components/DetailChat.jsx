@@ -17,7 +17,6 @@ export default function DetailChat({
   pinMessages,
   onScrollToMessage,
 }) {
-  console.log("DetailChat conversation", conversation);
   const [activeTab, setActiveTab] = useState({
     tab: "detail",
   });
