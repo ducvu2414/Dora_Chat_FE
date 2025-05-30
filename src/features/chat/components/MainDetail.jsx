@@ -112,9 +112,13 @@ export default function MainDetail({
   };
   const handleSubmit = async (selectedUserIds) => {
     try {
+      console.log("Selected user IDs:", selectedUserIds);
+      const newMemberIds = selectedUserIds.map((user) => user.id);
+
+      console.log("newMembers", newMemberIds);
       const responseAddMembers = await conversationApi.addMembersToConversation(
         conversation._id,
-        selectedUserIds
+        newMemberIds
       );
       console.log("Selected user IDs:", responseAddMembers);
       setIsOpenAddUser(false);

@@ -327,7 +327,7 @@ const chatSlice = createSlice({
             }
           );
           if (memberIndex === -1) {
-            state.conversations[index].members.push(newMember._id);
+            state.conversations[index].members.push(newMember);
           }
           state.conversations[index].joinRequests = state.conversations[
             index
@@ -385,6 +385,15 @@ const chatSlice = createSlice({
         }
       }
     },
+    addCountRequest: (state, action) => {
+      const { conversationId, memberIds } = action.payload;
+      const conversation = state.conversations.find(
+        (conv) => conv._id === conversationId
+      );
+      if (conversation) {
+        conversation.joinRequests.push(...memberIds);
+      }
+    },
   },
 });
 
@@ -423,5 +432,6 @@ export const {
   removeMemberFromConversation,
   addMemberToConversation,
   demoteManager,
+  addCountRequest,
 } = chatSlice.actions;
 export default chatSlice.reducer;

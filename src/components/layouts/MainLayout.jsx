@@ -12,6 +12,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import conversationApi from "@/api/conversation";
 import classifiesApi from "../../api/classifies";
 import {
+  addCountRequest,
   demoteManager,
   toggleJoinApproval,
   setConversations,
@@ -347,13 +348,25 @@ const MainLayout = () => {
         );
       });
     };
+    const handleRequestJoin = ({ conversationId, joinRequestUserIds }) => {
+      startTransition(() => {
+        dispatch(
+          addCountRequest({
+            conversationId,
+            memberIds: joinRequestUserIds,
+          })
+        );
+      });
+    };
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
     socket.on(SOCKET_EVENTS.ACCEPT_JOIN_REQUEST, handleAcceptJoinRequest);
     socket.on(SOCKET_EVENTS.REJECT_JOIN_REQUEST, handleRejectJoinRequest);
+    socket.on(SOCKET_EVENTS.JOIN_REQUEST_APPROVED, handleRequestJoin);
     return () => {
       socket.off(SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
       socket.off(SOCKET_EVENTS.ACCEPT_JOIN_REQUEST, handleAcceptJoinRequest);
       socket.off(SOCKET_EVENTS.REJECT_JOIN_REQUEST, handleRejectJoinRequest);
+      socket.off(SOCKET_EVENTS.JOIN_REQUEST_APPROVED, handleRequestJoin);
     };
   }, [dispatch, conversations, location.pathname]);
 
