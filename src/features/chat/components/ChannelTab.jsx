@@ -108,8 +108,8 @@ export function ChannelTab({
       className="relative flex items-center border-b border-gray-200"
       ref={tabsRef}
     >
-      <div className="flex-1 overflow-x-auto scrollbar-hide">
-        <div className="relative flex items-center gap-4 px-6 py-3 border-b border-gray-300">
+      <div className="flex-1 overflow-x-auto">
+        <div className="relative flex items-center gap-4 px-6 py-3 border-b border-gray-300 max-w-md">
           {channels.map((channel) => (
             <button
               key={channel._id}
