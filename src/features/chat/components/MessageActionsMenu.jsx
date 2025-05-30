@@ -4,7 +4,6 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import messageApi from "../../../api/message";
 import pinMessageApi from "../../../api/pinMessage";
 import memberApi from "../../../api/member";
-import ForwardMessageModal from "./ForwardMessageModal";
 import { REACT_ICONS } from "../../../utils/constant";
 import { AlertMessage } from "@/components/ui/alert-message";
 
@@ -17,9 +16,11 @@ export default function MessageActionsMenu({
   isOpen,
   setIsOpen,
   onReply,
+  setForwardMessageData,
+  setShowForwardModal,
 }) {
   const [showAbove, setShowAbove] = useState(false);
-  const [showForwardModal, setShowForwardModal] = useState(false);
+
   const [audioUrl, setAudioUrl] = useState(null);
   const [showReactions, setShowReactions] = useState(false); // Trạng thái hiển thị reactions
 
@@ -78,6 +79,12 @@ export default function MessageActionsMenu({
   };
 
   const handleForwardMessage = () => {
+    setForwardMessageData({
+      _id: messageId,
+      content: message.content,
+      conversationId,
+      type,
+    });
     setShowForwardModal(true);
     setIsOpen(false);
   };
@@ -173,8 +180,9 @@ export default function MessageActionsMenu({
       <div className="relative">
         {/* Button với cả hover và click */}
         <button
-          className={`p-1 rounded-full transition-colors duration-200 ${isOpen ? "bg-gray-200" : "hover:bg-gray-200"
-            }`}
+          className={`p-1 rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-gray-200" : "hover:bg-gray-200"
+          }`}
           onClick={toggleMenu}
           ref={buttonRef}
           aria-label="Message actions"
@@ -185,8 +193,9 @@ export default function MessageActionsMenu({
         {/* Menu dropdown */}
         {isOpen && (
           <div
-            className={`absolute ${showAbove ? "bottom-full mb-1" : "top-full mt-1"
-              } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
+            className={`absolute ${
+              showAbove ? "bottom-full mb-1" : "top-full mt-1"
+            } right-0 bg-white border rounded-md shadow-md z-50 py-1 min-w-[140px] z-100000000`}
             ref={menuRef}
           >
             {type !== "VOTE" && (
@@ -268,18 +277,6 @@ export default function MessageActionsMenu({
           autoPlay
           onEnded={() => setAudioUrl(null)}
           style={{ display: "block" }}
-        />
-      )}
-
-      {showForwardModal && (
-        <ForwardMessageModal
-          message={{
-            _id: messageId,
-            content: message.content,
-            conversationId,
-            type,
-          }}
-          onClose={() => setShowForwardModal(false)}
         />
       )}
     </>

@@ -10,6 +10,7 @@ import {
 } from "react";
 import MessageItem from "./MessageItem";
 import memberApi from "@/api/member";
+import ForwardMessageModalWrapper from "./ForwardMessageModalWrapper";
 
 const ChatBox = forwardRef(
   (
@@ -17,7 +18,8 @@ const ChatBox = forwardRef(
     ref
   ) => {
     const [enrichedMessages, setEnrichedMessages] = useState([]);
-
+    const [showForwardModal, setShowForwardModal] = useState(false);
+    const [forwardMessageData, setForwardMessageData] = useState(null);
     const chatContainerRef = useRef(null);
     const messageRefs = useRef({});
     const firstRenderRef = useRef(true);
@@ -152,11 +154,19 @@ const ChatBox = forwardRef(
                   onReply={onReply}
                   messages={enrichedMessages}
                   handleScrollToMessage={scrollToMessage}
+                  setShowForwardModal={setShowForwardModal}
+                  setForwardMessageData={setForwardMessageData}
                 />
               </div>
             );
           })}
         </div>
+        {showForwardModal && forwardMessageData && (
+          <ForwardMessageModalWrapper
+            message={forwardMessageData}
+            onClose={() => setShowForwardModal(false)}
+          />
+        )}
       </div>
     );
   }

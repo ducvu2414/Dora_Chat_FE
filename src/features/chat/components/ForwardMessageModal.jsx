@@ -81,44 +81,109 @@ export default function ForwardMessageModal({ message, onClose }) {
 
   const handleSubmit = async (selections) => {
     setIsSubmitting(true);
-    try {
-      for (const selection of selections) {
-        if (selection.type === "individual" && selection.userId) {
-          const conversation = await conversationApi.createConversation(
-            selection.userId
-          );
-          const friend = friends.find((f) => f.id === selection.userId);
-          if (!conversation || !friend) {
-            throw new Error(
-              `Failed to create conversation for user ${selection.userId}`
-            );
-          }
-          console.log("Forwarding message to individual:", conversation);
+    const results = [];
+    const errors = [];
 
-          await messageApi.sendTextMessage({
-            conversationId: conversation._id,
-            content: message.content,
-            type: message.type,
-          });
-        } else if (
-          selection.type === "group" &&
-          selection.groupId &&
-          selection.channelId
-        ) {
-          await messageApi.sendMessage({
-            conversationId: selection.groupId,
-            channelId: selection.channelId,
-            content: message.content,
-            type: message.type,
+    try {
+      // Xử lý từng selection song song để tăng hiệu suất
+      const promises = selections.map(async (selection) => {
+        try {
+          if (selection.type === "individual" && selection.userId) {
+            const conversation = await conversationApi.createConversation(
+              selection.userId
+            );
+            const friend = friends.find((f) => f.id === selection.userId);
+            if (!conversation || !friend) {
+              throw new Error(
+                `Failed to create conversation for user ${selection.userId}`
+              );
+            }
+            console.log("Forwarding message to individual:", conversation);
+
+            await messageApi.sendTextMessage({
+              conversationId: conversation._id,
+              content: message.content,
+              type: message.type,
+            });
+
+            results.push({
+              type: "individual",
+              name: friend.name,
+              success: true,
+            });
+          } else if (
+            selection.type === "group" &&
+            selection.groupId &&
+            selection.channelId
+          ) {
+            const group = groups.find((g) => g.id === selection.groupId);
+            const channel = channels[selection.groupId]?.find(
+              (c) => c.id === selection.channelId
+            );
+
+            await messageApi.sendTextMessage({
+              conversationId: selection.groupId,
+              channelId: selection.channelId,
+              content: message.content,
+              type: message.type,
+            });
+
+            results.push({
+              type: "group",
+              name: `${group?.name || "Unknown Group"} > ${
+                channel?.name || "Unknown Channel"
+              }`,
+              success: true,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Error forwarding to selection ${selection.id}:`,
+            error
+          );
+          const targetName =
+            selection.type === "individual"
+              ? friends.find((f) => f.id === selection.userId)?.name ||
+                "Unknown User"
+              : groups.find((g) => g.id === selection.groupId)?.name ||
+                "Unknown Group";
+
+          errors.push({
+            name: targetName,
+            error: error.response?.data?.message || error.message,
           });
         }
+      });
+
+      await Promise.all(promises);
+
+      // Hiển thị kết quả
+      if (results.length > 0 && errors.length === 0) {
+        AlertMessage({
+          message: `Successfully forwarded message to ${results.length} ${
+            results.length === 1 ? "recipient" : "recipients"
+          }`,
+          type: "success",
+        });
+      } else if (results.length > 0 && errors.length > 0) {
+        AlertMessage({
+          message: `Partially successful: ${results.length} succeeded, ${errors.length} failed. Check console for details.`,
+          type: "warning",
+        });
+      } else {
+        throw new Error("All forwarding attempts failed");
       }
+
       setIsOpen(false);
       onClose();
     } catch (error) {
-      console.error("Error forwarding message:", error);
+      console.error("Error forwarding messages:", error);
       AlertMessage({
-        message: error.response?.data?.message || "Failed to forward message",
+        message:
+          errors.length > 0
+            ? `Failed to forward to: ${errors.map((e) => e.name).join(", ")}`
+            : error.response?.data?.message || "Failed to forward message",
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);

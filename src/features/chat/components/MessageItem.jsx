@@ -27,6 +27,8 @@ export default function MessageItem({
   onReply,
   messages,
   handleScrollToMessage,
+  setShowForwardModal,
+  setForwardMessageData,
 }) {
   dayjs.extend(relativeTime);
   const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -311,6 +313,8 @@ export default function MessageItem({
                   isOpen={menuOpen}
                   setIsOpen={setMenuOpen}
                   onReply={onReply}
+                  setShowForwardModal={setShowForwardModal}
+                  setForwardMessageData={setForwardMessageData}
                 />
               )}
             </div>
@@ -440,7 +444,7 @@ export default function MessageItem({
                 onClick={handleLocationClick}
               >
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-500" />
+                  <MapPin className="w-5 h-5 text-blue-500" />
                   <span className="font-medium">Location</span>
                 </div>
                 <div className="mt-2 text-sm text-gray-600">

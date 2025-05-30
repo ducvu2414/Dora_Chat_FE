@@ -133,7 +133,7 @@ export function AddFriendModal({ isOpen, onClose }) {
           <div className="relative flex-1">
             <div className="absolute flex items-center gap-1 -translate-y-1/2 left-3 top-1/2">
               <Select value={searchType} onValueChange={setSearchType}>
-                <SelectTrigger className="w-23 border-0 p-0 h-auto bg-transparent">
+                <SelectTrigger className="h-auto p-0 bg-transparent border-0 w-23">
                   <SelectValue>
                     {searchType === "phone" ? (
                       <div className="flex items-center gap-1">

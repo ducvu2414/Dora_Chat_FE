@@ -21,25 +21,33 @@ export default function UserSelectionModal({
   type = "add",
   channels = {},
   onGroupSelect,
+  disabled = false,
+  loading = false,
 }) {
-  console.log("channels", channels);
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState(initialSelectedUsers);
   const [selectedChannels, setSelectedChannels] = useState({});
 
   const toggleSelect = (id) => {
-    if (type.includes("transfer") || type.includes("forward_group")) {
+    if (type.includes("transfer")) {
+      // Transfer chỉ cho phép chọn một user/group
       setSelectedUsers([id]);
       if (type.includes("forward_group") && onGroupSelect) {
         onGroupSelect(id);
       }
-    } else {
+    } else if (type.includes("forward_group")) {
+      // Forward group cho phép chọn nhiều groups
       setSelectedUsers((prev) =>
         prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
       );
-      if (type.includes("forward_group") && onGroupSelect) {
+      if (onGroupSelect) {
         onGroupSelect(id);
       }
+    } else {
+      // Default behavior cho các type khác
+      setSelectedUsers((prev) =>
+        prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+      );
     }
   };
 
@@ -54,10 +62,11 @@ export default function UserSelectionModal({
     const selections = selectedUsers.map((id) => ({
       id,
       type: users.find((user) => user.id === id)?.type || "unknown",
-      userId: type === "forward_group" ? undefined : id,
+      userId: type === "forward_individual" ? id : undefined,
       groupId: type === "forward_group" ? id : undefined,
       channelId: type === "forward_group" ? selectedChannels[id] : undefined,
     }));
+    console.log("Selected Users:", selections);
     if (onSubmit) {
       onSubmit(selections);
     }
@@ -67,10 +76,32 @@ export default function UserSelectionModal({
     user.name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Kiểm tra xem tất cả groups đã chọn đều có channel được chọn chưa
+  const isSubmitDisabled = () => {
+    if (disabled) return true;
+    if (type === "forward_group") {
+      return selectedUsers.some((id) => !selectedChannels[id]);
+    }
+    return false;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32 text-gray-500">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)]">
       {message && (
-        <span className="mb-2 text-sm text-gray-500">Message: {message}</span>
+        <div className="p-2 mb-3 border-l-4 border-blue-500 rounded bg-gray-50">
+          <span className="text-sm font-medium text-gray-600">
+            Message Preview:
+          </span>
+          <p className="mt-1 text-sm text-gray-700 break-words">{message}</p>
+        </div>
       )}
 
       <div className="relative mt-1">
@@ -89,7 +120,9 @@ export default function UserSelectionModal({
           filteredUsers.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between border-b border-gray-200"
+              className={`flex items-center justify-between border-b border-gray-200 ${
+                selectedUsers.includes(user.id) ? "bg-blue-50" : ""
+              }`}
             >
               <label className="flex items-center w-full gap-3 p-3 cursor-pointer hover:bg-gray-100">
                 <input
@@ -117,23 +150,34 @@ export default function UserSelectionModal({
                   </div>
                 </div>
               </label>
-              {type === "forward_group" && channels[user.id] && (
-                <Select
-                  onValueChange={(value) => handleChannelSelect(user.id, value)}
-                  value={selectedChannels[user.id] || ""}
-                >
-                  <SelectTrigger className="w-[180px] mr-3">
-                    <SelectValue placeholder="Select a channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {channels[user.id].map((channel) => (
-                      <SelectItem key={channel.id} value={channel.id}>
-                        {channel.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              {type === "forward_group" &&
+                selectedUsers.includes(user.id) &&
+                channels[user.id] && (
+                  <div className="mr-3">
+                    <Select
+                      onValueChange={(value) =>
+                        handleChannelSelect(user.id, value)
+                      }
+                      value={selectedChannels[user.id] || ""}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select a channel" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[10000]">
+                        {channels[user.id].map((channel) => (
+                          <SelectItem key={channel.id} value={channel.id}>
+                            {channel.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!selectedChannels[user.id] && (
+                      <p className="mt-1 text-xs text-red-500">
+                        Please select a channel
+                      </p>
+                    )}
+                  </div>
+                )}
             </div>
           ))
         ) : (
@@ -144,16 +188,27 @@ export default function UserSelectionModal({
       </div>
 
       {selectedUsers.length > 0 && (
-        <Button
-          className="mt-4 bg-[#086DC0] text-white px-6 py-2 rounded-md hover:bg-[#065a9d]"
-          onClick={handleSubmit}
-          disabled={
-            type === "forward_group" &&
-            selectedUsers.some((id) => !selectedChannels[id])
-          }
-        >
-          {buttonText} {selectedUsers.length > 0 && `(${selectedUsers.length})`}
-        </Button>
+        <div className="mt-4 space-y-2">
+          {type === "forward_group" && (
+            <div className="text-sm text-gray-600">
+              Selected {selectedUsers.length} group(s).
+              {selectedUsers.filter((id) => !selectedChannels[id]).length >
+                0 && (
+                <span className="ml-1 text-red-500">
+                  Please select channels for all groups.
+                </span>
+              )}
+            </div>
+          )}
+          <Button
+            className="w-full bg-[#086DC0] text-white px-6 py-2 rounded-md hover:bg-[#065a9d] disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled()}
+          >
+            {buttonText}{" "}
+            {selectedUsers.length > 0 && `(${selectedUsers.length})`}
+          </Button>
+        </div>
       )}
     </div>
   );
