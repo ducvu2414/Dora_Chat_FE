@@ -1053,11 +1053,13 @@ export default function ChatSingle() {
                 imagesVideos={photosVideos}
                 files={files}
                 links={links}
-                pinMessages={pinMessages.filter((pinMessage) =>
-                  conversationMessages.some(
-                    (message) => message._id === pinMessage.messageId
+                pinMessages={pinMessages
+                  .filter((pinMessage) =>
+                    conversationMessages.some(
+                      (message) => message._id === pinMessage.messageId
+                    )
                   )
-                )}
+                  .reverse()}
                 onScrollToMessage={handleScrollToMessage}
               />
             )}
