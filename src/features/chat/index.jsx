@@ -113,13 +113,22 @@ export default function ChatSingle() {
     if (conversationId && conversationMessages.length > 0) {
       if (conversation?.type && activeChannel) {
         const cacheKey = `${conversationId}_${activeChannel}`;
-
         const currentSerialized = JSON.stringify(conversationMessages);
         if (
           !lastSyncedRef.current[cacheKey] ||
           lastSyncedRef.current[cacheKey] !== currentSerialized
         ) {
           channelMessagesCache.set(cacheKey, conversationMessages);
+          lastSyncedRef.current[cacheKey] = currentSerialized;
+        }
+      } else if (!conversation?.type) {
+        const cacheKey = `${conversationId}`;
+        const currentSerialized = JSON.stringify(conversationMessages);
+        if (
+          !lastSyncedRef.current[cacheKey] ||
+          lastSyncedRef.current[cacheKey] !== currentSerialized
+        ) {
+          individualMessagesCache.set(conversationId, conversationMessages);
           lastSyncedRef.current[cacheKey] = currentSerialized;
         }
       }
