@@ -439,53 +439,6 @@ export default function ChatSingle() {
     }
   }, [activeChannel]);
 
-  useEffect(() => {
-    if (!activeChannel || !conversationId || !conversation?.type) return;
-    if (previousChannelId.current === activeChannel) return;
-    if (loadingChannelId.current === activeChannel) return;
-
-    const fetchChannelMessages = async () => {
-      const cacheKey = `${conversationId}_${activeChannel}`;
-      const cachedMessages = channelMessagesCache.get(cacheKey);
-
-      if (cachedMessages) {
-        dispatch(setMessages({ conversationId, messages: cachedMessages }));
-        setIsLoadingMessages(false);
-        return;
-      }
-
-      try {
-        loadingChannelId.current = activeChannel;
-        setIsLoadingMessages(true);
-        const messagesRes = await messageApi.fetchMessagesByChannelId(
-          activeChannel,
-          {
-            skip: 0,
-            limit: 100,
-          }
-        );
-        dispatch(setMessages({ conversationId, messages: messagesRes }));
-        lastFetchedChannelIdRef.current = activeChannel;
-        channelMessagesCache.set(cacheKey, messagesRes);
-        setMessageSkip(100);
-        setHasMoreMessages(true);
-      } catch (error) {
-        console.error("Error fetching channel messages", error);
-        AlertMessage({
-          type: "error",
-          message:
-            error.response?.data.message || "Error fetching channel messages",
-        });
-      } finally {
-        setIsLoadingMessages(false);
-        loadingChannelId.current = null;
-      }
-    };
-
-    fetchChannelMessages();
-    previousChannelId.current = activeChannel;
-  }, [activeChannel, conversationId, dispatch, conversation?.type]);
-
   const onSelected = (optionIds, vote) => {
     console.log("Selected optionIds:", optionIds);
     console.log("Vote data:", vote);
