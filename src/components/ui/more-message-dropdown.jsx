@@ -32,7 +32,6 @@ const googleMapsLoader = (() => {
         const script = document.createElement("script");
         script.id = "google-maps-script";
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-        console.log("API Key:", apiKey);
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=${callbackName}&loading=async`;
         script.async = true;
         script.onerror = (error) => {
@@ -211,8 +210,7 @@ function LocationModal({ isOpen, onClose, onSend }) {
             aria-label="Close"
           >
             <span className="flex items-center justify-center w-5 h-5 text-gray-600">
-
-            <X className="w-5 h-5" />
+              <X className="w-5 h-5" />
             </span>
           </button>
         </div>
@@ -240,9 +238,10 @@ function LocationModal({ isOpen, onClose, onSend }) {
                 streetViewControl: false,
                 mapTypeControl: false,
                 fullscreenControl: false,
+                draggable: false,
+                scrollwheel: true,
                 zoomControl: true,
-                clickableIcons: false,
-                disableDefaultUI: false,
+                disableDefaultUI: true,
               }}
               onClick={(e) => {
                 // Cho phép người dùng chọn vị trí khác bằng cách click vào bản đồ

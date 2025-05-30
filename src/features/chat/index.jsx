@@ -65,18 +65,20 @@ export default function ChatSingle() {
   const lastFetchedChannelIdRef = useRef(null);
   const lastSyncedRef = useRef({});
 
-  const conversationMessages = useMemo(() => {
-    return (
-      messages[conversationId]?.filter(
-        (msg) => msg.channelId === activeChannel
-      ) || []
-    );
-  }, [messages, conversationId, activeChannel]);
-
   const conversation = useMemo(
     () => conversations.find((conv) => conv._id === conversationId),
     [conversations, conversationId]
   );
+
+  const conversationMessages = useMemo(() => {
+    const allMessages = messages[conversationId] || [];
+    if (conversation?.type && activeChannel) {
+      // Group conversation: lọc theo channel
+      return allMessages.filter((msg) => msg.channelId === activeChannel);
+    }
+    // Individual conversation: không lọc
+    return allMessages;
+  }, [messages, conversationId, conversation?.type, activeChannel]);
 
   const syncCacheWithReduxStore = useCallback(
     (conversationId, channelId = null) => {
@@ -111,13 +113,22 @@ export default function ChatSingle() {
     if (conversationId && conversationMessages.length > 0) {
       if (conversation?.type && activeChannel) {
         const cacheKey = `${conversationId}_${activeChannel}`;
-
         const currentSerialized = JSON.stringify(conversationMessages);
         if (
           !lastSyncedRef.current[cacheKey] ||
           lastSyncedRef.current[cacheKey] !== currentSerialized
         ) {
           channelMessagesCache.set(cacheKey, conversationMessages);
+          lastSyncedRef.current[cacheKey] = currentSerialized;
+        }
+      } else if (!conversation?.type) {
+        const cacheKey = `${conversationId}`;
+        const currentSerialized = JSON.stringify(conversationMessages);
+        if (
+          !lastSyncedRef.current[cacheKey] ||
+          lastSyncedRef.current[cacheKey] !== currentSerialized
+        ) {
+          individualMessagesCache.set(conversationId, conversationMessages);
           lastSyncedRef.current[cacheKey] = currentSerialized;
         }
       }
@@ -427,53 +438,6 @@ export default function ChatSingle() {
       previousActiveChannelRef.current = activeChannel;
     }
   }, [activeChannel]);
-
-  useEffect(() => {
-    if (!activeChannel || !conversationId || !conversation?.type) return;
-    if (previousChannelId.current === activeChannel) return;
-    if (loadingChannelId.current === activeChannel) return;
-
-    const fetchChannelMessages = async () => {
-      const cacheKey = `${conversationId}_${activeChannel}`;
-      const cachedMessages = channelMessagesCache.get(cacheKey);
-
-      if (cachedMessages) {
-        dispatch(setMessages({ conversationId, messages: cachedMessages }));
-        setIsLoadingMessages(false);
-        return;
-      }
-
-      try {
-        loadingChannelId.current = activeChannel;
-        setIsLoadingMessages(true);
-        const messagesRes = await messageApi.fetchMessagesByChannelId(
-          activeChannel,
-          {
-            skip: 0,
-            limit: 100,
-          }
-        );
-        dispatch(setMessages({ conversationId, messages: messagesRes }));
-        lastFetchedChannelIdRef.current = activeChannel;
-        channelMessagesCache.set(cacheKey, messagesRes);
-        setMessageSkip(100);
-        setHasMoreMessages(true);
-      } catch (error) {
-        console.error("Error fetching channel messages", error);
-        AlertMessage({
-          type: "error",
-          message:
-            error.response?.data.message || "Error fetching channel messages",
-        });
-      } finally {
-        setIsLoadingMessages(false);
-        loadingChannelId.current = null;
-      }
-    };
-
-    fetchChannelMessages();
-    previousChannelId.current = activeChannel;
-  }, [activeChannel, conversationId, dispatch, conversation?.type]);
 
   const onSelected = (optionIds, vote) => {
     console.log("Selected optionIds:", optionIds);
@@ -1089,11 +1053,13 @@ export default function ChatSingle() {
                 imagesVideos={photosVideos}
                 files={files}
                 links={links}
-                pinMessages={pinMessages.filter((pinMessage) =>
-                  conversationMessages.some(
-                    (message) => message._id === pinMessage.messageId
+                pinMessages={pinMessages
+                  .filter((pinMessage) =>
+                    conversationMessages.some(
+                      (message) => message._id === pinMessage.messageId
+                    )
                   )
-                )}
+                  .reverse()}
                 onScrollToMessage={handleScrollToMessage}
               />
             )}

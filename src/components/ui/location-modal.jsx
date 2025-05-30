@@ -1,99 +1,106 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useRef } from "react"
-import { Modal } from "@/components/ui/modal"
-import { GoogleMap } from "@react-google-maps/api"
+import { useState, useEffect, useRef } from "react";
+import { Modal } from "@/components/ui/modal";
+import { GoogleMap } from "@react-google-maps/api";
 
 // Google Maps script loading utility
 const loadGoogleMapsScript = (() => {
-  let isLoading = false
-  let isLoaded = false
-  let loadPromise = null
+  let isLoading = false;
+  let isLoaded = false;
+  let loadPromise = null;
 
   return () => {
     // Return existing promise if already loading
-    if (isLoading) return loadPromise
+    if (isLoading) return loadPromise;
 
     // Return resolved promise if already loaded
     if (isLoaded || window.google?.maps) {
-      isLoaded = true
-      return Promise.resolve()
+      isLoaded = true;
+      return Promise.resolve();
     }
 
     // Otherwise load the script
-    isLoading = true
+    isLoading = true;
     loadPromise = new Promise((resolve, reject) => {
       // Create a unique callback name
-      const callbackName = `googleMapsCallback_${Date.now()}`
+      const callbackName = `googleMapsCallback_${Date.now()}`;
       window[callbackName] = () => {
-        isLoaded = true
-        isLoading = false
-        delete window[callbackName]
-        resolve()
-      }
+        isLoaded = true;
+        isLoading = false;
+        delete window[callbackName];
+        resolve();
+      };
 
-      const script = document.createElement("script")
-      script.id = "google-maps-script"
+      const script = document.createElement("script");
+      script.id = "google-maps-script";
       // Thêm loading=async để tối ưu hiệu suất
-      const apiKey = import.meta.env.VITE_GOOGLE_API_KEY
-      console.log("API Key:", apiKey)
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=${callbackName}&loading=async`
-      script.async = true
+      const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+      console.log("API Key:", apiKey);
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=${callbackName}&loading=async`;
+      script.async = true;
       script.onerror = (error) => {
-        isLoading = false
-        reject(error)
-      }
-      document.body.appendChild(script)
-    })
+        isLoading = false;
+        reject(error);
+      };
+      document.body.appendChild(script);
+    });
 
-    return loadPromise
-  }
-})()
+    return loadPromise;
+  };
+})();
 
 // Custom Advanced Marker component
 function AdvancedMarker({ position }) {
-  const markerRef = useRef(null)
+  const markerRef = useRef(null);
 
   useEffect(() => {
-    if (!window.google?.maps?.marker?.AdvancedMarkerElement) return
+    if (!window.google?.maps?.marker?.AdvancedMarkerElement) return;
 
     // Create the advanced marker
     const marker = new window.google.maps.marker.AdvancedMarkerElement({
       position,
       map: markerRef.current?.getMap(),
-    })
+    });
 
     return () => {
       // Clean up marker
-      if (marker) marker.map = null
-    }
-  }, [position, markerRef.current])
+      if (marker) marker.map = null;
+    };
+  }, [position, markerRef.current]);
 
-  return null
+  return null;
 }
 
-export default function LocationModal({ isOpen, onClose, onSend, initialLocation = null, position }) {
-  const [scriptLoaded, setScriptLoaded] = useState(false)
-  const [location, setLocation] = useState(initialLocation || position || null)
-  const [loading, setLoading] = useState(!initialLocation && !position)
-  const [error, setError] = useState(null)
-  const mapRef = useRef(null)
+export default function LocationModal({
+  isOpen,
+  onClose,
+  onSend,
+  initialLocation = null,
+  position,
+}) {
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [location, setLocation] = useState(initialLocation || position || null);
+  const [loading, setLoading] = useState(!initialLocation && !position);
+  const [error, setError] = useState(null);
+  const mapRef = useRef(null);
 
-  const isViewMode = !!initialLocation || !!position
+  const isViewMode = !!initialLocation || !!position;
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     // Load Google Maps script when modal is open
-    let isMounted = true
+    let isMounted = true;
     loadGoogleMapsScript()
       .then(() => {
-        if (isMounted) setScriptLoaded(true)
+        if (isMounted) setScriptLoaded(true);
       })
       .catch((error) => {
-        console.error("Error loading Google Maps:", error)
-        if (isMounted) setError("Could not load Google Maps. Please try again later.")
-      })
+        console.error("Error loading Google Maps:", error);
+        if (isMounted)
+          setError("Could not load Google Maps. Please try again later.");
+      });
 
     // If no location is provided, get current location
     if (!initialLocation && !position && navigator.geolocation) {
@@ -103,40 +110,46 @@ export default function LocationModal({ isOpen, onClose, onSend, initialLocation
             setLocation({
               lat: position.coords.latitude,
               lng: position.coords.longitude,
-            })
-            setLoading(false)
+            });
+            setLoading(false);
           }
         },
         (err) => {
-          console.error("Geolocation error:", err)
+          console.error("Geolocation error:", err);
           if (isMounted) {
-            setError("Could not get your location. Please allow location access.")
-            setLoading(false)
+            setError(
+              "Could not get your location. Please allow location access."
+            );
+            setLoading(false);
           }
         },
-        { enableHighAccuracy: true },
-      )
+        { enableHighAccuracy: true }
+      );
     }
 
     return () => {
-      isMounted = false
-    }
-  }, [isOpen, initialLocation, position])
+      isMounted = false;
+    };
+  }, [isOpen, initialLocation, position]);
 
   // Don't render anything if modal is closed
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   // Handle missing position
-  const mapPosition = location || { lat: 0, lng: 0 }
+  const mapPosition = location || { lat: 0, lng: 0 };
 
   const handleOpenInGoogleMaps = () => {
-    if (!location) return
-    const url = `https://www.google.com/maps?q=${location.lat},${location.lng}`
-    window.open(url, "_blank")
-  }
+    if (!location) return;
+    const url = `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+    window.open(url, "_blank");
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isViewMode ? "View Location" : "Send Location"}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isViewMode ? "View Location" : "Send Location"}
+    >
       <div className="space-y-4">
         <div className="h-64 overflow-hidden bg-gray-200 rounded">
           {loading ? (
@@ -180,9 +193,14 @@ export default function LocationModal({ isOpen, onClose, onSend, initialLocation
         {location && (
           <div className="text-sm text-gray-600">
             <p>
-              {isViewMode ? "Location" : "Selected location"}: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+              {isViewMode ? "Location" : "Selected location"}:{" "}
+              {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
             </p>
-            {!isViewMode && <p className="mt-1 text-xs">Drag the marker or click on the map to adjust the location</p>}
+            {!isViewMode && (
+              <p className="mt-1 text-xs">
+                Drag the marker or click on the map to adjust the location
+              </p>
+            )}
           </div>
         )}
 
@@ -207,5 +225,5 @@ export default function LocationModal({ isOpen, onClose, onSend, initialLocation
         </div>
       </div>
     </Modal>
-  )
+  );
 }
